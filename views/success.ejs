@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+    <title>Order Success - Thank You!</title>
+    <style>
+      .success-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+      
+      .success-header {
+        text-align: center;
+        padding: 30px;
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 30px;
+      }
+      
+      .success-icon {
+        font-size: 64px;
+        margin-bottom: 10px;
+      }
+      
+      .order-summary {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 20px;
+      }
+      
+      .order-summary h2 {
+        margin-top: 0;
+        color: #333;
+        border-bottom: 2px solid #0070ba;
+        padding-bottom: 10px;
+      }
+      
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      
+      .summary-row:last-child {
+        border-bottom: none;
+      }
+      
+      .summary-label {
+        font-weight: 500;
+        color: #666;
+      }
+      
+      .summary-value {
+        font-weight: 600;
+        color: #333;
+      }
+      
+      .json-response {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 30px;
+      }
+      
+      .json-response h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      
+      .json-content {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+      
+      .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        justify-content: center;
+      }
+      
+      .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+      }
+      
+      .btn-primary {
+        background: #0070ba;
+        color: white;
+      }
+      
+      .btn-primary:hover {
+        background: #005a96;
+      }
+      
+      .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+      }
+      
+      .btn-secondary:hover {
+        background: #e0e0e0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="success-container">
+      <div class="success-header">
+        <div class="success-icon">✓</div>
+        <h1 style="margin: 0;">Payment Successful!</h1>
+        <p style="margin: 10px 0 0 0; font-size: 18px;">Thank you for your order</p>
+      </div>
+      
+      <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="summary-row">
+          <span class="summary-label">Order ID:</span>
+          <span class="summary-value" id="order-id">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Capture ID:</span>
+          <span class="summary-value" id="capture-id">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Payment Status:</span>
+          <span class="summary-value" id="payment-status">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Payment Source:</span>
+          <span class="summary-value" id="payment-source">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Amount:</span>
+          <span class="summary-value" id="amount">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Payer Name:</span>
+          <span class="summary-value" id="payer-name">-</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Payer Email:</span>
+          <span class="summary-value" id="payer-email">-</span>
+        </div>
+      </div>
+      
+      <div class="json-response">
+        <h3>Full API Response</h3>
+        <div class="json-content" id="json-content">
+          Loading...
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <a href="/product" class="btn btn-primary">Continue Shopping</a>
+        <a href="/orders" class="btn btn-secondary">View All Orders</a>
+        <a href="/" class="btn btn-secondary">Back to Home</a>
+      </div>
+    </div>
+    
+    <script>
+      // Get order data from URL parameters or sessionStorage
+      function getOrderData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderDataParam = urlParams.get('data');
+        
+        if (orderDataParam) {
+          try {
+            return JSON.parse(decodeURIComponent(orderDataParam));
+          } catch (e) {
+            console.error('Error parsing order data from URL:', e);
+          }
+        }
+        
+        // Fallback to sessionStorage
+        const storedData = sessionStorage.getItem('orderData');
+        if (storedData) {
+          try {
+            return JSON.parse(storedData);
+          } catch (e) {
+            console.error('Error parsing order data from storage:', e);
+          }
+        }
+        
+        return null;
+      }
+      
+      // Display order data
+      const orderData = getOrderData();
+      
+      if (orderData) {
+        console.log('Order Data:', orderData);
+        
+        // Extract data
+        const orderId = orderData.id || 'N/A';
+        const captureId = orderData.purchase_units?.[0]?.payments?.captures?.[0]?.id || 'N/A';
+        const paymentStatus = orderData.purchase_units?.[0]?.payments?.captures?.[0]?.status || 'N/A';
+        const amount = orderData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || 'N/A';
+        const currency = orderData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code || 'USD';
+        const payerName = orderData.payer?.name?.given_name && orderData.payer?.name?.surname 
+          ? `${orderData.payer.name.given_name} ${orderData.payer.name.surname}` 
+          : orderData.payer?.email_address || 'N/A';
+        const payerEmail = orderData.payer?.email_address || 'N/A';
+        
+        // Determine payment source
+        let paymentSource = 'N/A';
+        if (orderData.payment_source) {
+          if (orderData.payment_source.paypal) {
+            paymentSource = 'PayPal';
+          } else if (orderData.payment_source.card) {
+            paymentSource = `Card (${orderData.payment_source.card.brand || 'Unknown'})`;
+          } else if (orderData.payment_source.venmo) {
+            paymentSource = 'Venmo';
+          } else {
+            paymentSource = Object.keys(orderData.payment_source)[0] || 'N/A';
+          }
+        }
+        
+        // Update UI
+        document.getElementById('order-id').textContent = orderId;
+        document.getElementById('capture-id').textContent = captureId;
+        document.getElementById('payment-status').textContent = paymentStatus;
+        document.getElementById('payment-source').textContent = paymentSource;
+        document.getElementById('amount').textContent = `${currency} ${amount}`;
+        document.getElementById('payer-name').textContent = payerName;
+        document.getElementById('payer-email').textContent = payerEmail;
+        
+        // Display formatted JSON
+        document.getElementById('json-content').textContent = JSON.stringify(orderData, null, 2);
+        
+        // Clear sessionStorage after displaying
+        sessionStorage.removeItem('orderData');
+      } else {
+        document.getElementById('json-content').textContent = 'No order data available. Please make a purchase first.';
+      }
+    </script>
+  </body>
+</html>

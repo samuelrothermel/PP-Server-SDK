@@ -47,7 +47,7 @@ app.use((req, res, next) => {
       'frame-src https://www.sandbox.paypal.com https://www.paypal.com https://sandbox.paypal.com https://paypal.com https://appleid.apple.com https://pay.google.com https://*.google.com https://google.com; ' +
       "frame-ancestors 'self' https://www.paypal.com https://www.sandbox.paypal.com https://sandbox.paypal.com https://paypal.com; " +
       'child-src https://www.sandbox.paypal.com https://www.paypal.com https://sandbox.paypal.com https://paypal.com https://pay.google.com https://*.google.com; ' +
-      "img-src 'self' data: https://www.paypalobjects.com https://t.paypal.com https://www.paypal.com https://sandbox.paypal.com https://paypal.com https://www.gstatic.com https://*.gstatic.com https://pay.google.com https://*.google.com; " +
+      "img-src 'self' data: https://www.paypalobjects.com https://t.paypal.com https://www.paypal.com https://sandbox.paypal.com https://paypal.com https://www.gstatic.com https://*.gstatic.com https://pay.google.com https://*.google.com https://media.istockphoto.com; " +
       "manifest-src 'self' https://pay.google.com https://*.google.com https://google.com; " +
       "style-src 'self' 'unsafe-inline' https://www.paypalobjects.com;"
   );

@@ -87,21 +87,6 @@ export const createVaultSetupToken = async ({ paymentSource }) => {
       console.error('[SERVER SDK] Error creating setup token:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const response = await fetch(`${base}/v3/vault/setup-tokens`, {
-      method: 'post',
-      headers: {
-        'PayPal-Request-Id': Date.now().toString(),
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${await generateAccessToken()}`,
-      },
-      body: JSON.stringify(setupTokenPayload),
-    });
-
-    const responseData = await response.clone().json();
-    console.log('API Response:', JSON.stringify(responseData, null, 2));
-    return handleResponse(response);
   }
 };
 
@@ -139,21 +124,6 @@ export const createVaultPaymentToken = async vaultSetupToken => {
       console.error('[SERVER SDK] Error creating payment token:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const response = await fetch(`${base}/v3/vault/payment-tokens`, {
-      method: 'post',
-      headers: {
-        'PayPal-Request-Id': Date.now().toString(),
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${await generateAccessToken()}`,
-      },
-      body: JSON.stringify(paymentTokenPayload),
-    });
-
-    const jsonResponse = await response.clone().json();
-    console.log('API Response:', JSON.stringify(jsonResponse, null, 2));
-    return handleResponse(response);
   }
 };
 
@@ -217,29 +187,6 @@ export const fetchPaymentTokens = async customerId => {
       console.error('[SERVER SDK] Error fetching payment tokens:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const accessToken = await generateAccessToken();
-    const response = await fetch(
-      `https://api-m.sandbox.paypal.com/v3/vault/payment-tokens?customer_id=${customerId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-    const data = await response.json();
-    console.log('API Response:', JSON.stringify(data, null, 2));
-
-    // Log detailed customer and payment source information
-    if (data.customer) {
-    }
-
-    if (data.payment_tokens && data.payment_tokens.length > 0) {
-      // Payment tokens fetched successfully
-    }
-
-    return data.payment_tokens || [];
   }
 };
 
@@ -268,17 +215,6 @@ export const getPaymentTokenDetails = async vaultId => {
       console.error('[SERVER SDK] Error getting payment token:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const accessToken = await generateAccessToken();
-    const response = await fetch(`${base}/v3/vault/payment-tokens/${vaultId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const data = await response.json();
-    console.log('Payment Token Details Response: ', data);
-    return data;
   }
 };
 

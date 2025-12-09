@@ -6,6 +6,9 @@ import {
   renderSaveWoPurchase,
   renderBaReference,
   renderProductCart,
+  renderProduct,
+  renderCart,
+  renderSuccess,
   renderWebhookTesting,
   renderFastlane,
   renderRecurringPayment,
@@ -20,6 +23,9 @@ const router = express.Router();
 // Page routes
 router.get('/', renderIndex);
 router.get('/product-cart', renderProductCart);
+router.get('/product', renderProduct);
+router.get('/cart', renderCart);
+router.get('/success', renderSuccess);
 router.get('/checkout', renderCheckout);
 router.get('/test-no-applepay', (req, res) => {
   res.render('test-no-applepay', { clientId: process.env.CLIENT_ID });

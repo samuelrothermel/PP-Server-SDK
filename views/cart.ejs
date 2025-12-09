@@ -3,37 +3,43 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
-    <title>Product Cart - Acacia Salad Bowl</title>
+    <title>Shopping Cart - Rainforest Bowl</title>
   </head>
 
   <body>
     <div class="container">
       <header>
-        <h1>Product/Cart Demo</h1>
+        <h1>Shopping Cart</h1>
       </header>
       
       <div class="product-layout">
-        <!-- Left Side: Image, Title, Total -->
+        <!-- Left Side: Cart Summary -->
         <div class="product-left">
-          <img src="https://media.istockphoto.com/id/508179654/photo/wooden-bowl-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=c5BqYjY0wgzjMsWsUlj_9uFpi4kT9YWO-_ZKZg4uoxY=" 
-               alt="Wooden Bowl" 
-               class="product-image">
+          <div class="cart-item">
+            <img src="https://media.istockphoto.com/id/508179654/photo/wooden-bowl-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=c5BqYjY0wgzjMsWsUlj_9uFpi4kT9YWO-_ZKZg4uoxY=" 
+                 alt="Wooden Bowl" 
+                 class="cart-item-image"
+                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px;">
+            
+            <div class="cart-item-details" style="flex: 1; margin-left: 15px;">
+              <h3 style="margin: 0 0 5px 0;">Wooden Bowl</h3>
+              <p style="color: #666; margin: 0 0 5px 0;">Handcrafted tropical hardwood bowl</p>
+              <p style="font-weight: bold; margin: 0;">$<span id="cart-total">50.00</span></p>
+            </div>
+          </div>
           
-          <h2 class="product-title">Wooden Bowl</h2>
-          <div class="product-price">$<span id="cart-total">50.00</span></div>
-          
-          <div class="cart-details">
+          <div class="cart-details" style="margin-top: 25px;">
             <div class="cart-row">
               <span>Subtotal:</span>
-              <span>$<span id="cart-total">50.00</span></span>
+              <span>$<span id="subtotal-amount">50.00</span></span>
             </div>
             <div class="cart-row">
               <span>Shipping:</span>
               <span>$<span id="shipping-amount">0.00</span></span>
             </div>
             <div class="cart-row total">
-              <span>Pre-Tax Total:</span>
-              <span>$<span id="amount-total">50.00</span></span>
+              <span><strong>Pre-Tax Total:</strong></span>
+              <span><strong>$<span id="amount-total">50.00</span></strong></span>
             </div>
           </div>
           
@@ -50,43 +56,40 @@
             </div>
           </div>
           
-          <!-- Development Controls -->
-          <div class="controls-section">
+          <!-- Development Controls - Moved higher for visibility -->
+          <div class="controls-section" style="margin-top: 30px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+            <h3 style="margin-top: 0; font-size: 16px; color: #333;">Development Options</h3>
             <div class="checkbox-control">
               <input type="checkbox" id="returning-user-checkbox">
               <label for="returning-user-checkbox">Returning User Flow</label>
             </div>
-            <div class="customer-id-input" id="customer-id-input">
+            <div class="customer-id-input" id="customer-id-input" style="display: none;">
               <input type="number" placeholder="Enter Customer ID" step="1" min="1">
             </div>
           </div>
         </div>
         
-        <!-- Right Side: Product Description and PayPal Buttons -->
+        <!-- Right Side: Checkout -->
         <div class="product-right">
           <div class="product-description">
-            <h3>Product Description</h3>
+            <h3>Secure Checkout</h3>
             <p>
-              This beautiful acacia wood salad bowl brings natural elegance to your dining experience. 
-              Handcrafted from sustainably sourced acacia wood, each bowl features unique grain patterns 
-              that make it truly one-of-a-kind.
+              Complete your purchase securely with PayPal. You can pay with your PayPal account, 
+              debit or credit card, or Venmo.
             </p>
-            <p>
-              Perfect for serving salads, fruits, or as a decorative centerpiece, this bowl combines 
-              functionality with style. The smooth finish and ergonomic design make it both beautiful 
-              and practical for everyday use.
-            </p>
-            <ul>
-              <li>Made from sustainable acacia wood</li>
-              <li>Unique natural grain patterns</li>
-              <li>Food-safe finish</li>
-              <li>Easy to clean and maintain</li>
-              <li>Dimensions: 12" diameter x 4" height</li>
-              <li>Hand wash recommended</li>
-            </ul>
+            <div style="padding: 15px; background: #f0f7ff; border-left: 4px solid #0070ba; margin: 20px 0;">
+              <h4 style="margin: 0 0 10px 0; color: #0070ba;">Why choose PayPal?</h4>
+              <ul style="margin: 0; padding-left: 20px;">
+                <li>Buyer protection on eligible purchases</li>
+                <li>Fast and secure checkout</li>
+                <li>No need to share your financial information</li>
+                <li>Pay over time with Pay Later options</li>
+              </ul>
+            </div>
           </div>
           
           <div class="paypal-section">
+            <h3>Payment Method</h3>
             <div id="paypal-button-container" class="paypal-button-container"></div>
           </div>
         </div>
@@ -114,6 +117,6 @@
     <script>
       const clientId = '<%= clientId %>';
     </script>
-    <script src="/product-cart.js"></script>
+    <script src="/cart.js"></script>
   </body>
 </html>

@@ -107,28 +107,6 @@ export const createSubscriptionPlan = async () => {
         console.error('[SERVER SDK] Error creating plan:', error);
         throw error;
       }
-    } else {
-      // Legacy direct REST API call
-      const accessToken = await generateAccessToken();
-      const planResponse = await fetch(`${base}/v1/billing/plans`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/json',
-          'PayPal-Request-Id': `plan-${Date.now()}`,
-          Prefer: 'return=representation',
-        },
-        body: JSON.stringify(planData),
-      });
-
-      if (!planResponse.ok) {
-        throw new Error(`Failed to create plan: ${await planResponse.text()}`);
-      }
-
-      const plan = await planResponse.json();
-      console.log('Subscription plan created:', plan);
-      return plan;
     }
   } catch (error) {
     console.error('Error creating subscription plan:', error);
@@ -155,24 +133,6 @@ export const getSubscriptionPlan = async planId => {
           ? JSON.parse(planResponse)
           : planResponse;
       console.log('[SERVER SDK] Plan retrieved successfully');
-      return plan;
-    } else {
-      // Legacy direct REST API call
-      const accessToken = await generateAccessToken();
-
-      const response = await fetch(`${base}/v1/billing/plans/${planId}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get plan: ${await response.text()}`);
-      }
-
-      const plan = await response.json();
       return plan;
     }
   } catch (error) {

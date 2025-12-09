@@ -390,20 +390,6 @@ export const createCheckoutOrder = async orderData => {
       console.error('[SERVER SDK] Error creating order:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const url = `${base}/v2/checkout/orders`;
-    const response = await fetch(url, {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-        'PayPal-Request-Id': Date.now().toString(),
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify(orderPayload),
-    });
-
-    return handleResponse(response);
   }
 };
 
@@ -518,19 +504,6 @@ export const capturePayment = async orderId => {
       console.error('[SERVER SDK] Error capturing payment:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const accessToken = await generateAccessToken();
-    const url = `${base}/v2/checkout/orders/${orderId}/capture`;
-    const response = await fetch(url, {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    return handleResponse(response);
   }
 };
 
@@ -557,19 +530,6 @@ export const captureAuthorization = async authorizationId => {
       console.error('[SERVER SDK] Error capturing authorization:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const accessToken = await generateAccessToken();
-    const url = `${base}/v2/payments/authorizations/${authorizationId}/capture`;
-    const response = await fetch(url, {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    return handleResponse(response);
   }
 };
 
@@ -597,19 +557,6 @@ export const getOrderDetails = async orderId => {
       console.error('[SERVER SDK] Error getting order:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const accessToken = await generateAccessToken();
-    const url = `${base}/v2/checkout/orders/${orderId}`;
-    const response = await fetch(url, {
-      method: 'get',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    return handleResponse(response);
   }
 };
 
@@ -639,19 +586,6 @@ export const authorizePayment = async orderId => {
       console.error('[SERVER SDK] Error authorizing payment:', error);
       throw error;
     }
-  } else {
-    // Legacy direct REST API call
-    const accessToken = await generateAccessToken();
-    const url = `${base}/v2/checkout/orders/${orderId}/authorize`;
-    const response = await fetch(url, {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    return handleResponse(response);
   }
 };
 
