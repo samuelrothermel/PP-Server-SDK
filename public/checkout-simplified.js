@@ -284,6 +284,13 @@ const PayPalIntegration = {
       // Debug: Check what's actually in storage
       const savedOrders = window.paypalStorageManager.getOrders();
       console.log('💾 All orders in storage:', savedOrders);
+
+      // Store complete order data in sessionStorage for success page
+      sessionStorage.setItem('lastOrderData', JSON.stringify(orderData));
+
+      // Redirect to success page
+      window.location.href = '/success';
+      return;
     }
 
     // Show order results
