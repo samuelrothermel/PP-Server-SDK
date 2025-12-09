@@ -4,17 +4,9 @@ import fetch from 'node-fetch';
 
 const base = 'https://api-m.sandbox.paypal.com';
 
-// USE_SERVER_SDK flag - set to true to use Server SDK, false for direct REST API
-// Note: Subscriptions may not be available in all SDK versions
-const USE_SERVER_SDK = subscriptionsController ? true : false;
-
 // Create a subscription plan
 export const createSubscriptionPlan = async () => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Creating subscription plan'
-  );
+  console.log('[SERVER SDK] Creating subscription plan');
 
   try {
     const planData = {
@@ -89,24 +81,22 @@ export const createSubscriptionPlan = async () => {
     // Now create the plan with the product ID
     planData.product_id = productData.id;
 
-    if (USE_SERVER_SDK) {
-      // Use PayPal Server SDK to create billing plan
-      try {
-        const { body: planResponse } =
-          await subscriptionsController.createBillingPlan({
-            body: planData,
-            prefer: 'return=representation',
-          });
-        const plan =
-          typeof planResponse === 'string'
-            ? JSON.parse(planResponse)
-            : planResponse;
-        console.log('[SERVER SDK] Subscription plan created:', plan.id);
-        return plan;
-      } catch (error) {
-        console.error('[SERVER SDK] Error creating plan:', error);
-        throw error;
-      }
+    // Use PayPal Server SDK to create billing plan
+    try {
+      const { body: planResponse } =
+        await subscriptionsController.createBillingPlan({
+          body: planData,
+          prefer: 'return=representation',
+        });
+      const plan =
+        typeof planResponse === 'string'
+          ? JSON.parse(planResponse)
+          : planResponse;
+      console.log('[SERVER SDK] Subscription plan created:', plan.id);
+      return plan;
+    } catch (error) {
+      console.error('[SERVER SDK] Error creating plan:', error);
+      throw error;
     }
   } catch (error) {
     console.error('Error creating subscription plan:', error);
@@ -116,25 +106,19 @@ export const createSubscriptionPlan = async () => {
 
 // Get an existing plan by ID
 export const getSubscriptionPlan = async planId => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Getting subscription plan:',
-    planId
-  );
+  console.log('[SERVER SDK] Getting subscription plan:', planId);
 
   try {
-    if (USE_SERVER_SDK) {
-      // Use PayPal Server SDK
-      const { body: planResponse } =
-        await subscriptionsController.getBillingPlan(planId);
-      const plan =
-        typeof planResponse === 'string'
-          ? JSON.parse(planResponse)
-          : planResponse;
-      console.log('[SERVER SDK] Plan retrieved successfully');
-      return plan;
-    }
+    // Use PayPal Server SDK
+    const { body: planResponse } = await subscriptionsController.getBillingPlan(
+      planId
+    );
+    const plan =
+      typeof planResponse === 'string'
+        ? JSON.parse(planResponse)
+        : planResponse;
+    console.log('[SERVER SDK] Plan retrieved successfully');
+    return plan;
   } catch (error) {
     console.error('Error getting subscription plan:', error);
     throw error;

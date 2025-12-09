@@ -5,9 +5,6 @@ import { vaultController } from './paypalClient.js';
 // set some important variables
 const base = 'https://api-m.sandbox.paypal.com';
 
-// USE_SERVER_SDK flag - set to true to use Server SDK, false for direct REST API
-const USE_SERVER_SDK = true;
-
 // handle response from PayPal API
 const handleResponse = async response => {
   if (response.status === 200 || response.status === 201) {
@@ -21,12 +18,7 @@ const handleResponse = async response => {
 
 // create vault setup token
 export const createVaultSetupToken = async ({ paymentSource }) => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Creating vault setup token for:',
-    paymentSource
-  );
+  console.log('[SERVER SDK] Creating vault setup token for:', paymentSource);
 
   const paymentSources = {
     paypal: {
@@ -71,31 +63,26 @@ export const createVaultSetupToken = async ({ paymentSource }) => {
     },
   };
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK
-    try {
-      const { body: tokenResponse } = await vaultController.createSetupToken({
-        body: setupTokenPayload,
-      });
-      const token =
-        typeof tokenResponse === 'string'
-          ? JSON.parse(tokenResponse)
-          : tokenResponse;
-      console.log('[SERVER SDK] Setup token created successfully:', token.id);
-      return token;
-    } catch (error) {
-      console.error('[SERVER SDK] Error creating setup token:', error);
-      throw error;
-    }
+  try {
+    const { body: tokenResponse } = await vaultController.createSetupToken({
+      body: setupTokenPayload,
+    });
+    const token =
+      typeof tokenResponse === 'string'
+        ? JSON.parse(tokenResponse)
+        : tokenResponse;
+    console.log('[SERVER SDK] Setup token created successfully:', token.id);
+    return token;
+  } catch (error) {
+    console.error('[SERVER SDK] Error creating setup token:', error);
+    throw error;
   }
 };
 
 // create vault payment token
 export const createVaultPaymentToken = async vaultSetupToken => {
   console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Creating payment token from setup token:',
+    '[SERVER SDK] Creating payment token from setup token:',
     vaultSetupToken
   );
 
@@ -108,22 +95,19 @@ export const createVaultPaymentToken = async vaultSetupToken => {
     },
   };
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK
-    try {
-      const { body: tokenResponse } = await vaultController.createPaymentToken({
-        body: paymentTokenPayload,
-      });
-      const token =
-        typeof tokenResponse === 'string'
-          ? JSON.parse(tokenResponse)
-          : tokenResponse;
-      console.log('[SERVER SDK] Payment token created successfully:', token.id);
-      return token;
-    } catch (error) {
-      console.error('[SERVER SDK] Error creating payment token:', error);
-      throw error;
-    }
+  try {
+    const { body: tokenResponse } = await vaultController.createPaymentToken({
+      body: paymentTokenPayload,
+    });
+    const token =
+      typeof tokenResponse === 'string'
+        ? JSON.parse(tokenResponse)
+        : tokenResponse;
+    console.log('[SERVER SDK] Payment token created successfully:', token.id);
+    return token;
+  } catch (error) {
+    console.error('[SERVER SDK] Error creating payment token:', error);
+    throw error;
   }
 };
 
@@ -152,69 +136,53 @@ export const createPaymentTokenFromCustomerId = async customerId => {
 
 // get payment tokens from customer ID
 export const fetchPaymentTokens = async customerId => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Fetching payment tokens for customer:',
-    customerId
-  );
+  console.log('[SERVER SDK] Fetching payment tokens for customer:', customerId);
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK
-    try {
-      const { body: responseData } =
-        await vaultController.listCustomerPaymentTokens({
-          customerId: customerId,
-        });
-      const response =
-        typeof responseData === 'string'
-          ? JSON.parse(responseData)
-          : responseData;
+  try {
+    const { body: responseData } =
+      await vaultController.listCustomerPaymentTokens({
+        customerId: customerId,
+      });
+    const response =
+      typeof responseData === 'string'
+        ? JSON.parse(responseData)
+        : responseData;
 
-      console.log('[SERVER SDK] Payment tokens fetched successfully');
+    console.log('[SERVER SDK] Payment tokens fetched successfully');
 
-      // Log detailed customer and payment source information
-      if (response.customer) {
-        // Customer info available
-      }
-
-      if (response.payment_tokens && response.payment_tokens.length > 0) {
-        // Payment tokens fetched successfully
-      }
-
-      return response.payment_tokens || [];
-    } catch (error) {
-      console.error('[SERVER SDK] Error fetching payment tokens:', error);
-      throw error;
+    // Log detailed customer and payment source information
+    if (response.customer) {
+      // Customer info available
     }
+
+    if (response.payment_tokens && response.payment_tokens.length > 0) {
+      // Payment tokens fetched successfully
+    }
+
+    return response.payment_tokens || [];
+  } catch (error) {
+    console.error('[SERVER SDK] Error fetching payment tokens:', error);
+    throw error;
   }
 };
 
 // get payment token details by vault_id
 export const getPaymentTokenDetails = async vaultId => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Getting payment token details for:',
-    vaultId
-  );
+  console.log('[SERVER SDK] Getting payment token details for:', vaultId);
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK
-    try {
-      const { body: tokenResponse } = await vaultController.getPaymentToken(
-        vaultId
-      );
-      const tokenDetails =
-        typeof tokenResponse === 'string'
-          ? JSON.parse(tokenResponse)
-          : tokenResponse;
-      console.log('[SERVER SDK] Payment token details retrieved successfully');
-      return tokenDetails;
-    } catch (error) {
-      console.error('[SERVER SDK] Error getting payment token:', error);
-      throw error;
-    }
+  try {
+    const { body: tokenResponse } = await vaultController.getPaymentToken(
+      vaultId
+    );
+    const tokenDetails =
+      typeof tokenResponse === 'string'
+        ? JSON.parse(tokenResponse)
+        : tokenResponse;
+    console.log('[SERVER SDK] Payment token details retrieved successfully');
+    return tokenDetails;
+  } catch (error) {
+    console.error('[SERVER SDK] Error getting payment token:', error);
+    throw error;
   }
 };
 

@@ -9,9 +9,6 @@ import { ordersController, paymentsController } from './paypalClient.js';
 const base = 'https://api-m.sandbox.paypal.com';
 const CALLBACK_URL = 'https://pp-checkout.onrender.com/api/shipping-callback';
 
-// USE_SERVER_SDK flag - set to true to use Server SDK, false for direct REST API
-const USE_SERVER_SDK = true;
-
 // handle response from PayPal API
 const handleResponse = async response => {
   if (response.status === 200 || response.status === 201) {
@@ -309,87 +306,82 @@ export const createCheckoutOrder = async orderData => {
   }
 
   console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Creating order with payload:',
+    '[SERVER SDK] Creating order with payload:',
     JSON.stringify(orderPayload, null, 2)
   );
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK - Convert to camelCase for SDK
-    const sdkPayload = {
-      intent,
-      purchaseUnits: orderPayload.purchase_units.map(unit => ({
-        amount: {
-          currencyCode: unit.amount.currency_code,
-          value: unit.amount.value,
-        },
-        ...(unit.shipping && {
-          shipping: {
-            name: {
-              fullName: unit.shipping.name.full_name,
-            },
-            address: {
-              addressLine1: unit.shipping.address.address_line_1,
-              adminArea2: unit.shipping.address.admin_area_2,
-              adminArea1: unit.shipping.address.admin_area_1,
-              postalCode: unit.shipping.address.postal_code,
-              countryCode: unit.shipping.address.country_code,
-            },
+  // Use PayPal Server SDK - Convert to camelCase for SDK
+  const sdkPayload = {
+    intent,
+    purchaseUnits: orderPayload.purchase_units.map(unit => ({
+      amount: {
+        currencyCode: unit.amount.currency_code,
+        value: unit.amount.value,
+      },
+      ...(unit.shipping && {
+        shipping: {
+          name: {
+            fullName: unit.shipping.name.full_name,
           },
-        }),
-      })),
-      ...(orderPayload.payment_source && {
-        paymentSource: orderPayload.payment_source.paypal
-          ? {
-              paypal: {
-                experienceContext: {
-                  returnUrl:
-                    orderPayload.payment_source.paypal.experience_context
-                      .return_url,
-                  cancelUrl:
-                    orderPayload.payment_source.paypal.experience_context
-                      .cancel_url,
-                  userAction:
-                    orderPayload.payment_source.paypal.experience_context
-                      .user_action,
-                  shippingPreference:
-                    orderPayload.payment_source.paypal.experience_context
-                      .shipping_preference,
-                  brandName:
-                    orderPayload.payment_source.paypal.experience_context
-                      .brand_name,
-                  locale:
-                    orderPayload.payment_source.paypal.experience_context
-                      .locale,
-                  landingPage:
-                    orderPayload.payment_source.paypal.experience_context
-                      .landing_page,
-                },
-              },
-            }
-          : orderPayload.payment_source,
+          address: {
+            addressLine1: unit.shipping.address.address_line_1,
+            adminArea2: unit.shipping.address.admin_area_2,
+            adminArea1: unit.shipping.address.admin_area_1,
+            postalCode: unit.shipping.address.postal_code,
+            countryCode: unit.shipping.address.country_code,
+          },
+        },
       }),
-    };
+    })),
+    ...(orderPayload.payment_source && {
+      paymentSource: orderPayload.payment_source.paypal
+        ? {
+            paypal: {
+              experienceContext: {
+                returnUrl:
+                  orderPayload.payment_source.paypal.experience_context
+                    .return_url,
+                cancelUrl:
+                  orderPayload.payment_source.paypal.experience_context
+                    .cancel_url,
+                userAction:
+                  orderPayload.payment_source.paypal.experience_context
+                    .user_action,
+                shippingPreference:
+                  orderPayload.payment_source.paypal.experience_context
+                    .shipping_preference,
+                brandName:
+                  orderPayload.payment_source.paypal.experience_context
+                    .brand_name,
+                locale:
+                  orderPayload.payment_source.paypal.experience_context.locale,
+                landingPage:
+                  orderPayload.payment_source.paypal.experience_context
+                    .landing_page,
+              },
+            },
+          }
+        : orderPayload.payment_source,
+    }),
+  };
 
-    try {
-      const { body: orderResponse } = await ordersController.createOrder({
-        body: sdkPayload,
-        prefer: 'return=representation',
-      });
+  try {
+    const { body: orderResponse } = await ordersController.createOrder({
+      body: sdkPayload,
+      prefer: 'return=representation',
+    });
 
-      // Parse the response if it's a string
-      const order =
-        typeof orderResponse === 'string'
-          ? JSON.parse(orderResponse)
-          : orderResponse;
+    // Parse the response if it's a string
+    const order =
+      typeof orderResponse === 'string'
+        ? JSON.parse(orderResponse)
+        : orderResponse;
 
-      console.log('[SERVER SDK] Order created successfully:', order.id);
-      return order;
-    } catch (error) {
-      console.error('[SERVER SDK] Error creating order:', error);
-      throw error;
-    }
+    console.log('[SERVER SDK] Order created successfully:', order.id);
+    return order;
+  } catch (error) {
+    console.error('[SERVER SDK] Error creating order:', error);
+    throw error;
   }
 };
 
@@ -480,112 +472,79 @@ export const createUpstreamQlOrder = async totalAmount => {
 
 // capture payment request
 export const capturePayment = async orderId => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Capturing payment for order:',
-    orderId
-  );
+  console.log('[SERVER SDK] Capturing payment for order:', orderId);
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK
-    try {
-      const { body: resultResponse } = await ordersController.captureOrder({
-        id: orderId,
-        prefer: 'return=representation',
-      });
-      const result =
-        typeof resultResponse === 'string'
-          ? JSON.parse(resultResponse)
-          : resultResponse;
-      console.log('[SERVER SDK] Payment captured successfully');
-      return result;
-    } catch (error) {
-      console.error('[SERVER SDK] Error capturing payment:', error);
-      throw error;
-    }
+  try {
+    const { body: resultResponse } = await ordersController.captureOrder({
+      id: orderId,
+      prefer: 'return=representation',
+    });
+    const result =
+      typeof resultResponse === 'string'
+        ? JSON.parse(resultResponse)
+        : resultResponse;
+    console.log('[SERVER SDK] Payment captured successfully');
+    return result;
+  } catch (error) {
+    console.error('[SERVER SDK] Error capturing payment:', error);
+    throw error;
   }
 };
 
 // capture authorization request
-// capture authorization request
 export const captureAuthorization = async authorizationId => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Capturing authorization:',
-    authorizationId
-  );
+  console.log('[SERVER SDK] Capturing authorization:', authorizationId);
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK
-    try {
-      const { body: result } = await paymentsController.authorizationsCapture({
-        authorizationId: authorizationId,
-        prefer: 'return=representation',
-      });
-      console.log('[SERVER SDK] Authorization captured successfully');
-      return result;
-    } catch (error) {
-      console.error('[SERVER SDK] Error capturing authorization:', error);
-      throw error;
-    }
+  try {
+    const { body: result } = await paymentsController.authorizationsCapture({
+      authorizationId: authorizationId,
+      prefer: 'return=representation',
+    });
+    console.log('[SERVER SDK] Authorization captured successfully');
+    return result;
+  } catch (error) {
+    console.error('[SERVER SDK] Error capturing authorization:', error);
+    throw error;
   }
 };
 
 // get order details request
 export const getOrderDetails = async orderId => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Getting order details for:',
-    orderId
-  );
+  console.log('[SERVER SDK] Getting order details for:', orderId);
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK
-    try {
-      const { body: orderResponse } = await ordersController.getOrder({
-        id: orderId,
-      });
-      const order =
-        typeof orderResponse === 'string'
-          ? JSON.parse(orderResponse)
-          : orderResponse;
-      return order;
-    } catch (error) {
-      console.error('[SERVER SDK] Error getting order:', error);
-      throw error;
-    }
+  try {
+    const { body: orderResponse } = await ordersController.getOrder({
+      id: orderId,
+    });
+    const order =
+      typeof orderResponse === 'string'
+        ? JSON.parse(orderResponse)
+        : orderResponse;
+    return order;
+  } catch (error) {
+    console.error('[SERVER SDK] Error getting order:', error);
+    throw error;
   }
 };
 
 // authorize payment request
 export const authorizePayment = async orderId => {
-  console.log(
-    '[SDK MODE: ' +
-      (USE_SERVER_SDK ? 'SERVER SDK' : 'DIRECT REST') +
-      '] Authorizing payment for order:',
-    orderId
-  );
+  console.log('[SERVER SDK] Authorizing payment for order:', orderId);
 
-  if (USE_SERVER_SDK) {
-    // Use PayPal Server SDK
-    try {
-      const { body: resultResponse } = await ordersController.authorizeOrder({
-        id: orderId,
-        prefer: 'return=representation',
-      });
-      const result =
-        typeof resultResponse === 'string'
-          ? JSON.parse(resultResponse)
-          : resultResponse;
-      console.log('[SERVER SDK] Payment authorized successfully');
-      return result;
-    } catch (error) {
-      console.error('[SERVER SDK] Error authorizing payment:', error);
-      throw error;
-    }
+  try {
+    const { body: resultResponse } = await ordersController.authorizeOrder({
+      id: orderId,
+      prefer: 'return=representation',
+    });
+    const result =
+      typeof resultResponse === 'string'
+        ? JSON.parse(resultResponse)
+        : resultResponse;
+    console.log('[SERVER SDK] Payment authorized successfully');
+    return result;
+  } catch (error) {
+    console.error('[SERVER SDK] Error authorizing payment:', error);
+    throw error;
   }
 };
 
@@ -1002,9 +961,9 @@ export const createOrderWithVaultIdAndCapture = async (
   return result;
 };
 
-// Fetch multiple orders by ID array using PayPal SDK
+// Fetch multiple orders by ID array using PayPal Server SDK
 export const getOrdersByIds = async orderIds => {
-  console.log('Fetching orders for IDs:', orderIds);
+  console.log('[SERVER SDK] Fetching orders for IDs:', orderIds);
   const orders = [];
 
   if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
@@ -1015,36 +974,29 @@ export const getOrdersByIds = async orderIds => {
     };
   }
 
-  // Fetch each order individually from PayPal's Orders API using direct API calls
+  // Use PayPal Server SDK
   for (const orderIdObj of orderIds) {
     const orderId = orderIdObj.id || orderIdObj;
     try {
-      console.log(`Fetching order details for: ${orderId}`);
+      console.log(`[SERVER SDK] Fetching order details for: ${orderId}`);
 
-      // Get access token for direct API call
-      const accessToken = await generateAccessToken();
-
-      // Make direct API call to fetch order details
-      const response = await fetch(`${base}/v2/checkout/orders/${orderId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const { body: orderResponse } = await ordersController.getOrder({
+        id: orderId,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const orderDetails = await response.json();
+      const orderDetails =
+        typeof orderResponse === 'string'
+          ? JSON.parse(orderResponse)
+          : orderResponse;
 
       orders.push({
         ...orderDetails,
         client_order_timestamp: orderIdObj.timestamp || null,
       });
     } catch (orderError) {
-      console.error(`Error fetching order ${orderId}:`, orderError);
+      console.error(
+        `[SERVER SDK] Error fetching order ${orderId}:`,
+        orderError
+      );
       // Continue with other orders even if one fails
       orders.push({
         id: orderId,
