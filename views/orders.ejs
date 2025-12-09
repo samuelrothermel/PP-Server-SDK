@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management - PayPal Demo</title>
+    <link rel="stylesheet" href="/styles/custom.css">
+</head>
+<body>
+    <div class="orders-container">
+        <div class="orders-header">
+            <h1>Order Management</h1>
+            <div class="header-actions">
+                <button id="delete-all-orders-btn" class="delete-all-btn" onclick="deleteAllOrders()" title="Clear all order IDs from local storage">
+                    Delete All Orders
+                </button>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Home</a>
+                    <a href="/vault" class="nav-link">Vault</a>
+                </div>
+            </div>
+        </div>
+        
+        <div id="message-container"></div>
+        
+        <div id="loading" class="loading">
+            Loading orders from PayPal API...
+        </div>
+        
+        <div id="orders-content" style="display: none;">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Payment Source</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-tbody">
+                    <!-- Orders will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- StorageManager for enhanced localStorage functionality -->
+    <script src="/modules/storage-manager.js"></script>
+    
+    <script src="/orders.js"></script>
+</body>
+</html>

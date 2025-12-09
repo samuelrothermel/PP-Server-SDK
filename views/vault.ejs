@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Management - PayPal Demo</title>
+    <link rel="stylesheet" href="/styles/custom.css">
+</head>
+<body>
+    <div class="vault-container">
+        <div class="vault-header">
+            <h1>Vault Management</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/orders" class="nav-link">Orders</a>
+            </div>
+        </div>
+        
+        <div id="message-container"></div>
+        
+        <div id="loading" class="loading">
+            Loading vault data from PayPal API...
+        </div>
+        
+        <div id="vault-content" style="display: none;">
+            <div class="stats" id="vault-stats">
+                <!-- Stats will be populated here -->
+            </div>
+            
+            <div id="customers-container">
+                <!-- Customer cards will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/vault.js"></script>
+</body>
+</html>

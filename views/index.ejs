@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://www.paypalobjects.com/webstatic/en_US/developer/docs/css/cardfields.css">
+  <link rel="stylesheet" href="/styles/custom.css">
+  <title>PayPal Checkout Integrations</title>
+</head>
+<body>
+  <div class="container">
+    <!-- Add navigation header -->
+    <div class="nav-header">
+      <div class="nav-header-content">
+        <h2>PayPal Demo Dashboard</h2>
+        <div class="nav-links">
+          <a href="/orders" class="nav-link">
+            Orders
+          </a>
+          <a href="/vault" class="nav-link">
+            Vault
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SDK Status Legend -->
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+      <h3 style="margin-top: 0; font-size: 1.1em;">Integration Status</h3>
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span style="font-size: 0.9em; color: #666;">Using PayPal Server SDK v2.0.0</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <span style="font-size: 0.9em; color: #666;">Not available in Server SDK yet</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="sdk-badge separate-sdk">◆ Fastlane SDK</span>
+          <span style="font-size: 0.9em; color: #666;">Separate SDK product</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="integrations-gallery">
+      
+      <!-- Standard Product Page Integration -->
+      <a href="/product-cart" class="integration-card">
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+        <h3>Product/Cart Page</h3>
+        <p><strong>PayPal's Standard Integration</strong></p>
+        <p>Optimized for fast, conversion-focused checkout flows.</p>
+        <ul>
+          <li>Shipping Address Verification and Tax Calculation performed via server-side callback</li>
+          <li>Pay Now functionality for one-click payments</li>
+          <li>App Switch Compatible</li>
+        </ul>
+      </a>
+
+      <!-- Expanded Checkout Integration -->
+      <a href="/checkout" class="integration-card">
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+        <h3>Expanded Checkout Page</h3>
+        <p><strong>PayPal's Advanced Checkout Experience</strong></p>
+        <p>Sample Checkout Page highlighting the full complement of PayPal's capabilities.</p>
+        <ul>
+          <li>Eventually it will include the below features:</li>
+          <li>The PayPal Marks component renders payment methods in radio buttons</li>
+          <li>Buyers have the flexibility to choose how to pay for their purchase after they fill out the form.</li>
+          <li>Shipping Callbacks utilized for Upstream Presentment buttons</li>
+          <li>Payment Methods are subject to change based on user input and selection.</li>
+        </ul>
+      </a>
+
+      <!-- Recurring Payments Integration-->
+      <a href="/recurring-payment" class="integration-card">
+        <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+        <h3>Recurring Payments</h3>
+        <p><strong>Automated Billing Plans</strong></p>
+        <p>Set up customers for automated monthly billing with initial one-time charges. Perfect for memberships, services, and subscription products.</p>
+        <ul>
+          <li>Setup billing plan with recurring charges</li>
+          <li>One-time initial charge option</li>
+          <li>Flexible billing frequency configuration</li>
+          <li>User-friendly subscription management</li>
+        </ul>
+      </a>
+       
+      <!-- Payee Testing Integration -->
+      <a href="/payee-test" class="integration-card">
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+        <h3>Payee Security Test</h3>
+        <p><strong>One-time vs Vaulted Token Security</strong></p>
+        <p>Demonstrates PayPal's security model for payments with different payee merchant IDs</p>
+        <ul>
+          <li>✅ One-time payments: Can disburse to different merchants</li>
+          <li>❌ Vaulted tokens: Tied to original merchant (security protection)</li>
+          <li>Test both scenarios with real API calls</li>
+          <li>Educational demo for understanding PayPal's security model</li>
+        </ul>
+      </a>
+
+      <!-- Webhook Testing Integration -->
+      <a href="/webhook-testing" class="integration-card">
+        <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+        <h3>Webhook Dashboard</h3>
+        <p><strong>Receive and Test Webhooks</strong></p>
+        <p>Merchant page for receiving and testing webhook events such as payment method vaulting</p>
+        <ul>
+          <li>bleh</li>
+          <li>blur</li>
+          <li>blah</li>
+        </ul>
+      </a>
+
+      <!-- Save without Purchase Setup Integration -->
+      <a href="/save-wo-purchase" class="integration-card">
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+        <h3>Save WITHOUT Purchase</h3>
+        <p><strong>Payment Method Setup</strong></p>
+        <p>Allow customers to add and verify payment methods without making an immediate purchase. Ideal for subscription services, trials, and account setup flows.</p>
+        <ul>
+          <li>Payment method verification without charge</li>
+          <li>Setup tokens for future billing</li>
+          <li>Subscription and trial support</li>
+          <li>Account onboarding optimization</li>
+        </ul>
+      </a>
+
+      <!-- Subscription Setup Integration -->
+      <a href="/subscriptions" class="integration-card">
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+        <h3>Subscriptions</h3>
+        <p><strong>Create subscriptions to bill customers at regular intervals.</strong></p>
+        <p>Creates a subscription plan for recurring billing.</p>
+        <ul>
+          <li>PayPal Subscription API</li>
+          <li>Creates a Plan, </li>
+        </ul>
+      </a>
+
+      <!-- Deprecated Create Billing Agreement Integration -->
+      <a href="/ba_reference" class="integration-card">
+        <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+        <h3>Create Billing Agreement</h3>
+        <p><strong>Deprecated Billing Agreement (without purchase) Integration</strong></p>
+        <p>Allow customers to add and verify payment methods without making an immediate purchase. Ideal for subscription services, trials, and account setup flows.</p>
+        <ul>
+          <li>PP JS SDK Intent set to "tokenize" along with "vault=true" to specify this is a billing (without purchase) transaction</li>
+          <li>Setup tokens for future billing</li>
+          <li>Subscription and trial support</li>
+        </ul>
+      </a>
+
+      <!-- PayPal Fastlane Integration -->
+      <a href="/fastlane" class="integration-card">
+        <span class="sdk-badge separate-sdk">◆ Fastlane SDK</span>
+        <h3>PayPal Fastlane</h3>
+        <p><strong>Next-Generation Accelerated Checkout</strong></p>
+        <p>Experience PayPal's Fastlane technology for lightning-fast guest checkout with intelligent payment method recognition and one-click express flows.</p>
+        <ul>
+          <li>One-click guest checkout acceleration</li>
+          <li>Secure payment processing with advanced fraud protection</li>
+          <li>Mobile-optimized responsive design</li>
+          <li>Instant payment method and customer recognition</li>
+          <li>Higher conversion rates and reduced cart abandonment</li>
+        </ul>
+      </a>
+
+      <!-- Returning Payer Integration -->
+      <a href="/returning-payer" class="integration-card">
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+        <h3>Returning Payer</h3>
+        <p><strong>Saved Payment Method Experience</strong></p>
+        <p>Demonstrates how returning customers can use their saved payment methods for quick and easy checkout experiences.</p>
+        <ul>
+          <li>Access saved PayPal accounts and cards</li>
+          <li>One-click payment with saved methods</li>
+          <li>Secure vault token management</li>
+          <li>Streamlined returning customer flow</li>
+          <li>Enhanced user experience for repeat purchases</li>
+        </ul>
+      </a>
+
+      <!-- PayPal Payouts API Integration -->
+      <a href="/payouts" class="integration-card">
+        <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+        <h3>PayPal Payouts API</h3>
+        <p><strong>Send Money to Multiple Recipients</strong></p>
+        <p>Test PayPal's Payouts API with Login with PayPal Identity integration for sending payments to PayPal accounts. Perfect for marketplaces, affiliate programs, and gig economy platforms.</p>
+        <ul>
+          <li>Login with PayPal to obtain user's PayPal ID</li>
+          <li>Create batch payouts to multiple recipients</li>
+          <li>Track payout status in real-time</li>
+          <li>Query payout batch and item details</li>
+          <li>Support for marketplace, rebate, and affiliate use cases</li>
+        </ul>
+      </a>
+
+    </section>
+  </div>
+</body>
+</html>

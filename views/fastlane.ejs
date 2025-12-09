@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://www.paypalobjects.com/webstatic/en_US/developer/docs/css/cardfields.css"
+    />
+    <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+    <link rel="stylesheet" type="text/css" href="/styles/fastlane.css" />
+    <link rel="stylesheet" type="text/css" href="/styles/payment-result.css" />
+    <title>PayPal Fastlane Integration</title>
+    
+    <!-- The SDK will be dynamically loaded with the client token in fastlane.js -->
+    <script src="/fastlane.js" defer></script>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>PayPal Fastlane Integration</h1>
+            <p>Experience PayPal's Fastlane - the next generation of accelerated checkout</p>
+        </header>
+        
+        <form>
+            <h1>PayPal Fastlane</h1>
+                <!-- Fastlane Identity Component -->
+                <section id="customer" class="checkout-section active visited">
+                    <div class="header">
+                        <h2>Customer</h2>
+                        <button
+                            id="email-edit-button"
+                            type="button"
+                            class="edit-button"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                    <div class="summary"></div>
+                    <div class="email-container">
+                        <fieldset class="email-input-with-watermark">
+                            <input
+                                id="email-input"
+                                name="email"
+                                type="email"
+                                placeholder="Email"
+                                autocomplete="email"
+                            />
+                            <div id="watermark-container"></div>
+                        </fieldset>
+                        <button
+                            id="email-submit-button"
+                            type="button"
+                            class="submit-button"
+                            disabled
+                        >
+                            Continue
+                        </button>
+                    </div>
+                </section>
+                
+                <hr />
+                
+                <!-- Shipping Information -->
+                <section id="shipping">
+                    <div class="header">
+                        <h2>Shipping</h2>
+                        <button
+                            id="shipping-edit-button"
+                            type="button"
+                            class="edit-button"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                    <div class="summary"></div>
+                    <fieldset>
+                        <span>
+                            <input
+                                id="shipping-required-checkbox"
+                                name="shipping-required"
+                                type="checkbox"
+                                checked
+                            />
+                            <label for="shipping-required-checkbox"
+                                >This purchase requires shipping</label
+                            >
+                        </span>
+                        <input
+                            name="given-name"
+                            placeholder="First name"
+                            autocomplete="given-name"
+                        />
+                        <input
+                            name="family-name"
+                            placeholder="Last name"
+                            autocomplete="family-name"
+                        />
+                        <input
+                            name="address-line1"
+                            placeholder="Street address"
+                            autocomplete="address-line1"
+                        />
+                        <input
+                            name="address-line2"
+                            placeholder="Apt., ste., bldg. (optional)"
+                            autocomplete="address-line2"
+                        />
+                        <input
+                            name="address-level2"
+                            placeholder="City"
+                            autocomplete="address-level2"
+                        />
+                        <input
+                            name="address-level1"
+                            placeholder="State"
+                            autocomplete="address-level1"
+                        />
+                        <input
+                            name="postal-code"
+                            placeholder="ZIP code"
+                            autocomplete="postal-code"
+                        />
+                        <input
+                            name="country"
+                            placeholder="Country"
+                            autocomplete="country"
+                        />
+                        <input
+                            name="tel-country-code"
+                            placeholder="Country calling code"
+                            autocomplete="tel-country-code"
+                        />
+                        <input
+                            name="tel-national"
+                            type="tel"
+                            placeholder="Phone number"
+                            autocomplete="tel-national"
+                        />
+                    </fieldset>
+                    <button
+                        id="shipping-submit-button"
+                        type="button"
+                        class="submit-button"
+                    >
+                        Continue
+                    </button>
+                </section>
+                
+                <hr />
+
+                <!-- Payment Information -->
+                <section id="payment">
+                    <div class="header">
+                        <h2>Payment</h2>
+                        <button
+                            id="payment-edit-button"
+                            type="button"
+                            class="edit-button"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                    <fieldset>
+                        <div id="payment-component"></div>
+                    </fieldset>
+                </section>
+
+                <button id="checkout-button" type="button" class="submit-button">
+                    Checkout
+                </button>
+        </form>
+        
+        <!-- Status Messages -->
+        <div id="payment-status" class="status-message" style="display: none;"></div>
+        <div id="debug-info" class="debug-info" style="display: none;"></div>
+        <div id="result-message" class="result-message" style="display: none;"></div>
+    </div>
+
+    <!-- PayPal SDK will be loaded dynamically -->
+    <!-- Fastlane Integration Script is loaded in the head with defer attribute -->
+    <script>
+        let fastlaneApp = null;
+
+        // Initialize Fastlane when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // We'll use clientId as a fallback, but the SDK will primarily use the client token
+                fastlaneApp = new FastlaneIntegration('<%= clientId %>');
+                
+                // The init method will fetch the client token and initialize with it
+                await fastlaneApp.init();
+                
+                console.log('✅ Fastlane initialized successfully with client token');
+            } catch (error) {
+                console.error('Failed to initialize Fastlane:', error);
+                document.getElementById('payment-status').innerHTML = 
+                    '<div class="status-message error">❌ Failed to load Fastlane. Please refresh the page.</div>';
+                document.getElementById('payment-status').style.display = 'block';
+            }
+        });
+    </script>
+
+
+</body>
+</html>

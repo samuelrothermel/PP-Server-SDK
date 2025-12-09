@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal Payee Test - One-time vs Vaulted</title>
+    <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+</head>
+<body>
+    <div class="test-container">
+        <h1>PayPal Vault v3 Test: Payment Method Tokens</h1>
+        
+        <div class="explanation">
+            <h4>Vault v3 Test Explanation:</h4>
+            <p><strong>New Payment Method Token Format:</strong></p>
+            <pre><code>"payment_source": {
+    "token": {
+        "id": "vault_id_from_previous_transaction",
+        "type": "PAYMENT_METHOD_TOKEN"
+    }
+}</code></pre>
+            <p><strong>Test Flow:</strong></p>
+            <ul>
+                <li><strong>Step 1:</strong> Create vaulted payment token (stores payment method)</li>
+                <li><strong>Step 2:</strong> Create capture intent order with different payee merchant ID</li>
+            </ul>
+            <p>This tests PayPal's new vault v3 API format and security model.</p>
+        </div>
+
+        <!-- Configuration Section -->
+        <div class="test-section">
+            <h3>Test Configuration</h3>
+            <div class="form-group">
+                <label for="payee-merchant-id">Different Payee Merchant ID:</label>
+                <input type="text" id="payee-merchant-id" placeholder="Enter different merchant ID for testing">
+                <small>This should be a different PayPal merchant ID than your primary account</small>
+            </div>
+            <div class="form-group">
+                <label for="test-amount">Test Amount (USD):</label>
+                <input type="number" id="test-amount" value="10.00" step="0.01" min="1">
+            </div>
+        </div>
+
+        <!-- Test 1: Create Vault Token -->
+        <div class="test-section">
+            <h3>Step 1: Create Vault Payment Token</h3>
+            <p>First, create a vaulted payment token that we'll test with the vault v3 format.</p>
+            <p><strong>Process:</strong> PayPal Button → Login/Approval → Vault Token Creation</p>
+            
+            <div id="paypal-button-container-vault"></div>
+            
+            <div id="vault-results" class="results" style="display: none;"></div>
+            <div id="vault-token" style="display: none;"></div>
+        </div>
+
+        <!-- Test 2: Create Capture Order with Different Payee -->
+        <div class="test-section">
+            <h3>Step 2: Create Capture Order with Different Payee</h3>
+            <p>Create a new order with capture intent using the vaulted payment token and disberse funds to the specified payee merchant account.</p>
+            <p><strong>Expected:</strong> Should succeed if you own the vault_id and funds will be disbursed to the separate PayPal business account.</p>
+            <p><strong>Process:</strong> Create Order (intent: capture) → Use vaulted token → Specify payee → Immediate capture and disbursement</p>
+            
+            <button class="btn" id="create-capture-order-btn" onclick="createCaptureOrderWithPayee()" disabled>
+                Create Capture Order with Payee
+            </button>
+            
+            <div id="capture-order-results" class="results" style="display: none;"></div>
+        </div>
+
+
+
+        <!-- Results Summary -->
+        <div class="test-section">
+            <h3>Test Results Summary</h3>
+            <div id="summary-results" class="results">
+                Ready to run tests...
+            </div>
+        </div>
+    </div>
+
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=<%= clientId %>&components=buttons&vault=true&intent=capture"></script>
+    
+    <script>
+        let vaultedToken = null;
+        let testResults = {
+            vaultCreation: null,
+            captureOrder: null
+        };
+
+        // Auto-fill the payee merchant ID field
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('payee-merchant-id').value = 'QA9TDBGQ8E5RS';
+        });
+
+        // Create capture order with different payee
+        function createCaptureOrderWithPayee() {
+            if (!vaultedToken) {
+                alert('Please create a vaulted token first');
+                return;
+            }
+
+            const payeeMerchantId = document.getElementById('payee-merchant-id').value;
+            const amount = document.getElementById('test-amount').value;
+            
+            if (!payeeMerchantId) {
+                alert('Please enter a payee merchant ID');
+                return;
+            }
+
+            showResults('capture-order-results', 'Creating capture order with different payee...', 'warning');
+
+            fetch('/api/create-capture-order-with-payee', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    vaultedToken: vaultedToken,
+                    payeeMerchantId: payeeMerchantId,
+                    amount: amount
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                testResults.captureOrder = data;
+                
+                let resultMessage = `💳 CAPTURE ORDER WITH PAYEE TEST:\n\n`;
+                
+                if (data.success) {
+                    resultMessage += `✅ ORDER CREATION: SUCCESS\n`;
+                    resultMessage += `Order ID: ${data.orderId}\n`;
+                    resultMessage += `Intent: CAPTURE\n`;
+                    resultMessage += `Amount: $${amount}\n`;
+                    resultMessage += `Payee Merchant ID: ${payeeMerchantId}\n`;
+                    resultMessage += `Vault Token Used: ${vaultedToken}\n\n`;
+                    
+                    if (data.capture) {
+                        if (data.capture.success) {
+                            resultMessage += `✅ CAPTURE: SUCCESS\n`;
+                            resultMessage += `Capture ID: ${data.capture.captureId}\n`;
+                            resultMessage += `Status: ${data.capture.status}\n`;
+                            resultMessage += `� Funds successfully disbursed to payee!\n`;
+                            resultMessage += `🎯 This confirms you own the vault_id and funds went to the separate PayPal business account.\n\n`;
+                        } else {
+                            resultMessage += `❌ CAPTURE: FAILED\n`;
+                            resultMessage += `Error: ${data.capture.error}\n\n`;
+                        }
+                    }
+                    
+                    resultMessage += `📋 ORDER STRUCTURE:\n`;
+                    resultMessage += `{\n`;
+                    resultMessage += `  "intent": "CAPTURE",\n`;
+                    resultMessage += `  "payment_source": {\n`;
+                    resultMessage += `    "token": {\n`;
+                    resultMessage += `      "id": "${vaultedToken}",\n`;
+                    resultMessage += `      "type": "PAYMENT_METHOD_TOKEN"\n`;
+                    resultMessage += `    }\n`;
+                    resultMessage += `  },\n`;
+                    resultMessage += `  "purchase_units": [{\n`;
+                    resultMessage += `    "amount": { "currency_code": "USD", "value": "${amount}" },\n`;
+                    resultMessage += `    "payee": { "merchant_id": "${payeeMerchantId}" }\n`;
+                    resultMessage += `  }]\n`;
+                    resultMessage += `}\n\n`;
+                    
+                    showResults('capture-order-results', resultMessage, data.capture?.success ? 'success' : 'warning');
+                } else {
+                    resultMessage += `❌ ORDER CREATION: FAILED\n`;
+                    resultMessage += `Error: ${data.error}\n\n`;
+                    
+                    if (data.error.includes('PERMISSION_DENIED') || data.error.includes('vault')) {
+                        resultMessage += `🔒 This indicates you may not own the vault_id or there's a security restriction.\n`;
+                    } else if (data.error.includes('payee')) {
+                        resultMessage += `👤 This may indicate an issue with the payee merchant ID.\n`;
+                    }
+                    
+                    showResults('capture-order-results', resultMessage, 'error');
+                }
+                
+                resultMessage += `📊 Full Response:\n${JSON.stringify(data, null, 2)}`;
+                document.getElementById('capture-order-results').textContent = resultMessage;
+                
+                updateSummary();
+            })
+            .catch(error => {
+                testResults.captureOrder = { success: false, error: error.message };
+                showResults('capture-order-results', `❌ ERROR: ${error.message}`, 'error');
+                updateSummary();
+            });
+        }
+
+        // Vault setup token creation function
+        const createVaultSetupToken = (data) => {
+            const paymentSource = 'paypal';
+            
+            return fetch('/api/vault/setup-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    paymentSource
+                })
+            })
+            .then(response => response.json())
+            .then(setupTokenResponse => {
+                console.log('Vault Setup Token Response:', setupTokenResponse);
+                showResults('vault-results', `Vault setup token created: ${setupTokenResponse.id}`, 'warning');
+                return setupTokenResponse.id;
+            });
+        };
+
+        // Vault approval function
+        const onVaultApprove = ({ vaultSetupToken }) => {
+            showResults('vault-results', 'Creating vaulted payment token...', 'warning');
+            
+            return fetch(`/api/vault/payment-token/${vaultSetupToken}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(tokenData => {
+                vaultedToken = tokenData.id;
+                testResults.vaultCreation = { success: true, data: tokenData };
+                
+                document.getElementById('vault-token').style.display = 'block';
+                document.getElementById('vault-token').innerHTML = `<strong>Vault Token ID:</strong> ${vaultedToken}`;
+                
+                // Enable capture order test button
+                document.getElementById('create-capture-order-btn').disabled = false;
+                
+                showResults('vault-results', `✅ Vault token created successfully!\n\nToken ID: ${vaultedToken}\n\n🧪 Ready for vault v3 testing!\n\nFull Response:\n${JSON.stringify(tokenData, null, 2)}`, 'success');
+                
+                updateSummary();
+                return tokenData;
+            });
+        };
+
+        // PayPal Buttons for vaulting
+        paypal.Buttons({
+            createVaultSetupToken,
+            onApprove: onVaultApprove,
+            onError: function(err) {
+                showResults('vault-results', `❌ Vaulting failed: ${err}`, 'error');
+            }
+        }).render('#paypal-button-container-vault');
+
+
+
+        function showResults(elementId, message, type = 'warning') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = message;
+            element.className = `results ${type}`;
+        }
+
+        function updateSummary() {
+            let summary = '💳 PayPal Payee Test Results:\n\n';
+            
+            if (testResults.vaultCreation !== null) {
+                summary += `1️⃣ VAULT TOKEN CREATION:\n`;
+                summary += `   Status: ${testResults.vaultCreation.success ? '✅ SUCCESS' : '❌ FAILED'}\n`;
+                summary += `   Token ID: ${vaultedToken || 'N/A'}\n\n`;
+            }
+            
+            if (testResults.captureOrder !== null) {
+                summary += `2️⃣ CAPTURE ORDER WITH PAYEE:\n`;
+                summary += `   Order Creation: ${testResults.captureOrder.success ? '✅ SUCCESS' : '❌ FAILED'}\n`;
+                
+                if (testResults.captureOrder.success) {
+                    summary += `   Order ID: ${testResults.captureOrder.orderId}\n`;
+                    summary += `   Intent: CAPTURE\n`;
+                    
+                    if (testResults.captureOrder.capture) {
+                        summary += `   Capture: ${testResults.captureOrder.capture.success ? '✅ SUCCESS' : '❌ FAILED'}\n`;
+                        
+                        if (testResults.captureOrder.capture.success) {
+                            summary += `   💰 Funds disbursed to payee account\n`;
+                            summary += `   🎯 Vault ownership confirmed\n`;
+                            summary += `   ✅ Payee disbursement working\n`;
+                        } else {
+                            summary += `   ❌ Capture failed: ${testResults.captureOrder.capture.error}\n`;
+                        }
+                    }
+                } else {
+                    summary += `   Error: ${testResults.captureOrder.error}\n`;
+                    
+                    if (testResults.captureOrder.error && testResults.captureOrder.error.includes('vault')) {
+                        summary += `   🔒 Vault ownership issue detected\n`;
+                    }
+                }
+                summary += '\n';
+            }
+            
+            // Overall assessment
+            const hasResults = testResults.vaultCreation !== null && testResults.captureOrder !== null;
+            if (hasResults) {
+                const vaultWorked = testResults.vaultCreation.success;
+                const captureWorked = testResults.captureOrder.success && testResults.captureOrder.capture?.success;
+                
+                summary += `🎯 PAYEE TEST ASSESSMENT:\n`;
+                summary += `   Vault Creation: ${vaultWorked ? '✅ WORKING' : '❌ FAILED'}\n`;
+                summary += `   Payee Disbursement: ${captureWorked ? '✅ WORKING' : '❌ FAILED'}\n`;
+                
+                if (vaultWorked && captureWorked) {
+                    summary += `   Result: ✅ You own the vault_id and payee disbursement works\n`;
+                    summary += `   💡 This confirms the payee field provides reliable fund routing\n`;
+                } else if (vaultWorked && !captureWorked) {
+                    summary += `   Result: ⚠️ Vault works but payee disbursement failed\n`;
+                } else {
+                    summary += `   Result: ❌ Issues detected - check vault ownership\n`;
+                }
+            }
+            
+            const summaryType = hasResults ? 'success' : 'warning';
+            showResults('summary-results', summary, summaryType);
+        }
+    </script>
+</body>
+</html>

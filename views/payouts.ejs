@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+  <link rel="stylesheet" type="text/css" href="/styles/payouts.css" />
+  <title>PayPal Payouts API Testing</title>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>PayPal Payouts API</h1>
+      <p>Test PayPal's Payouts API with Login with PayPal Identity integration</p>
+      <button class="btn-secondary" onclick="checkOAuthConfig()" style="margin-top: 10px;">
+        Check OAuth Configuration
+      </button>
+    </header>
+
+    <!-- Configuration Check Section -->
+    <div class="section" id="config-section" style="display: none;">
+      <h2>OAuth Configuration</h2>
+      <div id="config-details"></div>
+    </div>
+
+    <!-- Login with PayPal Section -->
+    <div class="section">
+      <h2>Step 1: Login with PayPal</h2>
+      <p>Authenticate and get your PayPal account information including your PayPal ID.</p>
+      
+      <div id="login-section">
+        <div id="paypal-login-button"></div>
+        <div id="user-info" style="display: none;">
+          <h3>User Information</h3>
+          <div id="user-details"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payout Creation Section -->
+    <div class="section">
+      <h2>Step 2: Create a Payout</h2>
+      <p>Send money to one or more PayPal accounts.</p>
+      
+      <div class="form-group">
+        <label for="sender-batch-id">Sender Batch ID:</label>
+        <input type="text" id="sender-batch-id" placeholder="Unique batch identifier" value="batch_<%= Date.now() %>">
+      </div>
+
+      <div class="form-group">
+        <label for="email-subject">Email Subject:</label>
+        <input type="text" id="email-subject" placeholder="You have a payment" value="You have a payout!">
+      </div>
+
+      <div class="form-group">
+        <label for="email-message">Email Message:</label>
+        <textarea id="email-message" placeholder="Optional message to recipients">Thank you for your service!</textarea>
+      </div>
+
+      <h3>Recipients</h3>
+      <div id="recipients-container">
+        <div class="recipient-item">
+          <div class="form-group">
+            <label>Recipient PayPal ID:</label>
+            <input type="text" class="recipient-paypal-id" placeholder="PayPal ID (payer_id)">
+          </div>
+          <div class="form-group">
+            <label>Amount (USD):</label>
+            <input type="number" class="recipient-amount" placeholder="10.00" step="0.01" min="0.01">
+          </div>
+          <div class="form-group">
+            <label>Note:</label>
+            <input type="text" class="recipient-note" placeholder="Optional note">
+          </div>
+          <button class="btn-remove" onclick="removeRecipient(this)">Remove</button>
+        </div>
+      </div>
+
+      <button class="btn-secondary" onclick="addRecipient()">Add Another Recipient</button>
+      <button class="btn-primary" onclick="createPayout()">Send Payout</button>
+    </div>
+
+    <!-- Payout Status Section -->
+    <div class="section" id="payout-status-section" style="display: none;">
+      <h2>Step 3: Payout Status</h2>
+      <div id="payout-status"></div>
+    </div>
+
+    <!-- Query Payout Section -->
+    <div class="section">
+      <h2>Query Payout Details</h2>
+      <p>Look up details for a payout batch or individual payout item.</p>
+      
+      <div class="form-group">
+        <label for="payout-batch-id">Payout Batch ID:</label>
+        <input type="text" id="payout-batch-id" placeholder="Enter payout batch ID">
+        <button class="btn-primary" onclick="queryPayout()">Query Batch</button>
+      </div>
+
+      <div class="form-group">
+        <label for="payout-item-id">Payout Item ID:</label>
+        <input type="text" id="payout-item-id" placeholder="Enter payout item ID">
+        <button class="btn-primary" onclick="queryPayoutItem()">Query Item</button>
+      </div>
+
+      <div id="query-results" style="display: none;">
+        <h3>Query Results</h3>
+        <pre id="query-data"></pre>
+      </div>
+    </div>
+
+    <!-- Information Section -->
+    <div class="section info-box">
+      <h3>About PayPal Payouts API</h3>
+      <p>The Payouts API enables you to make PayPal payments to multiple recipients in a single API call.</p>
+      
+      <h4>Developer Resources</h4>
+      <ul>
+        <li><a href="https://developer.paypal.com/docs/payouts/" target="_blank">Payouts API Overview & Integration Guide</a></li>
+        <li><a href="https://developer.paypal.com/api/payouts/v1/" target="_blank">Payouts API Reference (v1)</a></li>
+        <li><a href="https://developer.paypal.com/docs/payouts/integrate/" target="_blank">Quick Start - Integrate Payouts</a></li>
+        <li><a href="https://developer.paypal.com/docs/payouts/standard/" target="_blank">Standard Integration Guide</a></li>
+        <li><a href="https://developer.paypal.com/docs/payouts/reference/api-requests/" target="_blank">API Request & Response Examples</a></li>
+        <li><a href="https://developer.paypal.com/api/rest/sandbox/" target="_blank">Sandbox Testing Guide</a></li>
+        <li><a href="https://developer.paypal.com/dashboard/applications/sandbox" target="_blank">Sandbox App Dashboard</a></li>
+      </ul>
+      
+      <h4>Login with PayPal (Identity API)</h4>
+      <ul>
+        <li><a href="https://developer.paypal.com/docs/log-in-with-paypal/" target="_blank">Login with PayPal Overview</a></li>
+        <li><a href="https://developer.paypal.com/docs/log-in-with-paypal/integrate/" target="_blank">Integration Guide - Get User Info</a></li>
+        <li><a href="https://developer.paypal.com/api/identity/v1/" target="_blank">Identity API Reference (OAuth & User Info)</a></li>
+        <li><a href="https://developer.paypal.com/docs/log-in-with-paypal/integrate/generate-button/" target="_blank">Generate Login Button</a></li>
+      </ul>
+      
+      <h4>Additional Resources</h4>
+      <ul>
+        <li><a href="https://developer.paypal.com/docs/api/reference/api-responses/" target="_blank">Error Codes & Handling</a></li>
+        <li><a href="https://developer.paypal.com/docs/payouts/reference/fees-limits/" target="_blank">Payout Fees & Limits</a></li>
+        <li><a href="https://developer.paypal.com/community/" target="_blank">PayPal Developer Community</a></li>
+        <li><a href="https://developer.paypal.com/tools/sandbox/accounts/" target="_blank">Manage Sandbox Test Accounts</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    window.clientId = '<%= clientId %>';
+  </script>
+  <script src="https://www.paypal.com/sdk/js?client-id=<%= clientId %>&components=buttons&enable-funding=venmo&disable-funding=card,paylater"></script>
+  <script src="/payouts.js"></script>
+</body>
+</html>
