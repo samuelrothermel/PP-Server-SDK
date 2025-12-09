@@ -1,5 +1,5 @@
 {
-  "name": "@paypal/pp-server-sdk",
+  "name": "paypal-checkout-demo",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
