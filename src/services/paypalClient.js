@@ -24,7 +24,7 @@ import {
   VaultController,
   TransactionSearchController,
   SubscriptionsController,
-} from '@paypal/paypal-server-sdk';
+} from '@paypal/paypal-server-sdk/dist/esm/index.js';
 
 const { CLIENT_ID, APP_SECRET, NODE_ENV } = process.env;
 
