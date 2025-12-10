@@ -18,7 +18,6 @@ const renderPage = view => async (req, res, next) => {
 // Page Controllers
 export const renderIndex = renderPage('index');
 export const renderCheckout = renderPage('checkout');
-export const renderProductCart = renderPage('product-cart');
 export const renderProduct = renderPage('product');
 export const renderCart = renderPage('cart');
 export const renderSuccess = renderPage('success');

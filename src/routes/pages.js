@@ -5,7 +5,6 @@ import {
   renderSubscriptions,
   renderSaveWoPurchase,
   renderBaReference,
-  renderProductCart,
   renderProduct,
   renderCart,
   renderSuccess,
@@ -22,7 +21,6 @@ const router = express.Router();
 
 // Page routes
 router.get('/', renderIndex);
-router.get('/product-cart', renderProductCart);
 router.get('/product', renderProduct);
 router.get('/cart', renderCart);
 router.get('/success', renderSuccess);
