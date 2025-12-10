@@ -1,46 +1,157 @@
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
-    <title>Recurring - Subscriptions API</title>
-  </head>
-
-  <body>
-    <div class="container">
-      <section>
-        <div class="or-text">Recurring - Subscriptions API</div>
-        <h2>Monthly Subscription Cost: $3.99</span>
-          
-        </h2>
-        
-        <div class="separator"></div>
-        <div id="order-info-section" style="display: none;">
-            <div class="separator"></div>
-          <div id="create-order-info"></div>
-        </div>
-        <div id="capture-info-section" style="display: none;">
-            <div class="separator"></div>
-          <div id="capture-order-info"></div>
-        </div>
-        <div id="payment-source-section" style="display: none;">
-            <div class="separator"></div>
-            <div id="payment-source-type-info"></div>
-          <div id="vault-payment-info"></div>
-          <div id="vault-status-info"></div>
-          <div id="customer-id-info"></div>
-          <div id="payment-token-id-info"></div>
-          <p>Check Console Log full API Response</p>
-        </div>
-        <!-- <div id="saved-payment-methods-container"></div> -->
-        <!-- <div class="separator"></div> -->
-        <div id="paypal-button-container" class="paypal-button-container"></div>
-      </section>
-      
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/custom.css">
+  <title>Premium Membership - Subscribe</title>
+  <style>
+    .product-hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+      margin-bottom: 40px;
+      border-radius: 12px;
+    }
+    .product-hero h1 {
+      font-size: 2.5em;
+      margin: 0 0 15px 0;
+      font-weight: 700;
+    }
+    .product-hero .tagline {
+      font-size: 1.3em;
+      opacity: 0.95;
+      margin-bottom: 10px;
+    }
+    .product-hero .price {
+      font-size: 3em;
+      font-weight: 700;
+      margin: 20px 0 10px 0;
+    }
+    .product-hero .price-subtitle {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin: 40px 0;
+    }
+    .feature-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-left: 4px solid #667eea;
+    }
+    .feature-card h3 {
+      color: #667eea;
+      margin: 0 0 10px 0;
+      font-size: 1.2em;
+    }
+    .feature-card p {
+      color: #666;
+      margin: 0;
+      line-height: 1.6;
+    }
+    .subscription-section {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 40px auto;
+    }
+    .subscription-section h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .info-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .info-section h3 {
+      color: #667eea;
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Product Hero Section -->
+    <div class="product-hero">
+      <h1>🚀 Premium Membership</h1>
+      <p class="tagline">Unlock unlimited access to all premium features</p>
+      <div class="price">$3.99</div>
+      <p class="price-subtitle">per month • Cancel anytime</p>
     </div>
-    <script>
-      const clientId = '<%= clientId %>';
-    </script>
-    <script src="/subscriptions.js"></script>
-  </body>
+
+    <!-- Features Section -->
+    <section class="features-grid">
+      <div class="feature-card">
+        <h3>⚡ Unlimited Access</h3>
+        <p>Get unrestricted access to all premium features and content without any limits.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🎯 Priority Support</h3>
+        <p>Receive dedicated 24/7 priority customer support from our expert team.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📊 Advanced Analytics</h3>
+        <p>Access detailed analytics and insights to track your progress and performance.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🔒 Enhanced Security</h3>
+        <p>Enjoy enterprise-grade security features to keep your data safe and protected.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🎨 Custom Branding</h3>
+        <p>Personalize your experience with custom themes and branding options.</p>
+      </div>
+      <div class="feature-card">
+        <h3>💎 Exclusive Content</h3>
+        <p>Get early access to new features and exclusive premium-only content.</p>
+      </div>
+    </section>
+
+    <!-- Subscription Purchase Section -->
+    <section class="subscription-section">
+      <h2>Start Your Subscription</h2>
+      <p style="text-align: center; color: #666; margin-bottom: 30px;">
+        Subscribe now and get instant access to all premium features. Cancel anytime with no hassle.
+      </p>
+      
+      <div id="paypal-button-container"></div>
+      
+      <div id="create-order-info" class="info-section" style="display: none;">
+        <h3>Subscription Created</h3>
+        <div id="order-details"></div>
+      </div>
+      
+      <div id="payment-source-section" class="info-section" style="display: none;">
+        <h3>Payment Information</h3>
+        <div id="payment-source-type-info"></div>
+        <div id="vault-payment-info"></div>
+        <div id="vault-status-info"></div>
+        <div id="customer-id-info"></div>
+        <div id="payment-token-id-info"></div>
+        <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
+          Check browser console for full API response
+        </p>
+      </div>
+    </section>
+
+  </div>
+  
+  <script>
+    const clientId = '<%= clientId %>';
+  </script>
+  <script src="/subscriptions.js"></script>
+</body>
 </html>

@@ -18,6 +18,8 @@ export const renderCart = renderPage('cart');
 export const renderSuccess = renderPage('success');
 export const renderSaveWoPurchase = renderPage('save-wo-purchase');
 export const renderSubscriptions = renderPage('subscriptions');
+export const renderSubscriptionManagement = renderPage('subscription-management');
+export const renderProductsManagement = renderPage('products-management');
 export const renderFastlane = renderPage('fastlane');
 
 export const renderWebhookTesting = renderPage('webhook-testing');

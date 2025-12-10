@@ -13,6 +13,8 @@ import {
   renderOrders,
   renderVault,
   renderPayouts,
+  renderSubscriptionManagement,
+  renderProductsManagement,
 } from '../controllers/pageController.js';
 
 const router = express.Router();
@@ -25,6 +27,8 @@ router.get('/success', renderSuccess);
 router.get('/checkout', renderCheckout);
 router.get('/save-wo-purchase', renderSaveWoPurchase);
 router.get('/subscriptions', renderSubscriptions);
+router.get('/subscription-management', renderSubscriptionManagement);
+router.get('/products-management', renderProductsManagement);
 router.get('/fastlane', renderFastlane);
 router.get('/webhook-testing', renderWebhookTesting);
 router.get('/payee-test', renderPayeeTest);

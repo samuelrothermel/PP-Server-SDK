@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/custom.css">
+  <title>Subscription Management</title>
+  <style>
+    .dashboard-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+    .dashboard-header h1 {
+      margin: 0 0 10px 0;
+      font-size: 2.2em;
+    }
+    .dashboard-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 1.1em;
+    }
+    .subscription-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+    .subscription-card.active {
+      border-left-color: #28a745;
+    }
+    .subscription-card.cancelled {
+      border-left-color: #dc3545;
+      opacity: 0.7;
+    }
+    .subscription-card.suspended {
+      border-left-color: #ffc107;
+    }
+    .subscription-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .subscription-header h3 {
+      margin: 0;
+      color: #333;
+    }
+    .status-badge {
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-badge.active {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-badge.cancelled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .status-badge.suspended {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .subscription-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 15px 0;
+    }
+    .detail-item {
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+    }
+    .detail-label {
+      font-size: 0.85em;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .detail-value {
+      font-weight: 600;
+      color: #333;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .empty-state h2 {
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="dashboard-header">
+      <h1>📋 Subscription Management</h1>
+      <p>View and manage all your active and past subscriptions</p>
+    </div>
+
+    <div id="loading-state" class="loading">
+      <div class="spinner"></div>
+      <p>Loading subscriptions...</p>
+    </div>
+
+    <div id="subscriptions-container" style="display: none;">
+      <!-- Subscriptions will be loaded here -->
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display: none;">
+      <h2>No Subscriptions Found</h2>
+      <p>You don't have any subscriptions yet. Start by subscribing to a plan!</p>
+      <a href="/subscriptions" class="btn btn-primary" style="display: inline-block; margin-top: 20px; text-decoration: none;">
+        Browse Subscription Plans
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    const clientId = '<%= clientId %>';
+  </script>
+  <script src="/subscription-management.js"></script>
+</body>
+</html>
