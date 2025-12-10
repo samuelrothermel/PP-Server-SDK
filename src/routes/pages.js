@@ -4,13 +4,11 @@ import {
   renderCheckout,
   renderSubscriptions,
   renderSaveWoPurchase,
-  renderBaReference,
   renderProduct,
   renderCart,
   renderSuccess,
   renderWebhookTesting,
   renderFastlane,
-  renderRecurringPayment,
   renderPayeeTest,
   renderOrders,
   renderVault,
@@ -25,16 +23,8 @@ router.get('/product', renderProduct);
 router.get('/cart', renderCart);
 router.get('/success', renderSuccess);
 router.get('/checkout', renderCheckout);
-router.get('/test-no-applepay', (req, res) => {
-  res.render('test-no-applepay', { clientId: process.env.CLIENT_ID });
-});
 router.get('/save-wo-purchase', renderSaveWoPurchase);
-router.get('/recurring-payment', renderRecurringPayment);
 router.get('/subscriptions', renderSubscriptions);
-router.get('/test-plan', (req, res) => {
-  res.render('test-plan');
-});
-router.get('/ba_reference', renderBaReference);
 router.get('/fastlane', renderFastlane);
 router.get('/webhook-testing', renderWebhookTesting);
 router.get('/payee-test', renderPayeeTest);
