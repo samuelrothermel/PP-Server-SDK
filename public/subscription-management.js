@@ -5,8 +5,10 @@ console.log('📋 Subscription Management loaded');
 async function loadSubscriptions() {
   try {
     // Get subscription IDs from localStorage
-    const subscriptionIds = JSON.parse(localStorage.getItem('subscriptionIds') || '[]');
-    
+    const subscriptionIds = JSON.parse(
+      localStorage.getItem('subscriptionIds') || '[]'
+    );
+
     if (subscriptionIds.length === 0) {
       showEmptyState();
       return;
@@ -14,7 +16,7 @@ async function loadSubscriptions() {
 
     // Fetch subscription details from server
     const subscriptions = await Promise.all(
-      subscriptionIds.map(async (id) => {
+      subscriptionIds.map(async id => {
         try {
           const response = await fetch(`/api/subscriptions/${id}`);
           if (response.ok) {
@@ -29,14 +31,13 @@ async function loadSubscriptions() {
     );
 
     const validSubscriptions = subscriptions.filter(s => s !== null);
-    
+
     if (validSubscriptions.length === 0) {
       showEmptyState();
       return;
     }
 
     displaySubscriptions(validSubscriptions);
-    
   } catch (error) {
     console.error('Error loading subscriptions:', error);
     showEmptyState();
@@ -46,17 +47,19 @@ async function loadSubscriptions() {
 function displaySubscriptions(subscriptions) {
   const container = document.getElementById('subscriptions-container');
   const loadingState = document.getElementById('loading-state');
-  
+
   loadingState.style.display = 'none';
   container.style.display = 'block';
-  
-  container.innerHTML = subscriptions.map(sub => createSubscriptionCard(sub)).join('');
-  
+
+  container.innerHTML = subscriptions
+    .map(sub => createSubscriptionCard(sub))
+    .join('');
+
   // Attach event listeners
   subscriptions.forEach(sub => {
     const cancelBtn = document.getElementById(`cancel-${sub.id}`);
     const viewBtn = document.getElementById(`view-${sub.id}`);
-    
+
     if (cancelBtn) {
       cancelBtn.addEventListener('click', () => cancelSubscription(sub.id));
     }
@@ -70,13 +73,19 @@ function createSubscriptionCard(subscription) {
   const status = subscription.status || 'ACTIVE';
   const statusClass = status.toLowerCase();
   const planName = subscription.plan?.name || 'Subscription Plan';
-  const amount = subscription.plan?.billing_cycles?.[0]?.pricing_scheme?.fixed_price?.value || '0.00';
-  const currency = subscription.plan?.billing_cycles?.[0]?.pricing_scheme?.fixed_price?.currency_code || 'USD';
-  const startDate = new Date(subscription.create_time || subscription.start_time).toLocaleDateString();
-  const nextBillingDate = subscription.billing_info?.next_billing_time 
+  const amount =
+    subscription.plan?.billing_cycles?.[0]?.pricing_scheme?.fixed_price
+      ?.value || '0.00';
+  const currency =
+    subscription.plan?.billing_cycles?.[0]?.pricing_scheme?.fixed_price
+      ?.currency_code || 'USD';
+  const startDate = new Date(
+    subscription.create_time || subscription.start_time
+  ).toLocaleDateString();
+  const nextBillingDate = subscription.billing_info?.next_billing_time
     ? new Date(subscription.billing_info.next_billing_time).toLocaleDateString()
     : 'N/A';
-  
+
   return `
     <div class="subscription-card ${statusClass}">
       <div class="subscription-header">
@@ -87,7 +96,9 @@ function createSubscriptionCard(subscription) {
       <div class="subscription-details">
         <div class="detail-item">
           <div class="detail-label">Subscription ID</div>
-          <div class="detail-value" style="font-size: 0.85em;">${subscription.id}</div>
+          <div class="detail-value" style="font-size: 0.85em;">${
+            subscription.id
+          }</div>
         </div>
         <div class="detail-item">
           <div class="detail-label">Amount</div>
@@ -104,10 +115,16 @@ function createSubscriptionCard(subscription) {
       </div>
       
       <div class="action-buttons">
-        <button id="view-${subscription.id}" class="btn btn-primary">View Details</button>
-        ${status === 'ACTIVE' ? `
+        <button id="view-${
+          subscription.id
+        }" class="btn btn-primary">View Details</button>
+        ${
+          status === 'ACTIVE'
+            ? `
           <button id="cancel-${subscription.id}" class="btn btn-danger">Cancel Subscription</button>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     </div>
   `;
@@ -117,24 +134,29 @@ async function cancelSubscription(subscriptionId) {
   if (!confirm('Are you sure you want to cancel this subscription?')) {
     return;
   }
-  
+
   try {
-    const response = await fetch(`/api/subscriptions/${subscriptionId}/cancel`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        reason: 'Customer requested cancellation',
-      }),
-    });
-    
+    const response = await fetch(
+      `/api/subscriptions/${subscriptionId}/cancel`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reason: 'Customer requested cancellation',
+        }),
+      }
+    );
+
     if (response.ok) {
       alert('Subscription cancelled successfully');
       loadSubscriptions(); // Reload the list
     } else {
       const error = await response.json();
-      alert(`Failed to cancel subscription: ${error.message || 'Unknown error'}`);
+      alert(
+        `Failed to cancel subscription: ${error.message || 'Unknown error'}`
+      );
     }
   } catch (error) {
     console.error('Error cancelling subscription:', error);
@@ -144,7 +166,9 @@ async function cancelSubscription(subscriptionId) {
 
 function viewSubscriptionDetails(subscription) {
   console.log('Full Subscription Details:', subscription);
-  alert(`Subscription ID: ${subscription.id}\n\nCheck console for full details.`);
+  alert(
+    `Subscription ID: ${subscription.id}\n\nCheck console for full details.`
+  );
 }
 
 function showEmptyState() {

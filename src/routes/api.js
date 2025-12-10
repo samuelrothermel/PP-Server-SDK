@@ -38,6 +38,18 @@ import {
 import { createPlan, getPlan } from '../controllers/subscriptionController.js';
 import { handleShippingCallback } from '../services/shippingCallback.js';
 import {
+  createProductHandler,
+  getProductHandler,
+  listProductsHandler,
+} from '../controllers/productsController.js';
+import {
+  getSubscriptionHandler,
+  cancelSubscriptionHandler,
+  suspendSubscriptionHandler,
+  activateSubscriptionHandler,
+  updateSubscriptionHandler,
+} from '../controllers/subscriptionsController.js';
+import {
   testOneTimePayee,
   testVaultedPayee,
   testVaultedSameMerchantDifferentPayee,
@@ -93,6 +105,18 @@ router.post('/ba/capture-order', captureOrderWithBillingAgreement);
 // Subscription routes
 router.post('/subscriptions/create-plan', createPlan);
 router.get('/subscriptions/plan/:planId', getPlan);
+
+// Subscription Management routes (Server SDK)
+router.get('/subscriptions/:subscriptionId', getSubscriptionHandler);
+router.post('/subscriptions/:subscriptionId/cancel', cancelSubscriptionHandler);
+router.post('/subscriptions/:subscriptionId/suspend', suspendSubscriptionHandler);
+router.post('/subscriptions/:subscriptionId/activate', activateSubscriptionHandler);
+router.patch('/subscriptions/:subscriptionId', updateSubscriptionHandler);
+
+// Products Management routes (Direct REST API)
+router.post('/products', createProductHandler);
+router.get('/products/:productId', getProductHandler);
+router.get('/products', listProductsHandler);
 
 // Diagnostic route
 router.get('/diagnostics', (req, res) => {
