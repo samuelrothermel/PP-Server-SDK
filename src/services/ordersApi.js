@@ -7,7 +7,8 @@ import { ordersController, paymentsController } from './paypalClient.js';
 
 // set some important variables
 const base = 'https://api-m.sandbox.paypal.com';
-const CALLBACK_URL = 'https://pp-checkout.onrender.com/api/shipping-callback';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8888';
+const CALLBACK_URL = `${BASE_URL}/api/shipping-callback`;
 
 // handle response from PayPal API
 const handleResponse = async response => {
