@@ -8,7 +8,9 @@ import { ordersController, paymentsController } from './paypalClient.js';
 // set some important variables
 const base = 'https://api-m.sandbox.paypal.com';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8888';
-const CALLBACK_URL = `${BASE_URL}/api/shipping-callback`;
+// Remove trailing slash if present
+const baseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+const CALLBACK_URL = `${baseUrl}/api/shipping-callback`;
 
 // handle response from PayPal API
 const handleResponse = async response => {
