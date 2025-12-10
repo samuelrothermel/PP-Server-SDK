@@ -4,6 +4,7 @@ import {
   generateAccessTokenForMerchant,
 } from './authApi.js';
 import { ordersController, paymentsController } from './paypalClient.js';
+import { handleResponse } from '../utils/responseHandler.js';
 
 // set some important variables
 const base = 'https://api-m.sandbox.paypal.com';
@@ -11,17 +12,6 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8888';
 // Remove trailing slash if present
 const baseUrl = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
 const CALLBACK_URL = `${baseUrl}/api/shipping-callback`;
-
-// handle response from PayPal API
-const handleResponse = async response => {
-  if (response.status === 200 || response.status === 201) {
-    return response.json();
-  }
-  console.log('Error Response: ', response);
-  const error = new Error(await response.text());
-  error.status = response.status;
-  throw error;
-};
 
 // create order request
 export const createCheckoutOrder = async orderData => {

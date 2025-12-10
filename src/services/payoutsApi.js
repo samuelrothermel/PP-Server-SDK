@@ -1,21 +1,9 @@
 import fetch from 'node-fetch';
 import { generateAccessToken } from './authApi.js';
+import { handleResponse } from '../utils/responseHandler.js';
 
 const base = 'https://api-m.sandbox.paypal.com';
 const { CLIENT_ID, APP_SECRET, BASE_URL } = process.env;
-
-// Handle response from PayPal API
-const handleResponse = async response => {
-  if (response.status === 200 || response.status === 201) {
-    return response.json();
-  }
-  console.log('Error Response: ', response);
-  const errorText = await response.text();
-  console.log('Error Text:', errorText);
-  const error = new Error(errorText);
-  error.status = response.status;
-  throw error;
-};
 
 // Create a payout batch
 export const createPayout = async payoutData => {
@@ -70,12 +58,7 @@ export const getPayoutItemDetails = async payoutItemId => {
 export const exchangeCodeForToken = async code => {
   const auth = Buffer.from(CLIENT_ID + ':' + APP_SECRET).toString('base64');
   const url = `${base}/v1/oauth2/token`;
-
-  // The redirect_uri must match exactly what was used in the authorization request
   const redirectUri = `${BASE_URL}/api/payouts/oauth/callback`;
-
-  console.log('Exchanging code for token...');
-  console.log('Redirect URI:', redirectUri);
 
   const response = await fetch(url, {
     method: 'POST',

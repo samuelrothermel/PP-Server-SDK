@@ -1,20 +1,10 @@
 import fetch from 'node-fetch';
 import { generateAccessToken } from './authApi.js';
 import { vaultController } from './paypalClient.js';
+import { handleResponse } from '../utils/responseHandler.js';
 
 // set some important variables
 const base = 'https://api-m.sandbox.paypal.com';
-
-// handle response from PayPal API
-const handleResponse = async response => {
-  if (response.status === 200 || response.status === 201) {
-    return response.json();
-  }
-  console.log('Error Response: ', response);
-  const error = new Error(await response.text());
-  error.status = response.status;
-  throw error;
-};
 
 // create vault setup token
 export const createVaultSetupToken = async ({ paymentSource }) => {

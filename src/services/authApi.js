@@ -1,19 +1,9 @@
 import fetch from 'node-fetch';
+import { handleResponse } from '../utils/responseHandler.js';
 
 // set some important variables
 const { CLIENT_ID, APP_SECRET, CLIENT_ID_2, APP_SECRET_2 } = process.env;
 const base = 'https://api-m.sandbox.paypal.com';
-
-// handle response from PayPal API
-const handleResponse = async response => {
-  if (response.status === 200 || response.status === 201) {
-    return response.json();
-  }
-  console.log('Error Response: ', response);
-  const error = new Error(await response.text());
-  error.status = response.status;
-  throw error;
-};
 
 // generate access token for first-time payer
 export const generateAccessToken = async () => {
@@ -61,7 +51,6 @@ export const generateAccessTokenForMerchant = async (merchantNumber = 1) => {
 
 // generate access token for returning payer
 export const returningAccessToken = async customerId => {
-  console.log('API Request: POST /v1/oauth2/token (returning payer)');
   const auth = Buffer.from(CLIENT_ID + ':' + APP_SECRET).toString('base64');
   const response = await fetch(`${base}/v1/oauth2/token`, {
     method: 'post',
@@ -77,7 +66,6 @@ export const returningAccessToken = async customerId => {
 
 // generate user ID token for first-time payer (required for Venmo vaulting)
 export const generateUserIdToken = async () => {
-  console.log('API Request: POST /v1/oauth2/token (first-time payer ID token)');
   const auth = Buffer.from(CLIENT_ID + ':' + APP_SECRET).toString('base64');
   const response = await fetch(`${base}/v1/oauth2/token`, {
     method: 'post',
