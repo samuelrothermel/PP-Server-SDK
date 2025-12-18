@@ -379,11 +379,47 @@ export const createCheckoutOrder = async orderData => {
 };
 
 // create upstream order request (server-side shipping callbacks)
-export const createUpstreamQlOrder = async totalAmount => {
+export const createUpstreamQlOrder = async (
+  totalAmount,
+  paymentSource = 'paypal'
+) => {
   const accessToken = await generateAccessToken();
-  const payload = {
-    intent: 'CAPTURE',
-    payment_source: {
+
+  // Build payment_source object based on the payment method
+  let payment_source = {};
+
+  if (paymentSource === 'venmo') {
+    payment_source = {
+      venmo: {
+        experience_context: {
+          user_action: 'PAY_NOW',
+          shipping_preference: 'GET_FROM_FILE',
+          return_url: 'https://pp-checkout.onrender.com/product-cart',
+          cancel_url: 'https://pp-checkout.onrender.com/product-cart',
+        },
+      },
+    };
+  } else if (paymentSource === 'google_pay') {
+    payment_source = {
+      google_pay: {
+        experience_context: {
+          return_url: 'https://pp-checkout.onrender.com/product-cart',
+          cancel_url: 'https://pp-checkout.onrender.com/product-cart',
+        },
+      },
+    };
+  } else if (paymentSource === 'apple_pay') {
+    payment_source = {
+      apple_pay: {
+        experience_context: {
+          return_url: 'https://pp-checkout.onrender.com/product-cart',
+          cancel_url: 'https://pp-checkout.onrender.com/product-cart',
+        },
+      },
+    };
+  } else {
+    // Default to PayPal with full experience context
+    payment_source = {
       paypal: {
         experience_context: {
           user_action: 'PAY_NOW',
@@ -401,7 +437,12 @@ export const createUpstreamQlOrder = async totalAmount => {
           },
         },
       },
-    },
+    };
+  }
+
+  const payload = {
+    intent: 'CAPTURE',
+    payment_source: payment_source,
     purchase_units: [
       {
         amount: {

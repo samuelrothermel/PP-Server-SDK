@@ -44,11 +44,12 @@ export const createCheckoutOrder = async (req, res, next) => {
 export const createUpstreamOrder = async (req, res, next) => {
   console.log('Upstream Client-Side Callback Create Order Request');
   console.log('');
-  const { totalAmount } = req.body;
+  const { totalAmount, source } = req.body;
+  console.log('Payment source:', source);
   try {
     // For now, use the same upstream QL order function
     // This can be customized later if needed for client-side callbacks
-    const order = await createUpstreamQlOrderApi(totalAmount);
+    const order = await createUpstreamQlOrderApi(totalAmount, source);
     res.json(order);
   } catch (err) {
     next(err);
@@ -59,9 +60,10 @@ export const createUpstreamOrder = async (req, res, next) => {
 export const createUpstreamQlOrder = async (req, res, next) => {
   console.log('Upstream Server-Side Callback Create Order Request');
   console.log('');
-  const { totalAmount } = req.body;
+  const { totalAmount, source } = req.body;
+  console.log('Payment source:', source);
   try {
-    const order = await createUpstreamQlOrderApi(totalAmount);
+    const order = await createUpstreamQlOrderApi(totalAmount, source);
     res.json(order);
   } catch (err) {
     next(err);
@@ -72,11 +74,12 @@ export const createUpstreamQlOrder = async (req, res, next) => {
 export const createQuantumOrder = async (req, res, next) => {
   console.log('Upstream Server-Side Callback Create Order Request');
   console.log('');
-  const { totalAmount } = req.body;
+  const { totalAmount, source } = req.body;
+  console.log('Payment source:', source);
   try {
     // For now, use the upstream QL order function
     // This can be customized later if needed for quantum testing
-    const order = await createUpstreamQlOrderApi(totalAmount);
+    const order = await createUpstreamQlOrderApi(totalAmount, source);
     res.json(order);
   } catch (err) {
     next(err);
