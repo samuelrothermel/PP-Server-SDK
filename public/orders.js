@@ -8,7 +8,8 @@ function getRecentOrderIds() {
     // First try to get orders from StorageManager
     if (window.paypalStorageManager) {
       const orders = window.paypalStorageManager.getOrders();
-      return orders.map(order => order.id);
+      // Return the full order objects (with id and timestamp) for the API
+      return orders;
     }
 
     // Fallback to legacy method for backward compatibility

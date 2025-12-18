@@ -2,7 +2,7 @@ import { subscriptionsController } from './paypalClient.js';
 
 /**
  * Subscriptions API Service
- * 
+ *
  * Uses PayPal Server SDK v2.1.0 - SubscriptionsController
  * All subscription operations use the Server SDK
  */

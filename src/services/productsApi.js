@@ -6,7 +6,7 @@ const base = 'https://api-m.sandbox.paypal.com';
 
 /**
  * Products API Service
- * 
+ *
  * NOTE: Products API is NOT available in PayPal Server SDK v2.1.0
  * Must use Direct REST API calls
  */
@@ -87,7 +87,7 @@ export const updateProduct = async (productId, updates) => {
 
   // Build PATCH operations
   const operations = [];
-  
+
   if (updates.description) {
     operations.push({
       op: 'replace',

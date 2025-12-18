@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/styles/custom.css">
-  <title>Subscription Management</title>
+  <title>Subscription & Plan Management</title>
   <style>
     .dashboard-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -22,6 +22,72 @@
       opacity: 0.9;
       font-size: 1.1em;
     }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .tab {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    .tab:hover {
+      color: #667eea;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .create-plan-form {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    .create-plan-form h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1em;
+      font-family: inherit;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .plan-card,
     .subscription-card {
       background: white;
       border-radius: 10px;
@@ -29,6 +95,13 @@
       padding: 25px;
       margin-bottom: 20px;
       border-left: 4px solid #667eea;
+    }
+    .plan-card.active {
+      border-left-color: #28a745;
+    }
+    .plan-card.inactive {
+      border-left-color: #6c757d;
+      opacity: 0.7;
     }
     .subscription-card.active {
       border-left-color: #28a745;
@@ -40,13 +113,13 @@
     .subscription-card.suspended {
       border-left-color: #ffc107;
     }
-    .subscription-header {
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
     }
-    .subscription-header h3 {
+    .card-header h3 {
       margin: 0;
       color: #333;
     }
@@ -61,6 +134,10 @@
       background: #d4edda;
       color: #155724;
     }
+    .status-badge.inactive {
+      background: #e2e3e5;
+      color: #383d41;
+    }
     .status-badge.cancelled {
       background: #f8d7da;
       color: #721c24;
@@ -69,7 +146,7 @@
       background: #fff3cd;
       color: #856404;
     }
-    .subscription-details {
+    .card-details {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
@@ -123,16 +200,19 @@
     .btn-secondary:hover {
       background: #5a6268;
     }
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #218838;
+    }
     .empty-state {
       text-align: center;
       padding: 60px 20px;
       background: white;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .empty-state h2 {
-      color: #666;
-      margin-bottom: 20px;
     }
     .loading {
       text-align: center;
@@ -151,31 +231,123 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     
     <div class="dashboard-header">
-      <h1>📋 Subscription Management</h1>
-      <p>View and manage all your active and past subscriptions</p>
+      <h1>📋 Subscription & Plan Management</h1>
+      <p>Manage your billing plans and customer subscriptions</p>
     </div>
 
-    <div id="loading-state" class="loading">
-      <div class="spinner"></div>
-      <p>Loading subscriptions...</p>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="plans">Billing Plans</button>
+      <button class="tab" data-tab="subscriptions">Active Subscriptions</button>
     </div>
 
-    <div id="subscriptions-container" style="display: none;">
-      <!-- Subscriptions will be loaded here -->
+    <!-- Plans Tab -->
+    <div id="plans-tab" class="tab-content active">
+      
+      <div class="create-plan-form">
+        <h2>Create New Billing Plan</h2>
+        <p style="color: #666; margin-bottom: 25px;">
+          Create a new subscription billing plan. Make sure you have a product created first.
+        </p>
+        
+        <div id="plan-success-message" class="success-message"></div>
+        <div id="plan-error-message" class="error-message"></div>
+        
+        <form id="create-plan-form">
+          <div class="form-group">
+            <label for="plan-product-id">Product ID *</label>
+            <input type="text" id="plan-product-id" name="product_id" required placeholder="PROD-XXXX-XXXX-XXXX">
+            <small style="color: #666;">Create a product first on the Products Management page</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="plan-name">Plan Name *</label>
+            <input type="text" id="plan-name" name="name" required placeholder="e.g., Monthly Premium Plan">
+          </div>
+          
+          <div class="form-group">
+            <label for="plan-description">Description *</label>
+            <textarea id="plan-description" name="description" required placeholder="Describe your billing plan..."></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="plan-price">Price (USD) *</label>
+              <input type="number" id="plan-price" name="price" step="0.01" min="0" required placeholder="9.99">
+            </div>
+            
+            <div class="form-group">
+              <label for="plan-interval">Billing Interval *</label>
+              <select id="plan-interval" name="interval" required>
+                <option value="MONTH">Monthly</option>
+                <option value="YEAR">Yearly</option>
+                <option value="WEEK">Weekly</option>
+                <option value="DAY">Daily</option>
+              </select>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Create Billing Plan</button>
+        </form>
+      </div>
+
+      <h2 style="margin-bottom: 20px;">Existing Plans</h2>
+      
+      <div id="plans-loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading plans...</p>
+      </div>
+
+      <div id="plans-container" style="display: none;">
+        <!-- Plans will be loaded here -->
+      </div>
+
+      <div id="plans-empty" class="empty-state" style="display: none;">
+        <h2>No Plans Found</h2>
+        <p>Create your first billing plan above to get started.</p>
+      </div>
+
     </div>
 
-    <div id="empty-state" class="empty-state" style="display: none;">
-      <h2>No Subscriptions Found</h2>
-      <p>You don't have any subscriptions yet. Start by subscribing to a plan!</p>
-      <a href="/subscriptions" class="btn btn-primary" style="display: inline-block; margin-top: 20px; text-decoration: none;">
-        Browse Subscription Plans
-      </a>
+    <!-- Subscriptions Tab -->
+    <div id="subscriptions-tab" class="tab-content">
+      
+      <div id="subscriptions-loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading subscriptions...</p>
+      </div>
+
+      <div id="subscriptions-container" style="display: none;">
+        <!-- Subscriptions will be loaded here -->
+      </div>
+
+      <div id="subscriptions-empty" class="empty-state" style="display: none;">
+        <h2>No Subscriptions Found</h2>
+        <p>No customer subscriptions have been created yet.</p>
+      </div>
+
     </div>
 
   </div>

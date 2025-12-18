@@ -109,8 +109,14 @@ router.get('/subscriptions/plan/:planId', getPlan);
 // Subscription Management routes (Server SDK)
 router.get('/subscriptions/:subscriptionId', getSubscriptionHandler);
 router.post('/subscriptions/:subscriptionId/cancel', cancelSubscriptionHandler);
-router.post('/subscriptions/:subscriptionId/suspend', suspendSubscriptionHandler);
-router.post('/subscriptions/:subscriptionId/activate', activateSubscriptionHandler);
+router.post(
+  '/subscriptions/:subscriptionId/suspend',
+  suspendSubscriptionHandler
+);
+router.post(
+  '/subscriptions/:subscriptionId/activate',
+  activateSubscriptionHandler
+);
 router.patch('/subscriptions/:subscriptionId', updateSubscriptionHandler);
 
 // Products Management routes (Direct REST API)
