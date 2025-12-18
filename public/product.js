@@ -95,6 +95,43 @@ const onApprove = (data, actions) => {
         JSON.stringify(orderData, null, 2)
       );
 
+      // Save order to localStorage using StorageManager
+      if (orderData?.id && window.paypalStorageManager) {
+        const paymentSource = orderData.payment_source;
+        let paymentMethod = 'unknown';
+
+        if (paymentSource?.card) {
+          paymentMethod = 'card';
+        } else if (paymentSource?.paypal) {
+          paymentMethod = 'paypal';
+        } else if (paymentSource?.venmo) {
+          paymentMethod = 'venmo';
+        } else if (paymentSource?.apple_pay) {
+          paymentMethod = 'apple_pay';
+        } else if (paymentSource?.google_pay) {
+          paymentMethod = 'google_pay';
+        }
+
+        const amount =
+          orderData.purchase_units?.[0]?.payments?.captures?.[0]?.amount
+            ?.value ||
+          document.getElementById('product-price')?.textContent ||
+          '0.00';
+
+        const orderMetadata = {
+          amount: amount,
+          paymentMethod: paymentMethod,
+          status: 'captured',
+        };
+
+        console.log(
+          '💾 Saving order to StorageManager:',
+          orderData.id,
+          orderMetadata
+        );
+        window.paypalStorageManager.saveOrder(orderData.id, orderMetadata);
+      }
+
       // Store order data in sessionStorage for success page
       sessionStorage.setItem('orderData', JSON.stringify(orderData));
 
