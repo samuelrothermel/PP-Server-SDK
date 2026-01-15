@@ -1236,7 +1236,17 @@ class CheckoutApp {
         await ApplePayButtons.initialize();
         // Show Apple Pay option if initialization succeeded
         console.log('✅ Apple Pay initialized successfully');
+        
+        // Debug: Check if element exists before showing
+        const applePayOption = document.getElementById('applepay-option');
+        console.log('🔍 applepay-option element:', applePayOption);
+        console.log('   Current display:', applePayOption?.style.display);
+        
         Utils.showElement('applepay-option');
+        
+        // Verify it was shown
+        console.log('   After showElement:', applePayOption?.style.display);
+        console.log('   Computed style:', window.getComputedStyle(applePayOption).display);
       } catch (error) {
         console.warn('❌ Apple Pay initialization failed:', error.message);
         console.warn('   Common reasons:');
@@ -1352,6 +1362,57 @@ if (
   window.location.search.includes('debug=true') ||
   window.location.search.includes('storage=true')
 ) {
+  window.paypalStorageManager?.enableDebugMode?.();
+  console.log('🐛 Debug mode enabled for StorageManager');
+}
+
+// Add a delayed check to verify Apple Pay option visibility
+setTimeout(() => {
+  const applePayOption = document.getElementById('applepay-option');
+  if (applePayOption) {
+    const computedDisplay = window.getComputedStyle(applePayOption).display;
+    console.log('🔍 POST-LOAD Apple Pay Check:');
+    console.log('   Element found:', !!applePayOption);
+    console.log('   Inline display:', applePayOption.style.display);
+    console.log('   Computed display:', computedDisplay);
+    console.log('   Is visible:', computedDisplay !== 'none');
+    
+    if (computedDisplay === 'none') {
+      console.warn('⚠️ Apple Pay option is hidden! This could mean:');
+      console.warn('   1. ApplePaySession is not available (not on Mac/iOS)');
+      console.warn('   2. Apple Pay initialization failed');
+      console.warn('   3. Domain not registered in PayPal account');
+      console.warn('   Check the initialization logs above for details.');
+    } else {
+      console.log('✅ Apple Pay option is visible and ready');
+    }
+  } else {
+    console.error('❌ applepay-option element not found in DOM!');
+  }
+}, 3000);
+
+// Add a global test function for manual debugging
+window.testApplePayVisibility = function() {
+  const applePayOption = document.getElementById('applepay-option');
+  console.log('=== APPLE PAY VISIBILITY TEST ===');
+  console.log('Element:', applePayOption);
+  console.log('Inline style display:', applePayOption?.style.display);
+  console.log('Computed style display:', applePayOption ? window.getComputedStyle(applePayOption).display : 'N/A');
+  console.log('Parent element:', applePayOption?.parentElement);
+  console.log('ApplePaySession available:', typeof ApplePaySession !== 'undefined');
+  console.log('window.paypal.Applepay available:', !!window.paypal?.Applepay);
+  
+  // Try to show it manually
+  if (applePayOption) {
+    console.log('Attempting to show element manually...');
+    applePayOption.style.display = 'block';
+    console.log('After setting to block:', window.getComputedStyle(applePayOption).display);
+  }
+  
+  return applePayOption;
+};
+
+console.log('💡 TIP: Run window.testApplePayVisibility() in console to debug Apple Pay visibility');
   window.paypalStorageManager.attachToWindow();
   console.log('🚀 StorageManager debug utilities enabled!');
   console.log('💾 Access storage data via window.storage methods:');
