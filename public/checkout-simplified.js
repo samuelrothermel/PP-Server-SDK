@@ -1236,17 +1236,20 @@ class CheckoutApp {
         await ApplePayButtons.initialize();
         // Show Apple Pay option if initialization succeeded
         console.log('✅ Apple Pay initialized successfully');
-        
+
         // Debug: Check if element exists before showing
         const applePayOption = document.getElementById('applepay-option');
         console.log('🔍 applepay-option element:', applePayOption);
         console.log('   Current display:', applePayOption?.style.display);
-        
+
         Utils.showElement('applepay-option');
-        
+
         // Verify it was shown
         console.log('   After showElement:', applePayOption?.style.display);
-        console.log('   Computed style:', window.getComputedStyle(applePayOption).display);
+        console.log(
+          '   Computed style:',
+          window.getComputedStyle(applePayOption).display
+        );
       } catch (error) {
         console.warn('❌ Apple Pay initialization failed:', error.message);
         console.warn('   Common reasons:');
@@ -1364,6 +1367,14 @@ if (
 ) {
   window.paypalStorageManager?.enableDebugMode?.();
   console.log('🐛 Debug mode enabled for StorageManager');
+  window.paypalStorageManager.attachToWindow();
+  console.log('🚀 StorageManager debug utilities enabled!');
+  console.log('💾 Access storage data via window.storage methods:');
+  console.log('   window.storage.orders() - View saved orders');
+  console.log('   window.storage.customers() - View saved customers');
+  console.log('   window.storage.stats() - View storage statistics');
+  console.log('   window.storage.export() - Export all data');
+  console.log('   window.storage.clear() - Clear all data');
 }
 
 // Add a delayed check to verify Apple Pay option visibility
@@ -1376,7 +1387,7 @@ setTimeout(() => {
     console.log('   Inline display:', applePayOption.style.display);
     console.log('   Computed display:', computedDisplay);
     console.log('   Is visible:', computedDisplay !== 'none');
-    
+
     if (computedDisplay === 'none') {
       console.warn('⚠️ Apple Pay option is hidden! This could mean:');
       console.warn('   1. ApplePaySession is not available (not on Mac/iOS)');
@@ -1392,33 +1403,35 @@ setTimeout(() => {
 }, 3000);
 
 // Add a global test function for manual debugging
-window.testApplePayVisibility = function() {
+window.testApplePayVisibility = function () {
   const applePayOption = document.getElementById('applepay-option');
   console.log('=== APPLE PAY VISIBILITY TEST ===');
   console.log('Element:', applePayOption);
   console.log('Inline style display:', applePayOption?.style.display);
-  console.log('Computed style display:', applePayOption ? window.getComputedStyle(applePayOption).display : 'N/A');
+  console.log(
+    'Computed style display:',
+    applePayOption ? window.getComputedStyle(applePayOption).display : 'N/A'
+  );
   console.log('Parent element:', applePayOption?.parentElement);
-  console.log('ApplePaySession available:', typeof ApplePaySession !== 'undefined');
+  console.log(
+    'ApplePaySession available:',
+    typeof ApplePaySession !== 'undefined'
+  );
   console.log('window.paypal.Applepay available:', !!window.paypal?.Applepay);
-  
+
   // Try to show it manually
   if (applePayOption) {
     console.log('Attempting to show element manually...');
     applePayOption.style.display = 'block';
-    console.log('After setting to block:', window.getComputedStyle(applePayOption).display);
+    console.log(
+      'After setting to block:',
+      window.getComputedStyle(applePayOption).display
+    );
   }
-  
+
   return applePayOption;
 };
 
-console.log('💡 TIP: Run window.testApplePayVisibility() in console to debug Apple Pay visibility');
-  window.paypalStorageManager.attachToWindow();
-  console.log('🚀 StorageManager debug utilities enabled!');
-  console.log('💾 Access storage data via window.storage methods:');
-  console.log('   window.storage.orders() - View saved orders');
-  console.log('   window.storage.customers() - View saved customers');
-  console.log('   window.storage.stats() - View storage statistics');
-  console.log('   window.storage.export() - Export all data');
-  console.log('   window.storage.clear() - Clear all data');
-}
+console.log(
+  '💡 TIP: Run window.testApplePayVisibility() in console to debug Apple Pay visibility'
+);
