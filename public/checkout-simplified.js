@@ -606,16 +606,17 @@ const ApplePayButtons = {
       const applepay = window.paypal.Applepay();
       let config;
 
+      console.log('🔧 Requesting Apple Pay configuration from PayPal...');
       try {
         config = await applepay.config();
       } catch (configError) {
-        console.error('Failed to get Apple Pay configuration:', configError);
+        console.error('❌ Failed to get Apple Pay configuration:', configError);
         throw new Error(
-          'Failed to configure Apple Pay - this is expected on PC/Windows'
+          'Failed to configure Apple Pay - check if domain is registered in PayPal'
         );
       }
 
-      console.log('Apple Pay config:', config);
+      console.log('📋 Apple Pay config received:', config);
 
       const {
         isEligible,
@@ -625,12 +626,27 @@ const ApplePayButtons = {
         supportedNetworks,
       } = config;
 
+      console.log('📊 Apple Pay Eligibility Details:');
+      console.log('   isEligible:', isEligible);
+      console.log('   countryCode:', countryCode);
+      console.log('   currencyCode:', currencyCode);
+      console.log('   supportedNetworks:', supportedNetworks);
+
       if (!isEligible) {
-        console.warn('Apple Pay is not eligible on this device/browser');
+        console.error('❌ Apple Pay is NOT eligible');
+        console.error('   This typically means:');
+        console.error(
+          '   1. Domain not registered in your PayPal sandbox account'
+        );
+        console.error('   2. Apple Pay not enabled for your merchant account');
+        console.error('   3. Your current domain:', window.location.hostname);
+        console.error(
+          '   4. Check: https://www.paypal.com/businessmanage/account/aboutBusiness'
+        );
         throw new Error('Apple Pay is not eligible');
       }
 
-      console.log('Apple Pay is eligible, setting up button...');
+      console.log('✅ Apple Pay is eligible, setting up button...');
 
       // Create Apple Pay button
       const container = document.getElementById('applepay-button-container');
@@ -1207,30 +1223,32 @@ class CheckoutApp {
   }
 
   async initializeApplePay() {
-    // Only initialize Apple Pay on supported devices
-    const isAppleDevice = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
-    const isSafari =
-      /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    // Check if ApplePaySession is available (works in Safari, Chrome, and other browsers on Mac)
+    // PayPal SDK will handle the full eligibility check including domain registration
+    console.log('🍎 Checking Apple Pay availability...');
+    console.log('   Browser:', navigator.userAgent);
+    console.log('   ApplePaySession:', typeof ApplePaySession);
 
-    if (isAppleDevice && isSafari && typeof ApplePaySession !== 'undefined') {
+    if (typeof ApplePaySession !== 'undefined') {
       try {
-        if (
-          ApplePaySession?.supportsVersion(4) &&
-          ApplePaySession?.canMakePayments()
-        ) {
-          await ApplePayButtons.initialize();
-          // Show Apple Pay option if initialization succeeded
-          Utils.showElement('applepay-option');
-        } else {
-          console.log('Apple Pay not available on this device/browser');
-          Utils.hideElement('applepay-option');
-        }
+        // Let PayPal SDK's applepay.config() do the full eligibility check
+        // This includes domain verification, merchant setup, and device capability
+        await ApplePayButtons.initialize();
+        // Show Apple Pay option if initialization succeeded
+        console.log('✅ Apple Pay initialized successfully');
+        Utils.showElement('applepay-option');
       } catch (error) {
-        console.warn('Apple Pay initialization failed:', error);
+        console.warn('❌ Apple Pay initialization failed:', error.message);
+        console.warn('   Common reasons:');
+        console.warn('   - Domain not registered in PayPal account');
+        console.warn('   - Apple Pay not enabled for merchant');
+        console.warn("   - Device/browser doesn't support Apple Pay");
         Utils.hideElement('applepay-option');
       }
     } else {
-      console.log('Non-Apple device or non-Safari browser - hiding Apple Pay');
+      console.log(
+        'ℹ️ ApplePaySession not available - likely not on Mac/iOS device'
+      );
       Utils.hideElement('applepay-option');
     }
   }

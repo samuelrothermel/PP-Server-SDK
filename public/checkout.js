@@ -599,37 +599,59 @@ async function processGooglePayPayment(paymentData) {
 }
 
 async function setupApplepay() {
+  console.log('🍎 Starting Apple Pay setup...');
   try {
     if (
       location.protocol !== 'https:' &&
       location.hostname !== 'localhost' &&
       location.hostname !== '127.0.0.1'
     ) {
+      console.error('❌ Apple Pay: HTTPS required');
       throw new Error('Apple Pay requires HTTPS connection');
     }
+    console.log('✅ Protocol check passed:', location.protocol);
 
     if (!window.paypal || !window.paypal.Applepay) {
+      console.error(
+        '❌ Apple Pay: PayPal SDK or Applepay component not loaded'
+      );
+      console.log('   window.paypal:', !!window.paypal);
+      console.log('   window.paypal.Applepay:', window.paypal?.Applepay);
       throw new Error('PayPal SDK or Apple Pay component not loaded');
     }
+    console.log('✅ PayPal SDK and Applepay component loaded');
 
     if (typeof ApplePaySession === 'undefined') {
+      console.error(
+        '❌ Apple Pay: ApplePaySession is not available on this browser/device'
+      );
       throw new Error('ApplePaySession is not available');
     }
+    console.log('✅ ApplePaySession is available');
 
     try {
       if (!ApplePaySession.canMakePayments()) {
+        console.error('❌ Apple Pay: Device cannot make payments');
         throw new Error('Apple Pay is not supported on this device');
       }
+      console.log('✅ Device can make Apple Pay payments');
     } catch (canMakePaymentsError) {
+      console.error(
+        '❌ Apple Pay availability check failed:',
+        canMakePaymentsError
+      );
       throw new Error('Apple Pay availability check failed');
     }
 
     const applepay = paypal.Applepay();
     let config;
 
+    console.log('🔧 Requesting Apple Pay config from PayPal...');
     try {
       config = await applepay.config();
+      console.log('✅ Apple Pay config received:', config);
     } catch (configError) {
+      console.error('❌ Failed to configure Apple Pay:', configError);
       throw new Error('Failed to configure Apple Pay');
     }
 
@@ -641,9 +663,20 @@ async function setupApplepay() {
       supportedNetworks,
     } = config;
 
+    console.log('📋 Apple Pay eligibility:', isEligible);
+    console.log('   Country:', countryCode);
+    console.log('   Currency:', currencyCode);
+    console.log('   Networks:', supportedNetworks);
+
     if (!isEligible) {
+      console.error('❌ Apple Pay is not eligible for this merchant/domain');
+      console.error('   This usually means:');
+      console.error('   1. Domain not registered in PayPal account');
+      console.error('   2. Apple Pay not enabled for this merchant');
+      console.error('   3. Country/currency not supported');
       throw new Error('Apple Pay is not eligible');
     }
+    console.log('✅ Apple Pay is eligible!');
 
     // Show Apple Pay option
     document.getElementById('applepay-option').style.display = 'block';
@@ -2265,12 +2298,14 @@ function initializeGooglePay() {
 // Initialize Apple Pay when first needed (when Apple Pay radio button is selected)
 function initializeApplePay() {
   if (window.applePayInitialized) {
+    console.log('🍎 Apple Pay already initialized');
     return;
   }
 
-  console.log('Initializing Apple Pay...');
-  setupApplepay().catch(() => {
-    console.log('Apple Pay initialization failed or not available');
+  console.log('🍎 Initializing Apple Pay...');
+  setupApplepay().catch(error => {
+    console.error('❌ Apple Pay initialization failed:', error);
+    console.log('   Apple Pay will not be available as a payment option');
   });
   window.applePayInitialized = true;
 }
