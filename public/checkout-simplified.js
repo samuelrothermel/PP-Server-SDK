@@ -5,13 +5,7 @@
 
 // Global callback for Google Pay SDK loading
 window.onGooglePayLoaded = function () {
-  console.log('💳 Google Pay SDK loaded via callback');
-
-  // If our checkout components aren't ready yet, queue the initialization
   if (!window.GooglePayButtons || !window.Utils) {
-    console.log(
-      '💳 Checkout components not ready yet, queuing Google Pay initialization'
-    );
     window.googlePayPendingInit = true;
     return;
   }
@@ -469,7 +463,6 @@ const PayPalButtons = {
 
       if (buttonsComponent.isEligible()) {
         await buttonsComponent.render('#paypal-button-container');
-        console.log('PayPal buttons rendered successfully');
       }
     } catch (error) {
       console.error('Error initializing PayPal buttons:', error);
@@ -503,9 +496,7 @@ const VenmoButtons = {
 
       if (venmoComponent.isEligible()) {
         await venmoComponent.render('#venmo-button-container');
-        console.log('Venmo buttons rendered successfully');
       } else {
-        console.warn('Venmo not eligible');
         Utils.hideElement('venmo-option');
       }
     } catch (error) {
@@ -541,9 +532,7 @@ const PayLaterButtons = {
 
       if (payLaterComponent.isEligible()) {
         await payLaterComponent.render('#paylater-button-container');
-        console.log('Pay Later buttons rendered successfully');
       } else {
-        console.warn('Pay Later not eligible');
         Utils.hideElement('paylater-option');
       }
     } catch (error) {
@@ -557,9 +546,7 @@ const PayLaterButtons = {
 const ApplePayButtons = {
   async initialize() {
     try {
-      console.log('🍎 Starting Apple Pay setup...');
-      console.log('🌐 Current protocol:', location.protocol);
-      console.log('🏠 Current hostname:', location.hostname);
+      console.log('Starting Apple Pay setup...');
 
       // Check if we're on HTTPS (required for Apple Pay)
       if (
@@ -571,14 +558,10 @@ const ApplePayButtons = {
         throw new Error('Apple Pay requires HTTPS connection');
       }
 
-      // Check if PayPal SDK is loaded
-      console.log('🔍 Checking PayPal SDK availability...');
       if (!window.paypal?.Applepay) {
         throw new Error('PayPal SDK or Apple Pay component not loaded');
       }
 
-      // Check if Apple Pay is available
-      console.log('🔍 Checking ApplePaySession availability...');
       if (typeof ApplePaySession === 'undefined') {
         throw new Error(
           'ApplePaySession is not available - script may be blocked by CSP or device not supported'
@@ -616,8 +599,6 @@ const ApplePayButtons = {
         );
       }
 
-      console.log('📋 Apple Pay config received:', config);
-
       const {
         isEligible,
         countryCode,
@@ -626,27 +607,10 @@ const ApplePayButtons = {
         supportedNetworks,
       } = config;
 
-      console.log('📊 Apple Pay Eligibility Details:');
-      console.log('   isEligible:', isEligible);
-      console.log('   countryCode:', countryCode);
-      console.log('   currencyCode:', currencyCode);
-      console.log('   supportedNetworks:', supportedNetworks);
-
       if (!isEligible) {
-        console.error('❌ Apple Pay is NOT eligible');
-        console.error('   This typically means:');
-        console.error(
-          '   1. Domain not registered in your PayPal sandbox account'
-        );
-        console.error('   2. Apple Pay not enabled for your merchant account');
-        console.error('   3. Your current domain:', window.location.hostname);
-        console.error(
-          '   4. Check: https://www.paypal.com/businessmanage/account/aboutBusiness'
-        );
+        console.error('Apple Pay is not eligible for this merchant/domain');
         throw new Error('Apple Pay is not eligible');
       }
-
-      console.log('✅ Apple Pay is eligible, setting up button...');
 
       // Create Apple Pay button
       const container = document.getElementById('applepay-button-container');
@@ -671,14 +635,9 @@ const ApplePayButtons = {
             await this.handleApplePayClick(applepay, config);
           });
 
-          console.log('🍎 Apple Pay button styled and ready');
-        }
-
-        // Hide the button initially - it will be shown when radio button is selected
         container.style.display = 'none';
       }
 
-      console.log('Apple Pay button rendered successfully');
     } catch (error) {
       console.error('Apple Pay setup failed:', error);
       // Re-throw error so the parent can handle showing/hiding the option
@@ -791,7 +750,7 @@ const GooglePayButtons = {
 
   async initialize() {
     try {
-      console.log('💳 Starting Google Pay setup...');
+
 
       // Check if we're on HTTPS (required for Google Pay in production)
       const isLocalhost =
@@ -814,14 +773,12 @@ const GooglePayButtons = {
       // Get Google Pay configuration from PayPal
       try {
         this.googlePayConfig = await window.paypal.Googlepay().config();
-        console.log('Google Pay config:', this.googlePayConfig);
       } catch (configError) {
         console.error('Google Pay config error:', configError);
         throw new Error('Google Pay requires HTTPS for testing');
       }
 
       if (!this.googlePayConfig.isEligible) {
-        console.warn('Google Pay is not eligible on this device/browser');
         throw new Error('Google Pay is not eligible');
       }
 
@@ -849,7 +806,6 @@ const GooglePayButtons = {
       );
 
       if (isReadyToPay.result) {
-        console.log('Google Pay is ready, adding button...');
         this.addGooglePayButton();
       } else {
         throw new Error('Google Pay is not available on this device/browser');
@@ -1034,7 +990,6 @@ const PayPalMessages = {
 
       // Messages component doesn't have isEligible method, just render directly
       await messagesComponent.render('[data-pp-message]');
-      console.log('PayPal messages rendered successfully');
     } catch (error) {
       console.error('Error initializing PayPal messages:', error);
     }
@@ -1231,9 +1186,7 @@ class CheckoutApp {
   async initializeApplePay() {
     // Check if ApplePaySession is available (works in Safari, Chrome, and other browsers on Mac)
     // PayPal SDK will handle the full eligibility check including domain registration
-    console.log('🍎 Checking Apple Pay availability...');
-    console.log('   Browser:', navigator.userAgent);
-    console.log('   ApplePaySession:', typeof ApplePaySession);
+
 
     if (typeof ApplePaySession !== 'undefined') {
       try {
@@ -1257,17 +1210,10 @@ class CheckoutApp {
           window.getComputedStyle(applePayOption).display
         );
       } catch (error) {
-        console.warn('❌ Apple Pay initialization failed:', error.message);
-        console.warn('   Common reasons:');
-        console.warn('   - Domain not registered in PayPal account');
-        console.warn('   - Apple Pay not enabled for merchant');
-        console.warn("   - Device/browser doesn't support Apple Pay");
+        console.warn('Apple Pay initialization failed:', error.message);
         Utils.hideElement('applepay-option');
       }
     } else {
-      console.log(
-        'ℹ️ ApplePaySession not available - likely not on Mac/iOS device'
-      );
       Utils.hideElement('applepay-option');
     }
   }
@@ -1372,15 +1318,7 @@ if (
   window.location.search.includes('storage=true')
 ) {
   window.paypalStorageManager?.enableDebugMode?.();
-  console.log('🐛 Debug mode enabled for StorageManager');
   window.paypalStorageManager.attachToWindow();
-  console.log('🚀 StorageManager debug utilities enabled!');
-  console.log('💾 Access storage data via window.storage methods:');
-  console.log('   window.storage.orders() - View saved orders');
-  console.log('   window.storage.customers() - View saved customers');
-  console.log('   window.storage.stats() - View storage statistics');
-  console.log('   window.storage.export() - Export all data');
-  console.log('   window.storage.clear() - Clear all data');
 }
 
 // Add a delayed check to verify Apple Pay option visibility
