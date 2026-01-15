@@ -733,12 +733,12 @@ const ApplePayButtons = {
 
       session.onpaymentauthorized = async event => {
         try {
-          // Create order with Apple Pay source
+          console.log('Apple Pay payment authorized');
+
           const orderId = await PayPalIntegration.createOrder({
             paymentSource: 'apple_pay',
           });
 
-          // Confirm payment with Apple Pay
           await applepay.confirmOrder({
             orderId: orderId,
             token: event.payment.token,

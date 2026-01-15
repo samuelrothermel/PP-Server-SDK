@@ -11,31 +11,33 @@ import {
 // Create order request
 export const createOrder = async (req, res, next) => {
   console.log('Create Order Request');
-  console.log('Request body:', JSON.stringify(req.body, null, 2));
+  console.log('Payment Source:', req.body.paymentSource || req.body.source);
 
   try {
-    // Create the order only - user must approve before authorization
     const order = await createCheckoutOrderApi(req.body);
     console.log('Order created:', order.id);
-
-    // Return the order for user approval
     res.json(order);
   } catch (err) {
+    console.error('Order creation failed:', err.message);
     next(err);
   }
-}; // Create order request from Checkout page
+};
+
+// Create order request from Checkout page
 export const createCheckoutOrder = async (req, res, next) => {
   console.log('Checkout Create Order Request');
-  console.log('');
+  console.log('Payment Source:', req.body.source || req.body.paymentSource);
+
   try {
-    // Map 'source' field from frontend to 'paymentSource' for backend
     const orderData = {
       ...req.body,
       paymentSource: req.body.source || req.body.paymentSource,
     };
     const order = await createCheckoutOrderApi(orderData);
+    console.log('Checkout order created:', order.id);
     res.json(order);
   } catch (err) {
+    console.error('Checkout order creation failed:', err.message);
     next(err);
   }
 };
@@ -43,7 +45,6 @@ export const createCheckoutOrder = async (req, res, next) => {
 // Create upstream order request (client-side callbacks only)
 export const createUpstreamOrder = async (req, res, next) => {
   console.log('Upstream Client-Side Callback Create Order Request');
-  console.log('');
   const { totalAmount, source } = req.body;
   console.log('Payment source:', source);
   try {
@@ -59,7 +60,6 @@ export const createUpstreamOrder = async (req, res, next) => {
 // Create upstream order request (server-side callbacks only)
 export const createUpstreamQlOrder = async (req, res, next) => {
   console.log('Upstream Server-Side Callback Create Order Request');
-  console.log('');
   const { totalAmount, source } = req.body;
   console.log('Payment source:', source);
   try {
@@ -73,12 +73,9 @@ export const createUpstreamQlOrder = async (req, res, next) => {
 // Create quantum test order
 export const createQuantumOrder = async (req, res, next) => {
   console.log('Upstream Server-Side Callback Create Order Request');
-  console.log('');
   const { totalAmount, source } = req.body;
   console.log('Payment source:', source);
   try {
-    // For now, use the upstream QL order function
-    // This can be customized later if needed for quantum testing
     const order = await createUpstreamQlOrderApi(totalAmount, source);
     res.json(order);
   } catch (err) {
@@ -88,8 +85,7 @@ export const createQuantumOrder = async (req, res, next) => {
 
 // Capture payment
 export const capturePayment = async (req, res, next) => {
-  console.log('capture order request triggered');
-  console.log('');
+  console.log('Capture order request triggered');
   const { orderID } = req.params;
   try {
     const captureData = await capturePaymentApi(orderID);
@@ -102,11 +98,9 @@ export const capturePayment = async (req, res, next) => {
 
 // Capture authorized payment
 export const captureAuthorizedPayment = async (req, res, next) => {
-  console.log('capture authorized payment request triggered');
-  console.log('');
+  console.log('Capture authorized payment request triggered');
   const { orderID } = req.params;
   try {
-    // First get the order details to find the authorization ID
     const orderDetails = await getOrderDetailsApi(orderID);
     console.log('Order details:', JSON.stringify(orderDetails, null, 2));
 
@@ -127,8 +121,7 @@ export const captureAuthorizedPayment = async (req, res, next) => {
 
 // Authorize payment
 export const authorizePayment = async (req, res, next) => {
-  console.log('authorize order request triggered');
-  console.log('');
+  console.log('Authorize order request triggered');
   const { orderID } = req.params;
   try {
     const authorizeData = await authorizePaymentApi(orderID);
@@ -141,7 +134,6 @@ export const authorizePayment = async (req, res, next) => {
 // Get orders by ID array (for localStorage integration)
 export const getOrdersByIds = async (req, res, next) => {
   console.log('Get Orders by IDs Request');
-  console.log('');
   try {
     const { orderIds } = req.body;
     const result = await getOrdersByIdsApi(orderIds);
@@ -154,7 +146,6 @@ export const getOrdersByIds = async (req, res, next) => {
 // Delete order (remove from internal tracking, not actual PayPal API call)
 export const deleteOrder = async (req, res, next) => {
   console.log('Delete Order Request (Internal Only)');
-  console.log('');
   const { orderID } = req.params;
 
   try {
