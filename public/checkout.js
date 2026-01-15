@@ -1677,15 +1677,10 @@ async function fetchUserIdTokenAndReloadSDK() {
 }
 
 function loadPayPalSDK(idToken) {
-  const isAppleDevice =
-    /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) &&
-    /Safari/.test(navigator.userAgent) &&
-    typeof ApplePaySession !== 'undefined';
-
-  // Include googlepay, marks, and funding-eligibility components
-  const components = isAppleDevice
-    ? 'buttons,card-fields,messages,marks,funding-eligibility,applepay,googlepay'
-    : 'buttons,card-fields,messages,marks,funding-eligibility,googlepay';
+  // Always include applepay component - PayPal SDK will determine eligibility
+  // Apple Pay works on Mac with Safari, Chrome, and other browsers that support it
+  const components =
+    'buttons,card-fields,messages,marks,funding-eligibility,applepay,googlepay';
 
   // Use PayPal SDK with Google Pay component
   let scriptUrl = `https://www.paypal.com/sdk/js?commit=false&components=${components}&intent=authorize&client-id=${clientId}&enable-funding=venmo&integration-date=2023-01-01&debug=false`;
@@ -1838,6 +1833,9 @@ function createPayPalSmartButtonStack() {
 
       // Initialize card fields alongside PayPal buttons (but keep them hidden)
       initializeCardFields();
+
+      // Initialize Apple Pay proactively to show the option if available
+      initializeApplePay();
 
       // Update the PayPal button for saved account if we have one
       if (window.savedPayPalCustomerId) {

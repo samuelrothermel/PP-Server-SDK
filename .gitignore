@@ -1,3 +1,5 @@
 /node_modules
 .env
 .codepal/**
+/.github/**
+.DS_Store
