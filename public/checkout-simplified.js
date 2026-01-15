@@ -661,11 +661,17 @@ const ApplePayButtons = {
           applePayButton.style.height = '40px';
           applePayButton.style.borderRadius = '4px';
           applePayButton.style.margin = '0';
-          applePayButton.style.display = 'block';
+          applePayButton.style.display = 'inline-block'; // Changed from 'block'
+          applePayButton.style.webkitAppearance = '-apple-pay-button';
+          applePayButton.style.applePayButtonStyle = 'black';
+          applePayButton.style.applePayButtonType = 'buy';
+          applePayButton.style.cursor = 'pointer';
 
           applePayButton.addEventListener('click', async () => {
             await this.handleApplePayClick(applepay, config);
           });
+
+          console.log('🍎 Apple Pay button styled and ready');
         }
 
         // Hide the button initially - it will be shown when radio button is selected
