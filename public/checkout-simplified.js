@@ -1383,7 +1383,7 @@ setTimeout(() => {
   if (applePayOption) {
     const styles = window.getComputedStyle(applePayOption);
     const rect = applePayOption.getBoundingClientRect();
-    
+
     console.log('🔍 POST-LOAD Apple Pay Comprehensive Check:');
     console.log('   Element found:', !!applePayOption);
     console.log('   📏 CSS Properties:');
@@ -1405,29 +1405,39 @@ setTimeout(() => {
     let level = 0;
     while (parent && level < 3) {
       const parentStyles = window.getComputedStyle(parent);
-      console.log(`      Level ${level}: ${parent.tagName}#${parent.id || 'no-id'}.${parent.className || 'no-class'}`);
-      console.log(`         display: ${parentStyles.display}, visibility: ${parentStyles.visibility}`);
+      console.log(
+        `      Level ${level}: ${parent.tagName}#${parent.id || 'no-id'}.${
+          parent.className || 'no-class'
+        }`
+      );
+      console.log(
+        `         display: ${parentStyles.display}, visibility: ${parentStyles.visibility}`
+      );
       parent = parent.parentElement;
       level++;
     }
 
-    const isActuallyVisible = 
-      styles.display !== 'none' && 
-      styles.visibility !== 'hidden' && 
+    const isActuallyVisible =
+      styles.display !== 'none' &&
+      styles.visibility !== 'hidden' &&
       parseFloat(styles.opacity) > 0 &&
-      rect.width > 0 && 
+      rect.width > 0 &&
       rect.height > 0;
 
     if (!isActuallyVisible) {
       console.error('❌ Apple Pay option exists but is NOT ACTUALLY VISIBLE!');
       console.error('   Reasons:');
       if (styles.display === 'none') console.error('   - display is "none"');
-      if (styles.visibility === 'hidden') console.error('   - visibility is "hidden"');
+      if (styles.visibility === 'hidden')
+        console.error('   - visibility is "hidden"');
       if (parseFloat(styles.opacity) === 0) console.error('   - opacity is 0');
-      if (rect.width === 0 || rect.height === 0) console.error('   - element has no dimensions');
+      if (rect.width === 0 || rect.height === 0)
+        console.error('   - element has no dimensions');
     } else {
       console.log('✅ Apple Pay option is ACTUALLY visible on screen!');
-      console.log('   If you still cannot see it, scroll down or check if another element is covering it');
+      console.log(
+        '   If you still cannot see it, scroll down or check if another element is covering it'
+      );
     }
   } else {
     console.error('❌ applepay-option element not found in DOM!');
@@ -1438,15 +1448,15 @@ setTimeout(() => {
 window.testApplePayVisibility = function () {
   const applePayOption = document.getElementById('applepay-option');
   console.log('=== APPLE PAY VISIBILITY TEST ===');
-  
+
   if (!applePayOption) {
     console.error('❌ Element not found!');
     return null;
   }
-  
+
   const styles = window.getComputedStyle(applePayOption);
   const rect = applePayOption.getBoundingClientRect();
-  
+
   console.log('📦 Element:', applePayOption);
   console.log('📝 HTML:', applePayOption.outerHTML.substring(0, 200) + '...');
   console.log('');
@@ -1471,7 +1481,10 @@ window.testApplePayVisibility = function () {
   console.log('   bottom:', rect.bottom, 'right:', rect.right);
   console.log('');
   console.log('🔍 Visibility Analysis:');
-  console.log('   In viewport:', rect.top >= 0 && rect.top < window.innerHeight);
+  console.log(
+    '   In viewport:',
+    rect.top >= 0 && rect.top < window.innerHeight
+  );
   console.log('   Has dimensions:', rect.width > 0 && rect.height > 0);
   console.log('   Display not none:', styles.display !== 'none');
   console.log('   Visibility not hidden:', styles.visibility !== 'hidden');
@@ -1481,7 +1494,7 @@ window.testApplePayVisibility = function () {
   console.log('   innerHTML length:', applePayOption.innerHTML.length);
   console.log('   textContent:', applePayOption.textContent.substring(0, 100));
   console.log('   children count:', applePayOption.children.length);
-  
+
   // Try to force visibility
   console.log('');
   console.log('🔧 Attempting to force visibility...');
@@ -1492,11 +1505,10 @@ window.testApplePayVisibility = function () {
   applePayOption.style.backgroundColor = 'yellow'; // Make it obvious
   applePayOption.style.border = '3px solid red';
   applePayOption.style.padding = '20px';
-  console.log('✅ Applied visibility overrides (yellow background, red border)');
+  console.log(
+    '✅ Applied visibility overrides (yellow background, red border)'
+  );
   console.log('   Scroll and look for a yellow box with red border');
-  
-  return applePayOption;
-};
 
   return applePayOption;
 };
