@@ -649,8 +649,12 @@ apple-pay-button {
 
 .payment-button-slot {
   min-height: 44px;
+  max-height: 44px;
+  height: 44px;
   border-radius: 4px;
   background: transparent;
+  display: flex;
+  align-items: center;
 }
 
 /* Ensure buttons render at full width in grid cells */
@@ -659,6 +663,24 @@ apple-pay-button {
 .payment-button-slot iframe {
   width: 100% !important;
   max-width: 100% !important;
+  height: 44px !important;
+  max-height: 44px !important;
+}
+
+/* Specific styling for Apple Pay button */
+.payment-button-slot apple-pay-button {
+  width: 100% !important;
+  height: 44px !important;
+  max-height: 44px !important;
+  --apple-pay-button-height: 44px !important;
+}
+
+/* Specific styling for Google Pay button */
+.payment-button-slot button[aria-label*='Google Pay'],
+.payment-button-slot button[aria-label*='Buy with Google Pay'] {
+  height: 44px !important;
+  max-height: 44px !important;
+  min-height: 44px !important;
 }
 
 #card-payment-section {
