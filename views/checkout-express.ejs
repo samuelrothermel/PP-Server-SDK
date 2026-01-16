@@ -311,6 +311,26 @@
     </script>
 
     <script>
+      // Define Google Pay callback early to avoid "not defined" errors
+      window.onGooglePayLoaded = function() {
+        console.log('💳 Google Pay SDK loaded');
+        if (typeof setupGooglePay === 'function') {
+          setupGooglePay();
+        }
+      };
+    </script>
+    
+    <!-- Google Pay JavaScript SDK -->
+    <script async src="https://pay.google.com/gp/p/js/pay.js" onload="onGooglePayLoaded()"></script>
+    
+    <!-- PayPal SDK -->
+    <script
+      src="https://www.paypal.com/sdk/js?client-id=<%= process.env.CLIENT_ID %>&components=buttons,card-fields,messages,googlepay,applepay&enable-funding=venmo,paylater&buyer-country=US"
+      data-partner-attribution-id="<%= process.env.BN_CODE || '' %>"
+      data-client-token="">
+    </script>
+
+    <script>
       // Fetch and set client token for card fields
       fetch('/api/client-token', {
         method: 'GET',

@@ -173,121 +173,341 @@ if (window.paypal) {
   }
 }
 
-// Apple Pay Button (separate)
-if (
-  window.paypal &&
-  window.ApplePaySession &&
-  window.ApplePaySession.canMakePayments()
-) {
-  const applepayButton = window.paypal.Buttons({
-    fundingSource: window.paypal.FUNDING.APPLEPAY,
-    style: {
-      layout: 'horizontal',
-      color: 'black',
-      shape: 'rect',
-      height: 45,
-    },
-    createOrder: async () => {
-      return await createOrder();
-    },
-    onApprove: async data => {
-      try {
-        const response = await fetch(`/api/orders/${data.orderID}/capture`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const orderData = await response.json();
-        Utils.showResult(
-          'Payment completed successfully with Apple Pay!',
-          true
-        );
-        console.log('Apple Pay capture result:', orderData);
-      } catch (error) {
-        Utils.showResult('Apple Pay payment failed. Please try again.', false);
-        console.error('Apple Pay capture error:', error);
-      }
-    },
-    onError: err => {
-      console.error('Apple Pay button error:', err);
-      Utils.showResult(
-        'An error occurred with Apple Pay. Please try again.',
-        false
-      );
-    },
-  });
+// Google Pay Setup (using Google Pay JavaScript SDK)
+let googlePayConfig = null;
 
-  if (applepayButton.isEligible()) {
-    const appleContainer = document.getElementById('applepay-button-container');
-    if (appleContainer) {
-      appleContainer.style.display = 'block';
-      applepayButton
-        .render('#applepay-button-container')
-        .then(() => {
-          Utils.showElement('wallet-buttons-row');
-        })
-        .catch(err => {
-          console.warn('Apple Pay button render failed:', err);
-          appleContainer.style.display = 'none';
-        });
+async function setupGooglePay() {
+  try {
+    // Check SDK availability
+    if (typeof google === 'undefined' || !google.payments) {
+      console.warn('Google Pay SDK not loaded');
+      return;
     }
+
+    if (!window.paypal || !window.paypal.Googlepay) {
+      console.warn('PayPal Googlepay component not available');
+      return;
+    }
+
+    // Get Google Pay configuration from PayPal
+    const googlepayComponent = paypal.Googlepay();
+    googlePayConfig = await googlepayComponent.config();
+
+    if (!googlePayConfig.isEligible) {
+      console.warn('Google Pay is not eligible');
+      return;
+    }
+
+    // Create payments client
+    const paymentsClient = new google.payments.api.PaymentsClient({
+      environment: googlePayConfig.environment || 'TEST',
+      paymentDataCallbacks: {
+        onPaymentDataChanged: onGooglePaymentDataChanged,
+        onPaymentAuthorized: onGooglePaymentAuthorized,
+      },
+    });
+
+    // Check readiness
+    const isReadyToPayRequest = {
+      apiVersion: googlePayConfig.apiVersion || 2,
+      apiVersionMinor: googlePayConfig.apiVersionMinor || 0,
+      allowedPaymentMethods: googlePayConfig.allowedPaymentMethods,
+      existingPaymentMethodRequired: false,
+    };
+
+    const isReadyToPay = await paymentsClient.isReadyToPay(isReadyToPayRequest);
+
+    if (isReadyToPay.result) {
+      console.log('Google Pay is ready, creating button...');
+
+      // Create button
+      const button = paymentsClient.createButton({
+        onClick: onGooglePayButtonClicked,
+        allowedPaymentMethods: googlePayConfig.allowedPaymentMethods,
+        buttonColor: 'default',
+        buttonType: 'buy',
+        buttonSizeMode: 'fill',
+      });
+
+      const container = document.getElementById('googlepay-button-container');
+      if (container) {
+        container.innerHTML = '';
+        container.appendChild(button);
+
+        // Apply styling
+        const googlePayButton = container.querySelector('button');
+        if (googlePayButton) {
+          googlePayButton.style.width = '100%';
+          googlePayButton.style.height = '45px';
+          googlePayButton.style.borderRadius = '4px';
+        }
+
+        container.style.display = 'block';
+        Utils.showElement('wallet-buttons-row');
+      }
+    }
+  } catch (error) {
+    console.error('Google Pay setup failed:', error);
   }
 }
 
-// Google Pay Button (separate)
-if (window.paypal) {
-  const googlepayButton = window.paypal.Buttons({
-    fundingSource: window.paypal.FUNDING.GOOGLEPAY,
-    style: {
-      layout: 'horizontal',
-      color: 'white',
-      shape: 'rect',
-      height: 45,
-    },
-    createOrder: async () => {
-      return await createOrder();
-    },
-    onApprove: async data => {
-      try {
-        const response = await fetch(`/api/orders/${data.orderID}/capture`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const orderData = await response.json();
-        Utils.showResult(
-          'Payment completed successfully with Google Pay!',
-          true
-        );
-        console.log('Google Pay capture result:', orderData);
-      } catch (error) {
-        Utils.showResult('Google Pay payment failed. Please try again.', false);
-        console.error('Google Pay capture error:', error);
-      }
-    },
-    onError: err => {
-      console.error('Google Pay button error:', err);
-      Utils.showResult(
-        'An error occurred with Google Pay. Please try again.',
-        false
-      );
+function onGooglePaymentDataChanged(intermediatePaymentData) {
+  return new Promise(resolve => {
+    let paymentDataRequestUpdate = {};
+    paymentDataRequestUpdate.newTransactionInfo = {
+      displayItems: [
+        {
+          label: 'Subtotal',
+          type: 'SUBTOTAL',
+          price: Utils.getCurrentTotal(),
+        },
+      ],
+      countryCode: 'US',
+      currencyCode: 'USD',
+      totalPriceStatus: 'FINAL',
+      totalPrice: Utils.getCurrentTotal(),
+    };
+    resolve(paymentDataRequestUpdate);
+  });
+}
+
+function onGooglePaymentAuthorized(paymentData) {
+  return new Promise(async resolve => {
+    try {
+      console.log('Google Pay payment authorized, processing...', paymentData);
+      await processGooglePayPayment(paymentData);
+      resolve({ transactionState: 'SUCCESS' });
+    } catch (error) {
+      console.error('Google Pay payment authorization failed:', error);
+      resolve({
+        transactionState: 'ERROR',
+        error: {
+          reason: 'PAYMENT_DATA_INVALID',
+          message: 'Payment processing failed',
+          intent: 'PAYMENT_AUTHORIZATION',
+        },
+      });
+    }
+  });
+}
+
+function onGooglePayButtonClicked() {
+  if (!googlePayConfig) {
+    console.error('Google Pay config not loaded');
+    return;
+  }
+
+  const paymentsClient = new google.payments.api.PaymentsClient({
+    environment: googlePayConfig.environment || 'TEST',
+    paymentDataCallbacks: {
+      onPaymentDataChanged: onGooglePaymentDataChanged,
+      onPaymentAuthorized: onGooglePaymentAuthorized,
     },
   });
 
-  if (googlepayButton.isEligible()) {
-    const googleContainer = document.getElementById(
-      'googlepay-button-container'
-    );
-    if (googleContainer) {
-      googleContainer.style.display = 'block';
-      googlepayButton
-        .render('#googlepay-button-container')
-        .then(() => {
-          Utils.showElement('wallet-buttons-row');
-        })
-        .catch(err => {
-          console.warn('Google Pay button render failed:', err);
-          googleContainer.style.display = 'none';
-        });
+  const paymentDataRequest = {
+    ...googlePayConfig,
+    transactionInfo: {
+      countryCode: 'US',
+      currencyCode: 'USD',
+      totalPriceStatus: 'FINAL',
+      totalPrice: Utils.getCurrentTotal(),
+    },
+    callbackIntents: ['PAYMENT_AUTHORIZATION'],
+  };
+
+  paymentsClient.loadPaymentData(paymentDataRequest);
+}
+
+async function processGooglePayPayment(paymentData) {
+  const orderData = {
+    intent: 'CAPTURE',
+    payment_source: {
+      google_pay: {
+        payment_data: paymentData,
+      },
+    },
+    purchase_units: [
+      {
+        amount: {
+          currency_code: 'USD',
+          value: Utils.getCurrentTotal(),
+        },
+        shipping: ShippingInfo.getShippingData(),
+      },
+    ],
+  };
+
+  const response = await fetch('/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(orderData),
+  });
+
+  const order = await response.json();
+
+  const captureResponse = await fetch(`/api/orders/${order.id}/capture`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  const captureData = await captureResponse.json();
+  Utils.showResult('Payment completed successfully with Google Pay!', true);
+  console.log('Google Pay capture result:', captureData);
+}
+
+// Apple Pay Setup (using ApplePaySession)
+async function setupApplePay() {
+  try {
+    if (!window.paypal || !window.paypal.Applepay) {
+      console.warn('PayPal Applepay component not available');
+      return;
     }
+
+    const applepay = paypal.Applepay();
+    const config = await applepay.config();
+
+    if (!config) {
+      console.warn('Apple Pay config failed');
+      return;
+    }
+
+    const {
+      countryCode,
+      currencyCode,
+      merchantCapabilities,
+      supportedNetworks,
+    } = config;
+
+    // Create Apple Pay button element
+    const container = document.getElementById('applepay-button-container');
+    if (container) {
+      container.innerHTML =
+        '<apple-pay-button id="btn-appl" buttonstyle="black" type="buy" locale="en"></apple-pay-button>';
+
+      const applePayButton = document.getElementById('btn-appl');
+      if (applePayButton) {
+        applePayButton.style.width = '100%';
+        applePayButton.style.height = '45px';
+        applePayButton.style.borderRadius = '4px';
+      }
+
+      container.style.display = 'block';
+      Utils.showElement('wallet-buttons-row');
+
+      applePayButton.addEventListener('click', async function () {
+        try {
+          const paymentRequest = {
+            countryCode,
+            currencyCode: 'USD',
+            merchantCapabilities,
+            supportedNetworks,
+            requiredBillingContactFields: [
+              'name',
+              'phone',
+              'email',
+              'postalAddress',
+            ],
+            requiredShippingContactFields: [],
+            total: {
+              label: 'Total',
+              amount: Utils.getCurrentTotal(),
+              type: 'final',
+            },
+          };
+
+          const session = new ApplePaySession(4, paymentRequest);
+
+          session.onvalidatemerchant = event => {
+            applepay
+              .validateMerchant({
+                validationUrl: event.validationURL,
+              })
+              .then(payload => {
+                session.completeMerchantValidation(payload.merchantSession);
+              })
+              .catch(err => {
+                console.error('Merchant validation failed:', err);
+                session.abort();
+              });
+          };
+
+          session.onpaymentmethodselected = () => {
+            session.completePaymentMethodSelection({
+              newTotal: paymentRequest.total,
+            });
+          };
+
+          session.onpaymentauthorized = async event => {
+            try {
+              const orderData = {
+                intent: 'CAPTURE',
+                payment_source: {
+                  apple_pay: {
+                    payment_data: event.payment.token,
+                  },
+                },
+                purchase_units: [
+                  {
+                    amount: {
+                      currency_code: 'USD',
+                      value: Utils.getCurrentTotal(),
+                    },
+                    shipping: ShippingInfo.getShippingData(),
+                  },
+                ],
+              };
+
+              const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData),
+              });
+
+              const order = await response.json();
+
+              const captureResponse = await fetch(
+                `/api/orders/${order.id}/capture`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                }
+              );
+
+              const captureData = await captureResponse.json();
+
+              session.completePayment({
+                status: window.ApplePaySession.STATUS_SUCCESS,
+              });
+
+              Utils.showResult(
+                'Payment completed successfully with Apple Pay!',
+                true
+              );
+              console.log('Apple Pay capture result:', captureData);
+            } catch (err) {
+              console.error('Payment processing failed:', err);
+              session.completePayment({
+                status: window.ApplePaySession.STATUS_FAILURE,
+              });
+            }
+          };
+
+          session.oncancel = () => {
+            console.log('Apple Pay cancelled');
+          };
+
+          session.begin();
+        } catch (clickError) {
+          console.error('Apple Pay session error:', clickError);
+          if (clickError.message.includes('insecure document')) {
+            alert('Apple Pay requires HTTPS.');
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Apple Pay setup failed:', error);
   }
 }
 
@@ -420,4 +640,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize card fields
   setupCardFields();
+
+  // Initialize Apple Pay if on Apple device
+  const isAppleDevice = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+  const isSafari =
+    /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+
+  if (isAppleDevice && isSafari) {
+    if (
+      typeof ApplePaySession !== 'undefined' &&
+      ApplePaySession?.supportsVersion(4) &&
+      ApplePaySession?.canMakePayments()
+    ) {
+      // Wait for PayPal SDK to load
+      const checkPayPal = setInterval(() => {
+        if (window.paypal && window.paypal.Applepay) {
+          clearInterval(checkPayPal);
+          setupApplePay();
+        }
+      }, 100);
+      setTimeout(() => clearInterval(checkPayPal), 10000);
+    }
+  }
+
+  // Setup Google Pay when SDK is ready
+  if (
+    window.paypal &&
+    window.paypal.Googlepay &&
+    typeof google !== 'undefined'
+  ) {
+    setupGooglePay();
+  }
 });
