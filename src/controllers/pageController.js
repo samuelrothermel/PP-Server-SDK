@@ -29,4 +29,3 @@ export const renderPayeeTest = renderPage('payee-test');
 export const renderOrders = renderPage('orders');
 export const renderVault = renderPage('vault');
 export const renderPayouts = renderPage('payouts');
-export const renderCheckoutExpress = renderPage('checkout-express');

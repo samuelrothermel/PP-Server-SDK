@@ -2,7 +2,6 @@ import express from 'express';
 import {
   renderIndex,
   renderCheckout,
-  renderCheckoutExpress,
   renderSubscriptions,
   renderSaveWoPurchase,
   renderProduct,
@@ -26,7 +25,6 @@ router.get('/product', renderProduct);
 router.get('/cart', renderCart);
 router.get('/success', renderSuccess);
 router.get('/checkout', renderCheckout);
-router.get('/checkout-express', renderCheckoutExpress);
 router.get('/save-wo-purchase', renderSaveWoPurchase);
 router.get('/subscriptions', renderSubscriptions);
 router.get('/subscription-management', renderSubscriptionManagement);
