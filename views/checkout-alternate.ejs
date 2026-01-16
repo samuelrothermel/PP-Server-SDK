@@ -1,0 +1,289 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/styles/checkout.css" />
+    <title>One-Time Payments - Checkout Page</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Checkout - Alternate Layout</h1>
+      </header>
+      
+      <!-- Payment Methods Section - Full Width at Top -->
+      <div class="payment-methods-top-section" style="margin-bottom: 30px; border: 2px solid #ddd; border-radius: 8px; padding: 20px; background: #f9f9f9;">
+        <h3 style="margin-top: 0; margin-bottom: 15px;">Select Payment Method</h3>
+        
+        <!-- Vault Toggle -->
+        <div class="checkbox-control" style="margin-bottom: 15px;">
+          <input type="checkbox" id="save-payment-method">
+          <label for="save-payment-method">Save my payment method for future purchases</label>
+        </div>
+        
+        <!-- Vaulting Limitations Notice -->
+        <div id="vaulting-notice" style="display: none; background-color: #e8f4fd; border: 1px solid #b8daff; border-radius: 4px; padding: 12px; margin-bottom: 15px; font-size: 0.9em; color: #004085;">
+          <strong>📝 Vaulting Limitations:</strong><br>
+          • <strong>Google Pay:</strong> Vaulting not available (sandbox or production)<br>
+          • <strong>Venmo:</strong> Vaulting not available in PayPal Sandbox environment
+        </div>
+        
+        <!-- Saved Payment Methods -->
+        <div id="saved-payment-methods-list" style="margin-bottom: 15px;"></div>
+        
+        <!-- Payment Buttons Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 15px;">
+          <div id="paypal-button-container" class="payment-button-slot"></div>
+          <div id="venmo-button-container" class="payment-button-slot" style="display: none;"></div>
+          <div id="paylater-button-container" class="payment-button-slot" style="display: none;"></div>
+          <div id="applepay-button-container" class="payment-button-slot" style="display: none;"></div>
+          <div id="googlepay-button-container" class="payment-button-slot" style="display: none;"></div>
+        </div>
+        
+        <!-- Card Payment Section -->
+        <div id="card-payment-section" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+          <h4>Credit/Debit Card</h4>
+          <div class="checkbox-group">
+            <div class="checkbox-option">
+              <input type="checkbox" id="billing-info-toggle" />
+              <label for="billing-info-toggle">Billing is different from Shipping</label>
+            </div>
+          </div>
+          
+          <div id="billing-info" class="billing-info" style="display: none;">
+            <h5>Billing Information</h5>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="billing-first-name">First Name</label>
+                <input type="text" id="billing-first-name" name="billing-first-name" value="Jane" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="billing-last-name">Last Name</label>
+                <input type="text" id="billing-last-name" name="billing-last-name" value="Doe" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="billing-email">Email Address</label>
+                <input type="email" id="billing-email" name="billing-email" value="jane.doe@example.com" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="billing-phone">Phone Number</label>
+                <input type="text" id="billing-phone" name="billing-phone" value="1234567890" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="billing-address-line1">Street Address</label>
+              <input type="text" id="billing-address-line1" name="billing-address-line1" value="123 Main St" class="form-control" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="billing-admin-area2">City</label>
+                <input type="text" id="billing-admin-area2" name="billing-admin-area2" value="Springfield" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="billing-admin-area1">State</label>
+                <input type="text" id="billing-admin-area1" name="billing-admin-area1" value="IL" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="billing-postal-code">Zip Code</label>
+                <input type="text" id="billing-postal-code" name="billing-postal-code" value="62701" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="billing-country-code">Country Code</label>
+                <input type="text" id="billing-country-code" name="billing-country-code" value="US" class="form-control" required />
+              </div>
+            </div>
+          </div>
+          
+          <div class="card-fields">
+            <div id="card-name-field-container"></div>
+            <div id="card-number-field-container"></div>
+            <div id="card-expiry-field-container"></div>
+            <div id="card-cvv-field-container"></div>
+          </div>
+        </div>
+        
+        <!-- Submit button for saved payment methods and new credit cards -->
+        <button id="submit-order-button" type="button" class="submit-button" style="display: none; margin-top: 15px; width: 100%;">
+          Submit Order
+        </button>
+      </div>
+      
+      <div class="checkout-layout">
+        <!-- Left Side: Order Summary and Controls -->
+        <div class="checkout-left">
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="order-row">
+              <span>Cart Total:</span>
+              <span>$<span id="cart-total">100</span></span>
+            </div>
+            <div class="order-row">
+              <span>Shipping:</span>
+              <span>$<span id="shipping-amount">0.00</span></span>
+            </div>
+            <div class="order-row total">
+              <span>Checkout Total:</span>
+              <span>$<span id="amount-total">100</span></span>
+            </div>
+          </div>
+          
+          <!-- PayPal Pay Later Messages -->
+          <div style="margin-bottom: 20px;">
+            <div
+              data-pp-message
+              data-pp-style-layout="text"
+              data-pp-style-logo-type="inline"
+              data-pp-style-text-color="black"
+              data-pp-style-text-size="12"
+              data-pp-amount="100"
+              data-pp-placement="payment">
+            </div>
+          </div>
+          
+          <!-- Returning User Controls -->
+          <div class="controls-section">
+            <div class="checkbox-control">
+              <input type="checkbox" id="toggle-customer-id">
+              <label for="toggle-customer-id">Returning User?</label>
+            </div>
+            <form id="customer-id-form" style="display: none;">
+              <label for="customer-id">Enter PayPal Customer ID:</label>
+              <input type="text" id="customer-id" name="customer-id" placeholder="e.g. 123456789" required />
+              <button type="submit">Load Payment Methods</button>
+            </form>
+            
+            <!-- Container for saved payment methods -->
+            <div id="saved-payment-methods-container" style="display: none;"></div>
+          </div>
+        </div>
+        
+        <!-- Right Side: Shipping Info -->
+        <div class="checkout-right">
+          <!-- Shipping Information -->
+          <div class="checkout-section">
+            <h4>Shipping Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-first-name">First Name</label>
+                <input type="text" id="shipping-first-name" name="shipping-first-name" value="Theodor" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-last-name">Last Name</label>
+                <input type="text" id="shipping-last-name" name="shipping-last-name" value="Adorno" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-email">Email Address</label>
+                <input type="email" id="shipping-email" name="shipping-email" value="theodor.adorno@example.com" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-phone">Phone Number</label>
+                <input type="text" id="shipping-phone" name="shipping-phone" value="1234567890" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="shipping-address-line1">Street Address</label>
+              <input type="text" id="shipping-address-line1" name="shipping-address-line1" value="123 Main St" class="form-control" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-admin-area2">City</label>
+                <input type="text" id="shipping-admin-area2" name="shipping-admin-area2" value="Springfield" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-admin-area1">State</label>
+                <input type="text" id="shipping-admin-area1" name="shipping-admin-area1" value="IL" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-postal-code">Zip Code</label>
+                <input type="text" id="shipping-postal-code" name="shipping-postal-code" value="62701" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-country-code">Country Code</label>
+                <input type="text" id="shipping-country-code" name="shipping-country-code" value="US" class="form-control" required />
+              </div>
+            </div>
+          </div>
+          
+          <!-- Shipping Options -->
+          <div class="checkout-section">
+            <h4>Shipping Options</h4>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="free-shipping" name="shipping-option" value="0" checked />
+                <label for="free-shipping">Free Shipping ($0)</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="expedited-shipping" name="shipping-option" value="10" />
+                <label for="expedited-shipping">Expedited Shipping ($10)</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Information Sections -->
+      <div class="info-sections">
+        <div id="order-info-section" class="info-section" style="display: none;">
+          <div id="create-order-info"></div>
+        </div>
+        <div id="capture-info-section" class="info-section" style="display: none;">
+          <div id="capture-order-info"></div>
+        </div>
+        <div id="payment-source-section" class="info-section" style="display: none;">
+          <div id="payment-source-type-info"></div>
+          <div id="vault-payment-info"></div>
+          <div id="vault-status-info"></div>
+          <div id="customer-id-info"></div>
+          <div id="payment-token-id-info"></div>
+          <p>Check Console Log for full API Response</p>
+        </div>
+      </div>
+    </div>
+<script>
+  const clientId = '<%= clientId %>';
+  
+  // Define Google Pay callback early to avoid "not defined" errors
+  // This will be replaced by the actual implementation in checkout.js
+  window.onGooglePayLoaded = function() {
+    console.log('💳 Google Pay SDK loaded (early callback)');
+    // The actual implementation will be set by checkout.js
+  };
+</script>
+    <!-- Google Pay JavaScript SDK -->
+    <script async src="https://pay.google.com/gp/p/js/pay.js" onload="onGooglePayLoaded()"></script>
+    
+    <!-- PayPal JavaScript SDK with Apple Pay and Google Pay components -->
+    <!-- Note: data-user-id-token will be added dynamically for Venmo vaulting support -->
+    <script id="paypal-sdk" src="https://www.paypal.com/sdk/js?client-id=<%= clientId %>&currency=USD&components=buttons,card-fields,marks,messages,applepay,googlepay&enable-funding=venmo,paylater&intent=authorize"></script>
+    
+    <!-- StorageManager for enhanced localStorage functionality -->
+    <script src="/modules/storage-manager.js"></script>
+    
+    <script>
+      // Fetch user ID token and add to PayPal SDK for Venmo vaulting support
+      fetch('/api/first-time-user-token', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          const sdkScript = document.getElementById('paypal-sdk');
+          if (data.idToken && sdkScript) {
+            sdkScript.setAttribute('data-user-id-token', data.idToken);
+            console.log('✅ User ID token added to PayPal SDK for Venmo vaulting');
+          }
+        })
+        .catch(error => {
+          console.warn('⚠️ Failed to fetch user ID token for Venmo vaulting:', error);
+        });
+    </script>
+    
+    <script src="/checkout-alternate.js"></script>
+</body>
+</html>

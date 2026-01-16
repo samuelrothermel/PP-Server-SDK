@@ -639,3 +639,39 @@ apple-pay-button {
     font-size: 1.8em;
   }
 }
+
+/* Alternate Checkout Layout Styles */
+.payment-methods-top-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 30px auto;
+}
+
+.payment-button-slot {
+  min-height: 44px;
+  border-radius: 4px;
+  background: transparent;
+}
+
+/* Ensure buttons render at full width in grid cells */
+.payment-button-slot > div,
+.payment-button-slot > button,
+.payment-button-slot iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#card-payment-section {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
