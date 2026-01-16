@@ -242,7 +242,7 @@ async function setupGooglePay() {
           googlePayButton.style.borderRadius = '4px';
         }
 
-        container.style.display = 'block';
+        container.style.display = 'flex';
         Utils.showElement('wallet-buttons-row');
       }
     }
@@ -392,7 +392,7 @@ async function setupApplePay() {
         applePayButton.style.borderRadius = '4px';
       }
 
-      container.style.display = 'block';
+      container.style.display = 'flex';
       Utils.showElement('wallet-buttons-row');
 
       applePayButton.addEventListener('click', async function () {
