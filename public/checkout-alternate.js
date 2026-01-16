@@ -85,7 +85,8 @@ const Utils = {
     this.showElement('paypal-button-container');
     this.showElement('venmo-button-container');
     this.showElement('paylater-button-container');
-    // Apple Pay and Google Pay are shown conditionally based on availability
+    this.showElement('applepay-button-container');
+    this.showElement('googlepay-button-container');
   },
 };
 
