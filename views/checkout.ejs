@@ -293,10 +293,10 @@
   const clientId = '<%= clientId %>';
   
   // Define Google Pay callback early to avoid "not defined" errors
-  // This will be replaced by the actual implementation in checkout-simplified.js
+  // This will be replaced by the actual implementation in checkout.js
   window.onGooglePayLoaded = function() {
     console.log('💳 Google Pay SDK loaded (early callback)');
-    // The actual implementation will be set by checkout-simplified.js
+    // The actual implementation will be set by checkout.js
   };
 </script>
     <!-- Google Pay JavaScript SDK -->
@@ -325,6 +325,6 @@
         });
     </script>
     
-    <script src="/checkout-simplified.js"></script>
+    <script src="/checkout.js"></script>
 </body>
 </html>
