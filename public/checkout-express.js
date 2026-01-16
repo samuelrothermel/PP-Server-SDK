@@ -134,21 +134,14 @@ async function createOrder(paymentSource = null) {
   return order.id;
 }
 
-// PayPal Buttons
-let paypalButtons;
-let paylaterButtons;
-let venmoButtons;
-
-// Initialize PayPal SDK
+// PayPal Button Stack (with all express methods in one container)
+// This creates a horizontal stack with PayPal, Pay Later, Venmo
 if (window.paypal) {
-  // PayPal Button
-  paypalButtons = window.paypal.Buttons({
-    fundingSource: window.paypal.FUNDING.PAYPAL,
+  const expressButtons = window.paypal.Buttons({
     style: {
       layout: 'horizontal',
       color: 'gold',
       shape: 'rect',
-      label: 'paypal',
       height: 45,
     },
     createOrder: async () => {
@@ -161,107 +154,21 @@ if (window.paypal) {
           headers: { 'Content-Type': 'application/json' },
         });
         const orderData = await response.json();
-        Utils.showResult('Payment completed successfully with PayPal!', true);
-        console.log('PayPal capture result:', orderData);
+        Utils.showResult('Payment completed successfully!', true);
+        console.log('Payment capture result:', orderData);
       } catch (error) {
         Utils.showResult('Payment failed. Please try again.', false);
-        console.error('PayPal capture error:', error);
+        console.error('Payment capture error:', error);
       }
     },
     onError: err => {
-      console.error('PayPal button error:', err);
-      Utils.showResult(
-        'An error occurred with PayPal. Please try again.',
-        false
-      );
+      console.error('Payment button error:', err);
+      Utils.showResult('An error occurred. Please try again.', false);
     },
   });
 
-  if (paypalButtons.isEligible()) {
-    paypalButtons.render('#paypal-button-container');
-  }
-
-  // Pay Later Button
-  paylaterButtons = window.paypal.Buttons({
-    fundingSource: window.paypal.FUNDING.PAYLATER,
-    style: {
-      layout: 'horizontal',
-      color: 'gold',
-      shape: 'rect',
-      label: 'paylater',
-      height: 45,
-    },
-    createOrder: async () => {
-      return await createOrder();
-    },
-    onApprove: async data => {
-      try {
-        const response = await fetch(`/api/orders/${data.orderID}/capture`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const orderData = await response.json();
-        Utils.showResult(
-          'Payment completed successfully with Pay Later!',
-          true
-        );
-        console.log('Pay Later capture result:', orderData);
-      } catch (error) {
-        Utils.showResult('Payment failed. Please try again.', false);
-        console.error('Pay Later capture error:', error);
-      }
-    },
-    onError: err => {
-      console.error('Pay Later button error:', err);
-      Utils.showResult(
-        'An error occurred with Pay Later. Please try again.',
-        false
-      );
-    },
-  });
-
-  if (paylaterButtons.isEligible()) {
-    paylaterButtons.render('#paylater-button-container');
-  }
-
-  // Venmo Button
-  venmoButtons = window.paypal.Buttons({
-    fundingSource: window.paypal.FUNDING.VENMO,
-    style: {
-      layout: 'horizontal',
-      color: 'blue',
-      shape: 'rect',
-      label: 'venmo',
-      height: 45,
-    },
-    createOrder: async () => {
-      return await createOrder();
-    },
-    onApprove: async data => {
-      try {
-        const response = await fetch(`/api/orders/${data.orderID}/capture`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const orderData = await response.json();
-        Utils.showResult('Payment completed successfully with Venmo!', true);
-        console.log('Venmo capture result:', orderData);
-      } catch (error) {
-        Utils.showResult('Payment failed. Please try again.', false);
-        console.error('Venmo capture error:', error);
-      }
-    },
-    onError: err => {
-      console.error('Venmo button error:', err);
-      Utils.showResult(
-        'An error occurred with Venmo. Please try again.',
-        false
-      );
-    },
-  });
-
-  if (venmoButtons.isEligible()) {
-    venmoButtons.render('#venmo-button-container');
+  if (expressButtons.isEligible()) {
+    expressButtons.render('#express-paypal-stack');
   }
 }
 

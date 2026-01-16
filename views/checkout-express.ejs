@@ -185,14 +185,8 @@
           <div class="express-payment-section">
             <h4>Express Payment Methods</h4>
             <div class="express-buttons-container">
-              <!-- PayPal Button -->
-              <div class="express-button-wrapper" id="paypal-button-container"></div>
-              
-              <!-- Pay Later Button -->
-              <div class="express-button-wrapper" id="paylater-button-container"></div>
-              
-              <!-- Venmo Button -->
-              <div class="express-button-wrapper" id="venmo-button-container"></div>
+              <!-- PayPal Button Stack (includes PayPal, Pay Later, Venmo in horizontal layout) -->
+              <div class="express-button-wrapper" id="express-paypal-stack"></div>
               
               <!-- Google Pay Button -->
               <div class="express-button-wrapper" id="googlepay-button-container" style="display: none;"></div>
@@ -312,8 +306,8 @@
 
     <script>
       // Fetch and set client token for card fields
-      fetch('/api/generate-client-token', {
-        method: 'POST',
+      fetch('/api/client-token', {
+        method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       })
         .then(response => response.json())
@@ -330,16 +324,16 @@
         });
 
       // Fetch user ID token for Venmo vaulting
-      fetch('/api/generate-user-id-token', {
+      fetch('/api/first-time-user-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })
         .then(response => response.json())
         .then(data => {
-          if (data.userIdToken) {
+          if (data.idToken) {
             const script = document.querySelector('script[src*="paypal.com/sdk/js"]');
             if (script) {
-              script.setAttribute('data-user-id-token', data.userIdToken);
+              script.setAttribute('data-user-id-token', data.idToken);
             }
             console.log('✅ User ID token added to PayPal SDK for Venmo vaulting');
           }
