@@ -1,0 +1,354 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/styles/checkout.css" />
+    <title>Express Checkout - One-Time Payments</title>
+    <style>
+      .express-payment-section {
+        border: 2px solid #0070ba;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        background-color: #f5f7fa;
+      }
+      
+      .express-payment-section h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #0070ba;
+        font-size: 18px;
+      }
+      
+      .express-buttons-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .express-button-wrapper {
+        min-height: 45px;
+      }
+      
+      .payment-divider {
+        display: flex;
+        align-items: center;
+        margin: 30px 0;
+        color: #6c757d;
+      }
+      
+      .payment-divider::before,
+      .payment-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+      }
+      
+      .payment-divider span {
+        padding: 0 15px;
+        font-weight: 500;
+      }
+      
+      .card-payment-section h4 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Express Checkout</h1>
+      </header>
+      
+      <div class="checkout-layout">
+        <!-- Left Side: Order Summary and Controls -->
+        <div class="checkout-left">
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="order-row">
+              <span>Cart Total:</span>
+              <span>$<span id="cart-total">100</span></span>
+            </div>
+            <div class="order-row">
+              <span>Shipping:</span>
+              <span>$<span id="shipping-amount">0.00</span></span>
+            </div>
+            <div class="order-row total">
+              <span>Checkout Total:</span>
+              <span>$<span id="amount-total">100</span></span>
+            </div>
+          </div>
+          
+          <!-- PayPal Pay Later Messages -->
+          <div style="margin-bottom: 20px;">
+            <div
+              data-pp-message
+              data-pp-style-layout="text"
+              data-pp-style-logo-type="inline"
+              data-pp-style-text-color="black"
+              data-pp-style-text-size="12"
+              data-pp-amount="100"
+              data-pp-placement="payment">
+            </div>
+          </div>
+          
+          <!-- Returning User Controls -->
+          <div class="controls-section">
+            <div class="checkbox-control">
+              <input type="checkbox" id="toggle-customer-id">
+              <label for="toggle-customer-id">Returning User?</label>
+            </div>
+            <form id="customer-id-form" style="display: none;">
+              <label for="customer-id">Enter PayPal Customer ID:</label>
+              <input type="text" id="customer-id" name="customer-id" placeholder="e.g. 123456789" required />
+              <button type="submit">Load Payment Methods</button>
+            </form>
+            
+            <!-- Container for saved payment methods -->
+            <div id="saved-payment-methods-container" style="display: none;"></div>
+          </div>
+          
+          <!-- Shipping Options -->
+          <div class="checkout-section">
+            <h4>Shipping Options</h4>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="free-shipping" name="shipping-option" value="0" checked />
+                <label for="free-shipping">Free Shipping ($0)</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="expedited-shipping" name="shipping-option" value="10" />
+                <label for="expedited-shipping">Expedited Shipping ($10)</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Side: Express Payment Methods + Shipping Info + Card Payment -->
+        <div class="checkout-right">
+          <!-- Shipping Information -->
+          <div class="checkout-section">
+            <h4>Shipping Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-first-name">First Name</label>
+                <input type="text" id="shipping-first-name" name="shipping-first-name" value="Theodor" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-last-name">Last Name</label>
+                <input type="text" id="shipping-last-name" name="shipping-last-name" value="Theodor" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-email">Email Address</label>
+                <input type="email" id="shipping-email" name="shipping-email" value="theodor.adorno@example.com" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-phone">Phone Number</label>
+                <input type="tel" id="shipping-phone" name="shipping-phone" value="1234567890" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="shipping-address-1">Address Line 1</label>
+              <input type="text" id="shipping-address-1" name="shipping-address-1" value="123 Main Street" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label for="shipping-address-2">Address Line 2</label>
+              <input type="text" id="shipping-address-2" name="shipping-address-2" class="form-control" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-city">City</label>
+                <input type="text" id="shipping-city" name="shipping-city" value="San Jose" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-state">State</label>
+                <input type="text" id="shipping-state" name="shipping-state" value="CA" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-postal-code">Postal Code</label>
+                <input type="text" id="shipping-postal-code" name="shipping-postal-code" value="95131" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-country">Country</label>
+                <input type="text" id="shipping-country" name="shipping-country" value="US" class="form-control" required />
+              </div>
+            </div>
+          </div>
+
+          <!-- Express Payment Methods Section -->
+          <div class="express-payment-section">
+            <h4>Express Payment Methods</h4>
+            <div class="express-buttons-container">
+              <!-- PayPal Button -->
+              <div class="express-button-wrapper" id="paypal-button-container"></div>
+              
+              <!-- Pay Later Button -->
+              <div class="express-button-wrapper" id="paylater-button-container"></div>
+              
+              <!-- Venmo Button -->
+              <div class="express-button-wrapper" id="venmo-button-container"></div>
+              
+              <!-- Google Pay Button -->
+              <div class="express-button-wrapper" id="googlepay-button-container" style="display: none;"></div>
+              
+              <!-- Apple Pay Button -->
+              <div class="express-button-wrapper" id="applepay-button-container" style="display: none;"></div>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="payment-divider">
+            <span>OR PAY WITH CARD</span>
+          </div>
+
+          <!-- Card Payment Section -->
+          <div class="card-payment-section">
+            <h4>Credit or Debit Card</h4>
+            
+            <!-- Card Fields -->
+            <div class="checkout-section">
+              <div class="form-group">
+                <label for="card-number">Card Number</label>
+                <div id="card-number" class="card-field"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="expiration-date">Expiration Date</label>
+                  <div id="expiration-date" class="card-field"></div>
+                </div>
+                <div class="form-group">
+                  <label for="cvv">CVV</label>
+                  <div id="cvv" class="card-field"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="card-name">Name on Card</label>
+                <div id="card-name" class="card-field"></div>
+              </div>
+            </div>
+
+            <!-- Billing Address -->
+            <div class="checkout-section">
+              <h4>Billing Address</h4>
+              <div class="checkbox-control">
+                <input type="checkbox" id="same-as-shipping" checked>
+                <label for="same-as-shipping">Same as shipping address</label>
+              </div>
+              
+              <div id="billing-address-fields" style="display: none;">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing-first-name">First Name</label>
+                    <input type="text" id="billing-first-name" name="billing-first-name" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="billing-last-name">Last Name</label>
+                    <input type="text" id="billing-last-name" name="billing-last-name" class="form-control" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="billing-address-1">Address Line 1</label>
+                  <input type="text" id="billing-address-1" name="billing-address-1" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="billing-address-2">Address Line 2</label>
+                  <input type="text" id="billing-address-2" name="billing-address-2" class="form-control" />
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing-city">City</label>
+                    <input type="text" id="billing-city" name="billing-city" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="billing-state">State</label>
+                    <input type="text" id="billing-state" name="billing-state" class="form-control" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="billing-postal-code">Postal Code</label>
+                    <input type="text" id="billing-postal-code" name="billing-postal-code" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="billing-country">Country</label>
+                    <input type="text" id="billing-country" name="billing-country" class="form-control" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vault Checkbox -->
+            <div class="checkout-section">
+              <div class="checkbox-control">
+                <input type="checkbox" id="vault-card">
+                <label for="vault-card">Save this card for future purchases</label>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="button" id="card-payment-button" class="btn btn-primary">
+              Pay with Card
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Container -->
+    <div id="result-container" style="display: none;"></div>
+
+    <!-- PayPal SDK -->
+    <script
+      src="https://www.paypal.com/sdk/js?client-id=<%= process.env.CLIENT_ID %>&components=buttons,card-fields,messages,googlepay,applepay&enable-funding=venmo,paylater&buyer-country=US"
+      data-partner-attribution-id="<%= process.env.BN_CODE || '' %>"
+      data-client-token="">
+    </script>
+
+    <script>
+      // Fetch and set client token for card fields
+      fetch('/api/generate-client-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.clientToken) {
+            const script = document.querySelector('script[src*="paypal.com/sdk/js"]');
+            if (script) {
+              script.setAttribute('data-client-token', data.clientToken);
+            }
+          }
+        })
+        .catch(error => {
+          console.warn('⚠️ Failed to fetch client token:', error);
+        });
+
+      // Fetch user ID token for Venmo vaulting
+      fetch('/api/generate-user-id-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.userIdToken) {
+            const script = document.querySelector('script[src*="paypal.com/sdk/js"]');
+            if (script) {
+              script.setAttribute('data-user-id-token', data.userIdToken);
+            }
+            console.log('✅ User ID token added to PayPal SDK for Venmo vaulting');
+          }
+        })
+        .catch(error => {
+          console.warn('⚠️ Failed to fetch user ID token for Venmo vaulting:', error);
+        });
+    </script>
+    
+    <script src="/checkout-express.js"></script>
+</body>
+</html>
