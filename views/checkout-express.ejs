@@ -20,13 +20,19 @@
         font-size: 18px;
       }
       
-      .express-buttons-container {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+      .express-button-wrapper {
+        min-height: 45px;
+        margin-bottom: 12px;
       }
       
-      .express-button-wrapper {
+      .wallet-buttons-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      
+      .wallet-button {
+        flex: 1;
         min-height: 45px;
       }
       
@@ -184,15 +190,14 @@
           <!-- Express Payment Methods Section -->
           <div class="express-payment-section">
             <h4>Express Payment Methods</h4>
-            <div class="express-buttons-container">
-              <!-- PayPal Button Stack (includes PayPal, Pay Later, Venmo in horizontal layout) -->
-              <div class="express-button-wrapper" id="express-paypal-stack"></div>
-              
-              <!-- Google Pay Button -->
-              <div class="express-button-wrapper" id="googlepay-button-container" style="display: none;"></div>
-              
-              <!-- Apple Pay Button -->
-              <div class="express-button-wrapper" id="applepay-button-container" style="display: none;"></div>
+            
+            <!-- PayPal Button Stack Row (PayPal, Pay Later, Venmo) -->
+            <div class="express-button-wrapper" id="express-paypal-stack"></div>
+            
+            <!-- Apple Pay & Google Pay Row -->
+            <div class="wallet-buttons-row" style="display: none;" id="wallet-buttons-row">
+              <div class="wallet-button" id="applepay-button-container" style="display: none;"></div>
+              <div class="wallet-button" id="googlepay-button-container" style="display: none;"></div>
             </div>
           </div>
 

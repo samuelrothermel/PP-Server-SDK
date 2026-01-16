@@ -221,6 +221,7 @@ if (
       .render('#applepay-button-container')
       .then(() => {
         Utils.showElement('applepay-button-container');
+        Utils.showElement('wallet-buttons-row');
       })
       .catch(err => {
         console.warn('Apple Pay button render failed:', err);
@@ -272,6 +273,7 @@ if (window.paypal) {
       .render('#googlepay-button-container')
       .then(() => {
         Utils.showElement('googlepay-button-container');
+        Utils.showElement('wallet-buttons-row');
       })
       .catch(err => {
         console.warn('Google Pay button render failed:', err);
