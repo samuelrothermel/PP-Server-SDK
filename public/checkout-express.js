@@ -143,6 +143,7 @@ if (window.paypal) {
       color: 'gold',
       shape: 'rect',
       height: 45,
+      tagline: false,
     },
     createOrder: async () => {
       return await createOrder();
@@ -172,202 +173,109 @@ if (window.paypal) {
   }
 }
 
-// Google Pay Setup
-async function setupGooglePay() {
-  if (!window.paypal || !window.paypal.Googlepay) {
-    console.warn('Google Pay not available');
-    return;
-  }
+// Apple Pay Button (separate)
+if (
+  window.paypal &&
+  window.ApplePaySession &&
+  window.ApplePaySession.canMakePayments()
+) {
+  const applepayButton = window.paypal.Buttons({
+    fundingSource: window.paypal.FUNDING.APPLEPAY,
+    style: {
+      layout: 'horizontal',
+      color: 'black',
+      shape: 'rect',
+      height: 45,
+    },
+    createOrder: async () => {
+      return await createOrder();
+    },
+    onApprove: async data => {
+      try {
+        const response = await fetch(`/api/orders/${data.orderID}/capture`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const orderData = await response.json();
+        Utils.showResult(
+          'Payment completed successfully with Apple Pay!',
+          true
+        );
+        console.log('Apple Pay capture result:', orderData);
+      } catch (error) {
+        Utils.showResult('Apple Pay payment failed. Please try again.', false);
+        console.error('Apple Pay capture error:', error);
+      }
+    },
+    onError: err => {
+      console.error('Apple Pay button error:', err);
+      Utils.showResult(
+        'An error occurred with Apple Pay. Please try again.',
+        false
+      );
+    },
+  });
 
-  try {
-    const googlepay = window.paypal.Googlepay();
-    const config = {
-      countryCode: 'US',
-      merchantInfo: {
-        merchantName: 'Example Merchant',
-      },
-      transactionInfo: {
-        currencyCode: 'USD',
-        totalPriceStatus: 'FINAL',
-        totalPrice: Utils.getCurrentTotal(),
-      },
-      buttonOptions: {
-        buttonColor: 'default',
-        buttonType: 'checkout',
-        buttonSizeMode: 'fill',
-      },
-    };
-
-    await googlepay.config(config);
-
-    const button = googlepay.render('#googlepay-button-container');
-
-    if (button) {
-      Utils.showElement('googlepay-button-container');
-
-      button.addEventListener('click', async () => {
-        try {
-          const paymentData = await googlepay.confirmOrder();
-
-          const orderData = {
-            intent: 'CAPTURE',
-            payment_source: {
-              google_pay: {
-                payment_data: paymentData,
-              },
-            },
-            purchase_units: [
-              {
-                amount: {
-                  currency_code: 'USD',
-                  value: Utils.getCurrentTotal(),
-                },
-                shipping: ShippingInfo.getShippingData(),
-              },
-            ],
-          };
-
-          const response = await fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData),
-          });
-
-          const order = await response.json();
-
-          const captureResponse = await fetch(
-            `/api/orders/${order.id}/capture`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
-
-          const captureData = await captureResponse.json();
-          Utils.showResult(
-            'Payment completed successfully with Google Pay!',
-            true
-          );
-          console.log('Google Pay capture result:', captureData);
-        } catch (error) {
-          console.error('Google Pay error:', error);
-          Utils.showResult(
-            'Google Pay payment failed. Please try again.',
-            false
-          );
-        }
+  if (applepayButton.isEligible()) {
+    applepayButton
+      .render('#applepay-button-container')
+      .then(() => {
+        Utils.showElement('applepay-button-container');
+      })
+      .catch(err => {
+        console.warn('Apple Pay button render failed:', err);
       });
-    }
-  } catch (error) {
-    console.error('Google Pay setup error:', error);
   }
 }
 
-// Apple Pay Setup
-async function setupApplePay() {
-  if (!window.paypal || !window.paypal.Applepay) {
-    console.warn('Apple Pay not available');
-    return;
-  }
+// Google Pay Button (separate)
+if (window.paypal) {
+  const googlepayButton = window.paypal.Buttons({
+    fundingSource: window.paypal.FUNDING.GOOGLEPAY,
+    style: {
+      layout: 'horizontal',
+      color: 'white',
+      shape: 'rect',
+      height: 45,
+    },
+    createOrder: async () => {
+      return await createOrder();
+    },
+    onApprove: async data => {
+      try {
+        const response = await fetch(`/api/orders/${data.orderID}/capture`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const orderData = await response.json();
+        Utils.showResult(
+          'Payment completed successfully with Google Pay!',
+          true
+        );
+        console.log('Google Pay capture result:', orderData);
+      } catch (error) {
+        Utils.showResult('Google Pay payment failed. Please try again.', false);
+        console.error('Google Pay capture error:', error);
+      }
+    },
+    onError: err => {
+      console.error('Google Pay button error:', err);
+      Utils.showResult(
+        'An error occurred with Google Pay. Please try again.',
+        false
+      );
+    },
+  });
 
-  try {
-    const applepay = window.paypal.Applepay();
-    const config = {
-      countryCode: 'US',
-      currencyCode: 'USD',
-      merchantCapabilities: ['supports3DS'],
-      supportedNetworks: ['visa', 'mastercard', 'amex', 'discover'],
-      requiredBillingContactFields: ['postalAddress'],
-      requiredShippingContactFields: [
-        'name',
-        'postalAddress',
-        'phone',
-        'email',
-      ],
-    };
-
-    await applepay.config(config);
-
-    const button = applepay.render('#applepay-button-container', {
-      buttonColor: 'black',
-      buttonType: 'checkout',
-      buttonRadius: 4,
-    });
-
-    if (button) {
-      Utils.showElement('applepay-button-container');
-
-      button.addEventListener('click', async () => {
-        try {
-          const paymentRequest = {
-            countryCode: 'US',
-            currencyCode: 'USD',
-            total: {
-              label: 'Total',
-              amount: Utils.getCurrentTotal(),
-              type: 'final',
-            },
-            requiredBillingContactFields: ['postalAddress'],
-            requiredShippingContactFields: [
-              'name',
-              'postalAddress',
-              'phone',
-              'email',
-            ],
-          };
-
-          const paymentData = await applepay.confirmOrder(paymentRequest);
-
-          const orderData = {
-            intent: 'CAPTURE',
-            payment_source: {
-              apple_pay: {
-                payment_data: paymentData,
-              },
-            },
-            purchase_units: [
-              {
-                amount: {
-                  currency_code: 'USD',
-                  value: Utils.getCurrentTotal(),
-                },
-              },
-            ],
-          };
-
-          const response = await fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData),
-          });
-
-          const order = await response.json();
-
-          const captureResponse = await fetch(
-            `/api/orders/${order.id}/capture`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
-
-          const captureData = await captureResponse.json();
-          Utils.showResult(
-            'Payment completed successfully with Apple Pay!',
-            true
-          );
-          console.log('Apple Pay capture result:', captureData);
-        } catch (error) {
-          console.error('Apple Pay error:', error);
-          Utils.showResult(
-            'Apple Pay payment failed. Please try again.',
-            false
-          );
-        }
+  if (googlepayButton.isEligible()) {
+    googlepayButton
+      .render('#googlepay-button-container')
+      .then(() => {
+        Utils.showElement('googlepay-button-container');
+      })
+      .catch(err => {
+        console.warn('Google Pay button render failed:', err);
       });
-    }
-  } catch (error) {
-    console.error('Apple Pay setup error:', error);
   }
 }
 
@@ -498,8 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-  // Initialize payment methods
-  setupGooglePay();
-  setupApplePay();
+  // Initialize card fields
   setupCardFields();
 });
