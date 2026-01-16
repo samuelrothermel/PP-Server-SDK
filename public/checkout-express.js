@@ -217,15 +217,19 @@ if (
   });
 
   if (applepayButton.isEligible()) {
-    applepayButton
-      .render('#applepay-button-container')
-      .then(() => {
-        Utils.showElement('applepay-button-container');
-        Utils.showElement('wallet-buttons-row');
-      })
-      .catch(err => {
-        console.warn('Apple Pay button render failed:', err);
-      });
+    const appleContainer = document.getElementById('applepay-button-container');
+    if (appleContainer) {
+      appleContainer.style.display = 'block';
+      applepayButton
+        .render('#applepay-button-container')
+        .then(() => {
+          Utils.showElement('wallet-buttons-row');
+        })
+        .catch(err => {
+          console.warn('Apple Pay button render failed:', err);
+          appleContainer.style.display = 'none';
+        });
+    }
   }
 }
 
@@ -269,15 +273,21 @@ if (window.paypal) {
   });
 
   if (googlepayButton.isEligible()) {
-    googlepayButton
-      .render('#googlepay-button-container')
-      .then(() => {
-        Utils.showElement('googlepay-button-container');
-        Utils.showElement('wallet-buttons-row');
-      })
-      .catch(err => {
-        console.warn('Google Pay button render failed:', err);
-      });
+    const googleContainer = document.getElementById(
+      'googlepay-button-container'
+    );
+    if (googleContainer) {
+      googleContainer.style.display = 'block';
+      googlepayButton
+        .render('#googlepay-button-container')
+        .then(() => {
+          Utils.showElement('wallet-buttons-row');
+        })
+        .catch(err => {
+          console.warn('Google Pay button render failed:', err);
+          googleContainer.style.display = 'none';
+        });
+    }
   }
 }
 

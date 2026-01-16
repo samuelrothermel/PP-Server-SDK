@@ -34,6 +34,7 @@
       .wallet-button {
         flex: 1;
         min-height: 45px;
+        display: none; /* Hide by default, show in JS when button is ready */
       }
       
       .payment-divider {
@@ -196,8 +197,8 @@
             
             <!-- Apple Pay & Google Pay Row -->
             <div class="wallet-buttons-row" style="display: none;" id="wallet-buttons-row">
-              <div class="wallet-button" id="applepay-button-container" style="display: none;"></div>
-              <div class="wallet-button" id="googlepay-button-container" style="display: none;"></div>
+              <div class="wallet-button" id="applepay-button-container"></div>
+              <div class="wallet-button" id="googlepay-button-container"></div>
             </div>
           </div>
 
