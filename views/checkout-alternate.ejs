@@ -14,14 +14,6 @@
       
       <!-- Payment Methods Section - Full Width at Top -->
       <div class="payment-methods-top-section" style="margin-bottom: 30px; border: 2px solid #ddd; border-radius: 8px; padding: 20px; background: #f9f9f9;">
-        <h3 style="margin-top: 0; margin-bottom: 15px;">Select Payment Method</h3>
-        
-        <!-- Vault Toggle -->
-        <div class="checkbox-control" style="margin-bottom: 15px;">
-          <input type="checkbox" id="save-payment-method">
-          <label for="save-payment-method">Save my payment method for future purchases</label>
-        </div>
-        
         <!-- Vaulting Limitations Notice -->
         <div id="vaulting-notice" style="display: none; background-color: #e8f4fd; border: 1px solid #b8daff; border-radius: 4px; padding: 12px; margin-bottom: 15px; font-size: 0.9em; color: #004085;">
           <strong>📝 Vaulting Limitations:</strong><br>
@@ -40,77 +32,6 @@
           <div id="applepay-button-container" class="payment-button-slot" style="display: none;"></div>
           <div id="googlepay-button-container" class="payment-button-slot" style="display: none;"></div>
         </div>
-        
-        <!-- Card Payment Section -->
-        <div id="card-payment-section" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
-          <h4>Credit/Debit Card</h4>
-          <div class="checkbox-group">
-            <div class="checkbox-option">
-              <input type="checkbox" id="billing-info-toggle" />
-              <label for="billing-info-toggle">Billing is different from Shipping</label>
-            </div>
-          </div>
-          
-          <div id="billing-info" class="billing-info" style="display: none;">
-            <h5>Billing Information</h5>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="billing-first-name">First Name</label>
-                <input type="text" id="billing-first-name" name="billing-first-name" value="Jane" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label for="billing-last-name">Last Name</label>
-                <input type="text" id="billing-last-name" name="billing-last-name" value="Doe" class="form-control" required />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="billing-email">Email Address</label>
-                <input type="email" id="billing-email" name="billing-email" value="jane.doe@example.com" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label for="billing-phone">Phone Number</label>
-                <input type="text" id="billing-phone" name="billing-phone" value="1234567890" class="form-control" required />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="billing-address-line1">Street Address</label>
-              <input type="text" id="billing-address-line1" name="billing-address-line1" value="123 Main St" class="form-control" required />
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="billing-admin-area2">City</label>
-                <input type="text" id="billing-admin-area2" name="billing-admin-area2" value="Springfield" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label for="billing-admin-area1">State</label>
-                <input type="text" id="billing-admin-area1" name="billing-admin-area1" value="IL" class="form-control" required />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="billing-postal-code">Zip Code</label>
-                <input type="text" id="billing-postal-code" name="billing-postal-code" value="62701" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label for="billing-country-code">Country Code</label>
-                <input type="text" id="billing-country-code" name="billing-country-code" value="US" class="form-control" required />
-              </div>
-            </div>
-          </div>
-          
-          <div class="card-fields">
-            <div id="card-name-field-container"></div>
-            <div id="card-number-field-container"></div>
-            <div id="card-expiry-field-container"></div>
-            <div id="card-cvv-field-container"></div>
-          </div>
-        </div>
-        
-        <!-- Submit button for saved payment methods and new credit cards -->
-        <button id="submit-order-button" type="button" class="submit-button" style="display: none; margin-top: 15px; width: 100%;">
-          Submit Order
-        </button>
       </div>
       
       <div class="checkout-layout">
@@ -145,11 +66,12 @@
             </div>
           </div>
           
-          <!-- Returning User Controls -->
+          <!-- Developer Options -->
           <div class="controls-section">
+            <h4>Developer Options</h4>
             <div class="checkbox-control">
               <input type="checkbox" id="toggle-customer-id">
-              <label for="toggle-customer-id">Returning User?</label>
+              <label for="toggle-customer-id">Returning User</label>
             </div>
             <form id="customer-id-form" style="display: none;">
               <label for="customer-id">Enter PayPal Customer ID:</label>
@@ -159,11 +81,18 @@
             
             <!-- Container for saved payment methods -->
             <div id="saved-payment-methods-container" style="display: none;"></div>
+            
+            <!-- Vault Toggle -->
+            <div class="checkbox-control" style="margin-top: 15px;">
+              <input type="checkbox" id="save-payment-method">
+              <label for="save-payment-method">Save Payment Method</label>
+            </div>
           </div>
         </div>
         
         <!-- Right Side: Shipping Info -->
         <div class="checkout-right">
+          <h3 style="text-align: center; margin-bottom: 20px; color: #666; font-weight: 400;">or pay with card</h3>
           <!-- Shipping Information -->
           <div class="checkout-section">
             <h4>Shipping Information</h4>
@@ -226,6 +155,77 @@
                 <label for="expedited-shipping">Expedited Shipping ($10)</label>
               </div>
             </div>
+          </div>
+          
+          <!-- Card Payment Section -->
+          <div class="checkout-section">
+            <h4>Card Information</h4>
+            <div class="checkbox-group">
+              <div class="checkbox-option">
+                <input type="checkbox" id="billing-info-toggle" />
+                <label for="billing-info-toggle">Billing is different from Shipping</label>
+              </div>
+            </div>
+            
+            <div id="billing-info" class="billing-info" style="display: none; margin-top: 15px;">
+              <h5>Billing Information</h5>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="billing-first-name">First Name</label>
+                  <input type="text" id="billing-first-name" name="billing-first-name" value="Jane" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label for="billing-last-name">Last Name</label>
+                  <input type="text" id="billing-last-name" name="billing-last-name" value="Doe" class="form-control" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="billing-email">Email Address</label>
+                  <input type="email" id="billing-email" name="billing-email" value="jane.doe@example.com" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label for="billing-phone">Phone Number</label>
+                  <input type="text" id="billing-phone" name="billing-phone" value="1234567890" class="form-control" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="billing-address-line1">Street Address</label>
+                <input type="text" id="billing-address-line1" name="billing-address-line1" value="123 Main St" class="form-control" required />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="billing-admin-area2">City</label>
+                  <input type="text" id="billing-admin-area2" name="billing-admin-area2" value="Springfield" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label for="billing-admin-area1">State</label>
+                  <input type="text" id="billing-admin-area1" name="billing-admin-area1" value="IL" class="form-control" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="billing-postal-code">Zip Code</label>
+                  <input type="text" id="billing-postal-code" name="billing-postal-code" value="62701" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label for="billing-country-code">Country Code</label>
+                  <input type="text" id="billing-country-code" name="billing-country-code" value="US" class="form-control" required />
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-fields" style="margin-top: 15px;">
+              <div id="card-name-field-container"></div>
+              <div id="card-number-field-container"></div>
+              <div id="card-expiry-field-container"></div>
+              <div id="card-cvv-field-container"></div>
+            </div>
+            
+            <!-- Submit button for card payments -->
+            <button id="submit-order-button" type="button" class="submit-button" style="margin-top: 15px; width: 100%;">
+              Pay with Card
+            </button>
           </div>
         </div>
       </div>
