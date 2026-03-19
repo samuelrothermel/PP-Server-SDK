@@ -15,7 +15,9 @@
  * - Subscriptions API v1
  */
 
-import {
+import paypalSdk from '@paypal/paypal-server-sdk';
+
+const {
   Client,
   Environment,
   LogLevel,
@@ -24,7 +26,7 @@ import {
   VaultController,
   TransactionSearchController,
   SubscriptionsController,
-} from '@paypal/paypal-server-sdk';
+} = paypalSdk;
 
 const { CLIENT_ID, APP_SECRET, NODE_ENV } = process.env;
 
@@ -56,7 +58,7 @@ export const ordersController = new OrdersController(client);
 export const paymentsController = new PaymentsController(client);
 export const vaultController = new VaultController(client);
 export const transactionSearchController = new TransactionSearchController(
-  client
+  client,
 );
 export const subscriptionsController = new SubscriptionsController(client);
 
