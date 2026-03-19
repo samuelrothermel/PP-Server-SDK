@@ -52,12 +52,6 @@ const VenmoButton = {
           height: 50,
         },
 
-        onShippingChange: (data, actions) => {
-          console.log('Shipping changed:', data);
-          Utils.showMessage('Shipping options updated', 'info');
-          return true;
-        },
-
         createOrder: (data, actions) => {
           const amount = document.getElementById('payment-amount').value;
           const customerId = `test-${Date.now()}`;
@@ -74,50 +68,6 @@ const VenmoButton = {
                   currency_code: 'USD',
                   value: amount,
                 },
-                shipping: {
-                  options: [
-                    {
-                      id: 'SHIP_1DAY',
-                      label: 'One day Shipping',
-                      type: 'SHIPPING',
-                      selected: true,
-                      amount: {
-                        value: '0.00',
-                        currency_code: 'USD',
-                      },
-                    },
-                    {
-                      id: 'SHIP_EXPRESS',
-                      label: 'Express Shipping',
-                      type: 'SHIPPING',
-                      selected: false,
-                      amount: {
-                        value: '5.00',
-                        currency_code: 'USD',
-                      },
-                    },
-                    {
-                      id: 'SHIP_PICKUP_1',
-                      label: 'Pick up in Store',
-                      type: 'PICKUP',
-                      selected: false,
-                      amount: {
-                        value: '0.00',
-                        currency_code: 'USD',
-                      },
-                    },
-                    {
-                      id: 'SHIP_PICKUP_2',
-                      label: 'Pick up in Store 2',
-                      type: 'PICKUP',
-                      selected: false,
-                      amount: {
-                        value: '0.00',
-                        currency_code: 'USD',
-                      },
-                    },
-                  ],
-                },
               },
             ],
             payment_source: {
@@ -130,11 +80,6 @@ const VenmoButton = {
                 experience_context: {
                   return_url: window.location.origin + '/venmo',
                   cancel_url: window.location.origin + '/venmo',
-                  order_update_callback_config: {
-                    callback_events: ['SHIPPING_ADDRESS', 'SHIPPING_OPTIONS'],
-                    callback_url:
-                      'https://p4vvvahfm0.execute-api.us-east-2.amazonaws.com/default/ssc',
-                  },
                 },
               },
             },
