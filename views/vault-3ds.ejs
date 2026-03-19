@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Secure Vault Testing - PayPal Demo</title>
+    <link rel="stylesheet" href="/styles/custom.css">
+    <link rel="stylesheet" href="/styles/checkout.css">
+    <style>
+        .vault-3ds-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .vault-3ds-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #0070ba;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-link {
+            padding: 8px 16px;
+            background: #fff;
+            border: 1px solid #0070ba;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #0070ba;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background: #0070ba;
+            color: #fff;
+        }
+        
+        .section-card {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #0070ba;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .info-box {
+            background: #f7f9fa;
+            border-left: 4px solid #0070ba;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box.warning {
+            border-left-color: #ff9800;
+            background: #fff8e1;
+        }
+        
+        .info-box.success {
+            border-left-color: #4caf50;
+            background: #f1f8e9;
+        }
+        
+        .test-card-info {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .test-card-info strong {
+            color: #0070ba;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #0070ba;
+            color: #fff;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #005a94;
+        }
+        
+        .btn-secondary {
+            background: #fff;
+            color: #0070ba;
+            border: 1px solid #0070ba;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #f7f9fa;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status-message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .status-message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .status-message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .status-message.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .status-message.show {
+            display: block;
+        }
+        
+        .result-container {
+            background: #f7f9fa;
+            border: 1px solid #e1e8ed;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            color: #0070ba;
+            margin-bottom: 10px;
+        }
+        
+        .result-json {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(0,0,0,.1);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: #f7f9fa;
+            border: 2px solid #e1e8ed;
+            position: relative;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #0070ba;
+            z-index: 1;
+        }
+        
+        .step.active {
+            background: #e3f2fd;
+            border-color: #0070ba;
+        }
+        
+        .step.completed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            border-radius: 50%;
+            background: #0070ba;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+        
+        .step.completed .step-number {
+            background: #4caf50;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .card-fields-container {
+            margin: 20px 0;
+        }
+        
+        #card-number-field,
+        #card-cvv-field,
+        #card-expiry-field {
+            height: 50px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="vault-3ds-container">
+        <div class="vault-3ds-header">
+            <h1>🔐 3D Secure Vault Testing</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/checkout" class="nav-link">Standard Checkout</a>
+                <a href="/vault" class="nav-link">Vault Management</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>🔧 API-Driven 3D Secure Configuration</h3>
+            <p>
+                This page demonstrates the <strong>API approach</strong> for 3D Secure authentication where 
+                all 3DS parameters are configured and passed <strong>server-side via PayPal API calls</strong>, 
+                not through client-side SDK configuration.
+            </p>
+            <p>
+                <strong>Key API Parameters:</strong>
+            </p>
+            <ul style="margin-left: 20px; line-height: 1.8;">
+                <li><code>verification_method: SCA_ALWAYS</code> - Forces 3DS challenge (passed in setup token API call)</li>
+                <li><code>stored_credential</code> object - Passed when using vaulted cards for subsequent transactions</li>
+                <li><code>payment_initiator: MERCHANT</code> - Indicates merchant-initiated transaction</li>
+                <li><code>payment_type: UNSCHEDULED</code> - For unscheduled recurring payments</li>
+                <li><code>usage: SUBSEQUENT</code> - Marks this as subsequent use of stored card</li>
+            </ul>
+            <p>
+                <strong>Testing Flow:</strong> Create Setup Token (API) → Complete 3DS Challenge (SDK) → Create Payment Token (API) → Use for Order Capture (API with stored_credential)
+            </p>
+            <p style="margin-top: 10px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107;">
+                <strong>Note:</strong> While we use the PayPal Card Fields SDK for card input convenience, 
+                all 3DS configuration and authentication parameters are controlled via server-side API calls, 
+                mimicking your customers' implementation pattern.
+            </p>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step" id="step-1">
+                <div class="step-number">1</div>
+                <div class="step-title">Create Setup Token</div>
+            </div>
+            <div class="step" id="step-2">
+                <div class="step-number">2</div>
+                <div class="step-title">3DS Authentication</div>
+            </div>
+            <div class="step" id="step-3">
+                <div class="step-number">3</div>
+                <div class="step-title">Create Payment Token</div>
+            </div>
+            <div class="step" id="step-4">
+                <div class="step-number">4</div>
+                <div class="step-title">Capture Order</div>
+            </div>
+        </div>
+
+        <div id="status-message" class="status-message"></div>
+
+        <!-- Step 1: Create Setup Token -->
+        <div class="section-card" id="section-setup-token">
+            <div class="section-title">
+                Step 1: Create 3D Secure Setup Token (via API)
+            </div>
+            <div class="section-description">
+                Create a setup token with <code>verification_method</code> parameter passed via <strong>server-side API call</strong>.
+                This controls 3DS authentication behavior.
+            </div>
+            
+            <div class="info-box" style="background: #e8f4f8; border-left-color: #00457c;">
+                <strong>📡 API Configuration Options (verification_method):</strong><br><br>
+                <strong>SCA_ALWAYS</strong> - Always perform 3D Secure authentication (recommended for testing)<br>
+                <strong>SCA_WHEN_REQUIRED</strong> - Perform 3DS only when required by issuing bank<br>
+                <br>
+                <em>These values are passed in the <code>POST /v3/vault/setup-tokens</code> API call payload.</em>
+            </div>
+            
+            <div class="test-card-info">
+                <strong>Test Card Numbers for 3DS:</strong><br>
+                Success (frictionless): <strong>4005519200000004</strong><br>
+                Success (challenge): <strong>4868719460707704</strong><br>
+                Failure: <strong>4000000000001091</strong><br>
+                <br>
+                CVV: <strong>123</strong> | Expiry: Any future date (e.g., <strong>12/2027</strong>)
+            </div>
+
+            <div class="button-group">
+                <button id="btn-create-setup-token" class="btn btn-primary">
+                    Create Setup Token (verification_method: SCA_ALWAYS)
+                </button>
+            </div>
+
+            <div id="setup-token-result" class="result-container" style="display: none;">
+                <div class="result-title">API Response - POST /v3/vault/setup-tokens:</div>
+                <pre id="setup-token-json" class="result-json"></pre>
+            </div>
+        </div>
+
+        <!-- Step 2: 3DS Card Authentication -->
+        <div class="section-card" id="section-card-auth" style="display: none;">
+            <div class="section-title">
+                Step 2: Enter Card Details & Complete 3DS Challenge
+            </div>
+            <div class="section-description">
+                Enter the test card details below. The 3D Secure challenge will appear in a popup or inline frame.
+            </div>
+
+            <div class="info-box warning">
+                <strong>Important:</strong> Make sure to complete the 3D Secure authentication when prompted. 
+                For test cards in sandbox, you may need to enter a test code or click "Submit" in the authentication window.
+            </div>
+
+            <!-- PayPal Card Fields will be rendered here -->
+            <div class="card-fields-container">
+                <div class="form-group">
+                    <label class="form-label">Card Number</label>
+                    <div id="card-number-field"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Expiration Date (MM/YY)</label>
+                    <div id="card-expiry-field"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">CVV</label>
+                    <div id="card-cvv-field"></div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="btn-submit-card" class="btn btn-primary" disabled>
+                    Submit Card & Authenticate
+                </button>
+            </div>
+
+            <div id="card-auth-result" class="result-container" style="display: none;">
+                <div class="result-title">3DS Authentication Result:</div>
+                <pre id="card-auth-json" class="result-json"></pre>
+            </div>
+        </div>
+
+        <!-- Step 3: Create Payment Token -->
+        <div class="section-card" id="section-payment-token" style="display: none;">
+            <div class="section-title">
+                Step 3: Create Payment Token from Setup Token (via API)
+            </div>
+            <div class="section-description">
+                After successful 3D Secure authentication, create a payment token via <strong>server-side API call</strong> 
+                that can be used for future transactions. The payment token will include the 3DS authentication results.
+            </div>
+            
+            <div class="info-box" style="background: #e8f4f8; border-left-color: #00457c;">
+                <strong>📡 API Call:</strong> <code>POST /v3/vault/payment-tokens</code><br>
+                <strong>Payload:</strong> References the setup token ID with 3DS authentication already completed<br>
+                <strong>Response:</strong> Returns vault_id (payment token) that stores the 3DS-authenticated card
+            </div>
+
+            <div class="info-box success">
+                <strong>Setup Token ID:</strong> <span id="display-setup-token-id"></span>
+            </div>
+
+            <div class="button-group">
+                <button id="btn-create-payment-token" class="btn btn-primary">
+                    Create Payment Token
+                </button>
+            </div>
+
+            <div id="payment-token-result" class="result-container" style="display: none;">
+                <div class="result-title">API Response - POST /v3/vault/payment-tokens:</div>
+                <pre id="payment-token-json" class="result-json"></pre>
+            </div>
+        </div>
+
+        <!-- Step 4: Use Payment Token for Order -->
+        <div class="section-card" id="section-order-capture" style="display: none;">
+            <div class="section-title">
+                Step 4: Create & Capture Order with Vaulted Payment Token (via API)
+            </div>
+            <div class="section-description">
+                Use the vaulted payment token to create and capture an order. The <code>stored_credential</code> object 
+                is passed via <strong>server-side API</strong> to indicate this is a subsequent merchant-initiated transaction 
+                using a previously authenticated card.
+            </div>
+            
+            <div class="info-box" style="background: #e8f4f8; border-left-color: #00457c;">
+                <strong>📡 API Parameters Passed (server-side):</strong><br><br>
+                <code>vault_id</code> - The payment token ID from step 3<br>
+                <code>stored_credential.payment_initiator</code> - "MERCHANT"<br>
+                <code>stored_credential.payment_type</code> - "UNSCHEDULED"<br>
+                <code>stored_credential.usage</code> - "SUBSEQUENT"<br>
+                <br>
+                <em>These parameters tell PayPal this is a subsequent use of a 3DS-authenticated card, 
+                without requiring a new 3DS challenge.</em>
+            </div>
+
+            <div class="info-box success">
+                <strong>Payment Token ID:</strong> <span id="display-payment-token-id"></span><br>
+                <strong>Card Last 4 Digits:</strong> <span id="display-card-last4"></span><br>
+                <strong>Card Brand:</strong> <span id="display-card-brand"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Order Amount (USD)</label>
+                <input type="number" id="order-amount" class="form-input" value="10.00" min="1" step="0.01">
+            </div>
+
+            <div class="button-group">
+                <button id="btn-create-order" class="btn btn-primary">
+                    Create Order
+                </button>
+                <button id="btn-capture-order" class="btn btn-secondary" disabled>
+                    Capture Order
+                </button>
+            </div>
+
+            <div id="order-result" class="result-container" style="display: none;">
+                <div class="result-title">API Response - POST /v2/checkout/orders & Capture:</div>
+                <pre id="order-json" class="result-json"></pre>
+            </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div class="section-card">
+            <h3>📋 API Parameters Summary</h3>
+            <div class="info-box" style="background: #f8f9fa;">
+                <strong>3DS Configuration via API (This Implementation):</strong>
+                <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+                    <tr style="background: #e9ecef;">
+                        <th style="padding: 8px; text-align: left; border: 1px solid #dee2e6;">Step</th>
+                        <th style="padding: 8px; text-align: left; border: 1px solid #dee2e6;">API Endpoint</th>
+                        <th style="padding: 8px; text-align: left; border: 1px solid #dee2e6;">Key Parameters (Server-Side)</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;">1. Setup Token</td>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;"><code>POST /v3/vault/setup-tokens</code></td>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;"><code>verification_method: "SCA_ALWAYS"</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;">2. 3DS Auth</td>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;">Card Fields SDK</td>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;">Uses setup token from step 1</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;">3. Payment Token</td>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;"><code>POST /v3/vault/payment-tokens</code></td>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;"><code>token.id: setup_token_id</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;">4. Order Capture</td>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;"><code>POST /v2/checkout/orders</code></td>
+                        <td style="padding: 8px; border: 1px solid #dee2e6;">
+                            <code>card.vault_id: payment_token_id</code><br>
+                            <code>stored_credential: {</code><br>
+                            &nbsp;&nbsp;<code>payment_initiator: "MERCHANT",</code><br>
+                            &nbsp;&nbsp;<code>payment_type: "UNSCHEDULED",</code><br>
+                            &nbsp;&nbsp;<code>usage: "SUBSEQUENT"</code><br>
+                            <code>}</code>
+                        </td>
+                    </tr>
+                </table>
+                <p style="margin-top: 15px; padding: 10px; background: #fff; border-left: 4px solid #28a745;">
+                    <strong>✅ Result:</strong> All 3DS configuration is handled via server-side API calls. 
+                    The client SDK is only used for card input UI convenience. Check your server console logs 
+                    to see the detailed API payloads and responses.
+                </p>
+            </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div class="section-card">
+            <button id="btn-reset" class="btn btn-secondary" style="width: 100%;">
+                🔄 Reset and Start Over
+            </button>
+        </div>
+    </div>
+
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=<%= clientId %>&components=card-fields&currency=USD"></script>
+    
+    <!-- Application Script -->
+    <script src="/vault-3ds.js"></script>
+</body>
+</html>

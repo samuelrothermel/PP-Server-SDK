@@ -26,6 +26,10 @@ export const createCheckoutOrder = async orderData => {
     payment_source_type,
     target_customer_id,
     savePaymentMethod,
+    intent: requestIntent,
+    payment_source: clientPaymentSource,
+    purchase_units: clientPurchaseUnits,
+    payer: clientPayer,
   } = orderData;
   const purchaseAmount = totalAmount || '100.00'; // Use provided amount or default to 100.00 (minimum $30 for Pay Later)
   const accessToken = await generateAccessToken();
@@ -272,25 +276,36 @@ export const createCheckoutOrder = async orderData => {
   // Note: Pay Later uses 'paypal' as paymentSource - no special handling needed
 
   // Build purchase unit with shipping details if provided
-  const purchaseUnit = {
-    amount: {
-      currency_code: 'USD',
-      value: purchaseAmount,
-    },
-  };
+  // Use client purchase_units if provided, otherwise build from parameters
+  let purchase_units;
 
-  // Add shipping details to purchase unit if provided
-  if (shippingInfo && Object.keys(shippingDetails).length > 0) {
-    purchaseUnit.shipping = shippingDetails;
+  if (clientPurchaseUnits && Array.isArray(clientPurchaseUnits)) {
+    // Use purchase units from client request
+    purchase_units = clientPurchaseUnits;
+  } else {
+    // Build purchase unit from parameters
+    const purchaseUnit = {
+      amount: {
+        currency_code: 'USD',
+        value: purchaseAmount,
+      },
+    };
+
+    // Add shipping details to purchase unit if provided
+    if (shippingInfo && Object.keys(shippingDetails).length > 0) {
+      purchaseUnit.shipping = shippingDetails;
+    }
+
+    purchase_units = [purchaseUnit];
   }
 
-  // Always use AUTHORIZE intent for all checkout orders
-  const intent = 'AUTHORIZE';
+  // Use intent from request or default to AUTHORIZE for backward compatibility
+  const intent = (requestIntent || 'AUTHORIZE').toUpperCase();
 
   // Build the order payload
   const orderPayload = {
     intent,
-    purchase_units: [purchaseUnit],
+    purchase_units,
   };
 
   // Only include payment_source if it has properties (not empty for Pay Later)
@@ -298,9 +313,14 @@ export const createCheckoutOrder = async orderData => {
     orderPayload.payment_source = payment_source;
   }
 
+  // Include payer if provided from client (for vaulting scenarios)
+  if (clientPayer && typeof clientPayer === 'object') {
+    orderPayload.payer = clientPayer;
+  }
+
   console.log(
     '[SERVER SDK] Creating order with payload:',
-    JSON.stringify(orderPayload, null, 2)
+    JSON.stringify(orderPayload, null, 2),
   );
 
   // Use PayPal Server SDK - Convert to camelCase for SDK
@@ -354,7 +374,44 @@ export const createCheckoutOrder = async orderData => {
               },
             },
           }
-        : orderPayload.payment_source,
+        : orderPayload.payment_source.venmo
+          ? {
+              venmo: {
+                ...(orderPayload.payment_source.venmo.experience_context && {
+                  experienceContext: {
+                    returnUrl:
+                      orderPayload.payment_source.venmo.experience_context
+                        .return_url,
+                    cancelUrl:
+                      orderPayload.payment_source.venmo.experience_context
+                        .cancel_url,
+                    ...(orderPayload.payment_source.venmo.experience_context
+                      .user_action && {
+                      userAction:
+                        orderPayload.payment_source.venmo.experience_context
+                          .user_action,
+                    }),
+                    ...(orderPayload.payment_source.venmo.experience_context
+                      .shipping_preference && {
+                      shippingPreference:
+                        orderPayload.payment_source.venmo.experience_context
+                          .shipping_preference,
+                    }),
+                  },
+                }),
+                ...(orderPayload.payment_source.venmo.attributes && {
+                  attributes: orderPayload.payment_source.venmo.attributes,
+                }),
+              },
+            }
+          : orderPayload.payment_source,
+    }),
+    ...(orderPayload.payer && {
+      payer: {
+        ...(orderPayload.payer.customer_id && {
+          customerId: orderPayload.payer.customer_id,
+        }),
+      },
     }),
   };
 
@@ -381,7 +438,7 @@ export const createCheckoutOrder = async orderData => {
 // create upstream order request (server-side shipping callbacks)
 export const createUpstreamQlOrder = async (
   totalAmount,
-  paymentSource = 'paypal'
+  paymentSource = 'paypal',
 ) => {
   const accessToken = await generateAccessToken();
 
@@ -585,7 +642,7 @@ export const authorizePayment = async orderId => {
 // Create order with Billing Agreement ID
 export async function createOrderWithBillingAgreement(
   billingAgreementId,
-  amount = '10.00'
+  amount = '10.00',
 ) {
   const accessToken = await generateAccessToken();
 
@@ -617,7 +674,7 @@ export async function createOrderWithBillingAgreement(
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(payload),
-    }
+    },
   );
   const responseData = await response.clone().json();
   console.log('API Response:', JSON.stringify(responseData, null, 2));
@@ -627,7 +684,7 @@ export async function createOrderWithBillingAgreement(
 // Test function: Create one-time order with different payee
 export const createOneTimeOrderWithPayee = async (
   payeeMerchantId,
-  amount = '10.00'
+  amount = '10.00',
 ) => {
   const accessToken = await generateAccessToken();
 
@@ -676,7 +733,7 @@ export const createOneTimeOrderWithPayee = async (
 export const createVaultedOrderWithPayee = async (
   vaultedToken,
   payeeMerchantId,
-  amount = '10.00'
+  amount = '10.00',
 ) => {
   const accessToken = await generateAccessToken();
 
@@ -719,7 +776,7 @@ export const createVaultedOrderWithPayee = async (
 // Test 2A: Create order with vaulting enabled and return order for approval
 export const createOrderWithVaulting = async (
   amount = '10.00',
-  merchantNumber = 1
+  merchantNumber = 1,
 ) => {
   const accessToken = await generateAccessTokenForMerchant(merchantNumber);
 
@@ -753,7 +810,7 @@ export const createOrderWithVaulting = async (
   };
 
   console.log(
-    `API Request: POST /v2/checkout/orders (vaulting for merchant ${merchantNumber})`
+    `API Request: POST /v2/checkout/orders (vaulting for merchant ${merchantNumber})`,
   );
   console.log('Request Body:', JSON.stringify(createPayload, null, 2));
 
@@ -785,7 +842,7 @@ export const createOrderWithVaultId = async (
   vaultId,
   payeeMerchantId,
   amount = '10.00',
-  merchantNumber = 1
+  merchantNumber = 1,
 ) => {
   const accessToken = await generateAccessTokenForMerchant(merchantNumber);
 
@@ -799,7 +856,7 @@ export const createOrderWithVaultId = async (
   } catch (error) {
     console.error('Error fetching token details:', error);
     throw new Error(
-      `Unable to retrieve payment token details for vault_id: ${vaultId}`
+      `Unable to retrieve payment token details for vault_id: ${vaultId}`,
     );
   }
 
@@ -833,7 +890,7 @@ export const createOrderWithVaultId = async (
   } else {
     // Fallback to paypal if we can't determine the source
     console.warn(
-      'Unable to determine payment source from token details, defaulting to paypal'
+      'Unable to determine payment source from token details, defaulting to paypal',
     );
     payment_source = {
       paypal: {
@@ -859,7 +916,7 @@ export const createOrderWithVaultId = async (
   };
 
   console.log(
-    `API Request: POST /v2/checkout/orders (vault_id for merchant ${merchantNumber})`
+    `API Request: POST /v2/checkout/orders (vault_id for merchant ${merchantNumber})`,
   );
   console.log('Request Body:', JSON.stringify(payload, null, 2));
 
@@ -879,13 +936,13 @@ export const createOrderWithVaultId = async (
 // Capture payment with specific merchant credentials
 export const capturePaymentWithMerchant = async (
   orderId,
-  merchantNumber = 1
+  merchantNumber = 1,
 ) => {
   const accessToken = await generateAccessTokenForMerchant(merchantNumber);
   const url = `${base}/v2/checkout/orders/${orderId}/capture`;
 
   console.log(
-    `API Request: POST /v2/checkout/orders/${orderId}/capture (merchant ${merchantNumber})`
+    `API Request: POST /v2/checkout/orders/${orderId}/capture (merchant ${merchantNumber})`,
   );
 
   const response = await fetch(url, {
@@ -903,7 +960,7 @@ export const capturePaymentWithMerchant = async (
 export const createOrderWithVaultIdAndCapture = async (
   vaultId,
   amount = '10.00',
-  merchantNumber = 1
+  merchantNumber = 1,
 ) => {
   const accessToken = await generateAccessTokenForMerchant(merchantNumber);
 
@@ -917,7 +974,7 @@ export const createOrderWithVaultIdAndCapture = async (
   } catch (error) {
     console.error('Error fetching token details:', error);
     throw new Error(
-      `Unable to retrieve payment token details for vault_id: ${vaultId}`
+      `Unable to retrieve payment token details for vault_id: ${vaultId}`,
     );
   }
 
@@ -937,11 +994,25 @@ export const createOrderWithVaultIdAndCapture = async (
       },
     };
   } else if (tokenDetails.payment_source?.card) {
+    // 3DS API Approach: Pass stored_credential via API for subsequent transactions
+    console.log(
+      '[3DS API APPROACH] Using vaulted card with stored_credential (passed via API)',
+    );
     payment_source = {
       card: {
         vault_id: vaultId,
+        // These parameters are passed via API (not client-side) for 3DS/SCA compliance
+        stored_credential: {
+          payment_initiator: 'MERCHANT', // Merchant-initiated transaction
+          payment_type: 'UNSCHEDULED', // Unscheduled recurring payment
+          usage: 'SUBSEQUENT', // Subsequent use of stored credential
+        },
       },
     };
+    console.log(
+      '[3DS API APPROACH] Stored credential details:',
+      JSON.stringify(payment_source.card.stored_credential, null, 2),
+    );
   } else if (tokenDetails.payment_source?.paypal) {
     payment_source = {
       paypal: {
@@ -951,7 +1022,7 @@ export const createOrderWithVaultIdAndCapture = async (
   } else {
     // Fallback to paypal if we can't determine the source
     console.warn(
-      'Unable to determine payment source from token details, defaulting to paypal'
+      'Unable to determine payment source from token details, defaulting to paypal',
     );
     payment_source = {
       paypal: {
@@ -974,7 +1045,7 @@ export const createOrderWithVaultIdAndCapture = async (
   };
 
   console.log(
-    `API Request: POST /v2/checkout/orders (create & capture vault_id for merchant ${merchantNumber})`
+    `API Request: POST /v2/checkout/orders (create & capture vault_id for merchant ${merchantNumber})`,
   );
   console.log('Request Body:', JSON.stringify(createPayload, null, 2));
 
@@ -1029,7 +1100,7 @@ export const getOrdersByIds = async orderIds => {
     } catch (orderError) {
       console.error(
         `[SERVER SDK] Error fetching order ${orderId}:`,
-        orderError
+        orderError,
       );
       // Continue with other orders even if one fails
       orders.push({
@@ -1045,4 +1116,83 @@ export const getOrdersByIds = async orderIds => {
     totalCount: orders.length,
     message: orders.length > 0 ? null : 'No valid orders found.',
   };
+};
+
+// Create Venmo order using Raw REST API (avoids SDK camelCase conversion issues)
+export const createVenmoOrderRawApi = async orderData => {
+  const accessToken = await generateAccessToken();
+
+  console.log(
+    '[RAW API] Creating Venmo order with payload:',
+    JSON.stringify(orderData, null, 2),
+  );
+
+  const response = await fetch(`${base}/v2/checkout/orders`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(orderData),
+  });
+
+  const responseData = await response.clone().json();
+  console.log(
+    '[RAW API] Order response:',
+    JSON.stringify(responseData, null, 2),
+  );
+
+  return await handleResponse(response);
+};
+
+// Capture Venmo payment using Raw REST API
+export const captureVenmoPaymentRawApi = async orderId => {
+  const accessToken = await generateAccessToken();
+
+  console.log('[RAW API] Capturing Venmo payment for order:', orderId);
+
+  const response = await fetch(
+    `${base}/v2/checkout/orders/${orderId}/capture`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+
+  const responseData = await response.clone().json();
+  console.log(
+    '[RAW API] Capture response:',
+    JSON.stringify(responseData, null, 2),
+  );
+
+  return await handleResponse(response);
+};
+
+// Authorize Venmo payment using Raw REST API
+export const authorizeVenmoPaymentRawApi = async orderId => {
+  const accessToken = await generateAccessToken();
+
+  console.log('[RAW API] Authorizing Venmo payment for order:', orderId);
+
+  const response = await fetch(
+    `${base}/v2/checkout/orders/${orderId}/authorize`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+
+  const responseData = await response.clone().json();
+  console.log(
+    '[RAW API] Authorize response:',
+    JSON.stringify(responseData, null, 2),
+  );
+
+  return await handleResponse(response);
 };

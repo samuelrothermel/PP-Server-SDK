@@ -10,9 +10,13 @@ import {
   getOrdersByIds,
   captureAuthorizedPayment,
   deleteOrder,
+  createVenmoOrder,
+  captureVenmoPayment,
+  authorizeVenmoPayment,
 } from '../controllers/orderController.js';
 import {
   createVaultSetupToken,
+  create3DSVaultSetupToken,
   createVaultPaymentToken,
   createPaymentTokenFromCustomerId,
   getPaymentTokens,
@@ -82,9 +86,15 @@ router.post('/orders/:orderID/capture-authorized', captureAuthorizedPayment); //
 router.post('/orders/:orderID/authorize', authorizePayment);
 router.delete('/orders/:orderID/delete', deleteOrder); // New route for deleting orders from localStorage
 
+// Venmo Raw API routes (avoids SDK compatibility issues)
+router.post('/venmo/orders', createVenmoOrder);
+router.post('/venmo/orders/:orderID/capture', captureVenmoPayment);
+router.post('/venmo/orders/:orderID/authorize', authorizeVenmoPayment);
+
 // Vault routes
 router.post('/vault/customers', getPaymentTokensByCustomerIds); // New route for fetching customers by ID array
 router.post('/vault/setup-token', createVaultSetupToken);
+router.post('/vault/3ds/setup-token', create3DSVaultSetupToken); // 3D Secure setup token route
 router.post('/vault/recurring-setup-token', createRecurringSetupToken);
 router.post('/vault/payment-token/:vaultSetupToken', createVaultPaymentToken);
 router.post('/vault/payment-token', createPaymentTokenFromCustomerId);
@@ -111,11 +121,11 @@ router.get('/subscriptions/:subscriptionId', getSubscriptionHandler);
 router.post('/subscriptions/:subscriptionId/cancel', cancelSubscriptionHandler);
 router.post(
   '/subscriptions/:subscriptionId/suspend',
-  suspendSubscriptionHandler
+  suspendSubscriptionHandler,
 );
 router.post(
   '/subscriptions/:subscriptionId/activate',
-  activateSubscriptionHandler
+  activateSubscriptionHandler,
 );
 router.patch('/subscriptions/:subscriptionId', updateSubscriptionHandler);
 
@@ -150,7 +160,7 @@ router.post('/capture-onetime-payee', captureOneTimePayee);
 router.post('/test-vaulted-payee', testVaultedPayee);
 router.post(
   '/test-vaulted-same-merchant-different-payee',
-  testVaultedSameMerchantDifferentPayee
+  testVaultedSameMerchantDifferentPayee,
 );
 
 // Vault v3 testing routes

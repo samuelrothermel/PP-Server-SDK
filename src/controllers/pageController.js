@@ -20,7 +20,7 @@ export const renderSuccess = renderPage('success');
 export const renderSaveWoPurchase = renderPage('save-wo-purchase');
 export const renderSubscriptions = renderPage('subscriptions');
 export const renderSubscriptionManagement = renderPage(
-  'subscription-management'
+  'subscription-management',
 );
 export const renderProductsManagement = renderPage('products-management');
 export const renderFastlane = renderPage('fastlane');
@@ -29,4 +29,6 @@ export const renderWebhookTesting = renderPage('webhook-testing');
 export const renderPayeeTest = renderPage('payee-test');
 export const renderOrders = renderPage('orders');
 export const renderVault = renderPage('vault');
+export const renderVault3DS = renderPage('vault-3ds');
 export const renderPayouts = renderPage('payouts');
+export const renderVenmo = renderPage('venmo');

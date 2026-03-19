@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venmo Sandbox Testing - PayPal Demo</title>
+    <link rel="stylesheet" href="/styles/custom.css">
+    <style>
+        .venmo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .venmo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #008CFF;
+        }
+        .venmo-header h1 {
+            color: #008CFF;
+            margin: 0;
+        }
+        .nav-links a {
+            margin-left: 15px;
+            color: #0070ba;
+            text-decoration: none;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #008CFF;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #008CFF;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 8px 0;
+        }
+        .test-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #008CFF;
+            padding-bottom: 10px;
+        }
+        .button-container {
+            margin: 20px 0;
+            min-height: 50px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+        .checkbox-group label {
+            margin: 0;
+            font-weight: normal;
+        }
+        #message-container {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .message.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .order-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .order-details h3 {
+            margin-top: 0;
+        }
+        .order-details pre {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="venmo-container">
+        <div class="venmo-header">
+            <h1>🔵 Venmo Sandbox (Simplified)</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/checkout" class="nav-link">Checkout</a>
+                <a href="/orders" class="nav-link">Orders</a>
+                <a href="/vault" class="nav-link">Vault</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>Venmo Sandbox Testing (Simplified)</h3>
+            <p>This page tests Venmo payment integration using <strong>Raw REST API</strong> with minimal configuration.</p>
+            <ul>
+                <li><strong>API:</strong> Direct PayPal REST API (<code>/api/venmo/orders</code>)</li>
+                <li><strong>Intent:</strong> <code>AUTHORIZE</code> - Venmo does not support CAPTURE yet</li>
+                <li><strong>enableVenmoSandbox:</strong> <code>true</code> - Forces Venmo button in sandbox</li>
+                <li><strong>No shipping callbacks</strong> - Simplified for debugging</li>
+                <li><strong>Check console</strong> - See request/response payloads for debugging</li>
+            </ul>
+            <p><strong>Note:</strong> If you see "something went wrong" in the Venmo window, check:</p>
+            <ol>
+                <li>Console logs for API request/response</li>
+                <li>Ensure <code>experience_context</code> has valid URLs</li>
+                <li>Test on mobile device for best results</li>
+            </ol>
+        </div>
+        
+        <div id="message-container"></div>
+        
+        <!-- Venmo Payment Test -->
+        <div class="test-section">
+            <h2>Venmo Payment</h2>
+            <p>Click the Venmo button below to initiate a payment using Venmo in the sandbox environment.</p>
+            
+            <div class="form-group">
+                <label for="payment-amount">Payment Amount ($)</label>
+                <input type="number" id="payment-amount" value="10.00" step="0.01" min="0.01">
+            </div>
+            
+            <div class="button-container" id="venmo-button-container"></div>
+        </div>
+
+        <!-- Order Details Display -->
+        <div class="order-details" id="order-details" style="display: none;">
+            <h3>Order Details</h3>
+            <pre id="order-json"></pre>
+        </div>
+    </div>
+
+    <!-- PayPal SDK with Venmo enabled (Sandbox) -->
+    <script id="paypal-sdk" 
+            src="https://www.sandbox.paypal.com/sdk/js?client-id=<%= clientId %>&locale=en_US&commit=true&intent=authorize&disable-funding=paylater&enable-funding=venmo,card">
+    </script>
+    
+    <script src="/venmo-simple.js"></script>
+</body>
+</html>

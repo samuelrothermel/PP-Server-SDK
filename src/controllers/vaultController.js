@@ -1,5 +1,6 @@
 import {
   createVaultSetupToken as createVaultSetupTokenApi,
+  create3DSVaultSetupToken as create3DSVaultSetupTokenApi,
   createVaultPaymentToken as createVaultPaymentTokenApi,
   createPaymentTokenFromCustomerId as createPaymentTokenFromCustomerIdApi,
   createRecurringSetupToken as createRecurringSetupTokenApi,
@@ -18,6 +19,20 @@ export const createVaultSetupToken = async (req, res, next) => {
     const { paymentSource } = req.body;
     const vaultSetupToken = await createVaultSetupTokenApi({
       paymentSource,
+    });
+    res.json(vaultSetupToken);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Create 3D Secure vault setup token
+export const create3DSVaultSetupToken = async (req, res, next) => {
+  try {
+    const { paymentSource, verificationMethod } = req.body;
+    const vaultSetupToken = await create3DSVaultSetupTokenApi({
+      paymentSource,
+      verificationMethod,
     });
     res.json(vaultSetupToken);
   } catch (err) {
@@ -106,14 +121,14 @@ export const createRecurringOrder = async (req, res, next) => {
 // Create and capture order using vault_id (for testing Apple Pay vaults)
 export const createOrderWithVaultId = async (req, res, next) => {
   try {
-    const { vaultId, amount, merchantNumber = 1 } = req.body;
-    const { createOrderWithVaultIdAndCapture } = await import(
-      '../services/ordersApi.js'
-    );
+    const { vaultId, vault_id, amount, merchantNumber = 1 } = req.body;
+    const actualVaultId = vaultId || vault_id; // Support both naming conventions
+    const { createOrderWithVaultIdAndCapture } =
+      await import('../services/ordersApi.js');
     const order = await createOrderWithVaultIdAndCapture(
-      vaultId,
+      actualVaultId,
       amount,
-      merchantNumber
+      merchantNumber,
     );
     res.json(order);
   } catch (err) {

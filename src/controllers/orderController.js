@@ -6,6 +6,9 @@ import {
   getOrdersByIds as getOrdersByIdsApi,
   captureAuthorization as captureAuthorizationApi,
   getOrderDetails as getOrderDetailsApi,
+  createVenmoOrderRawApi,
+  captureVenmoPaymentRawApi,
+  authorizeVenmoPaymentRawApi,
 } from '../services/ordersApi.js';
 
 // Create order request
@@ -159,6 +162,51 @@ export const deleteOrder = async (req, res, next) => {
       message: `Order ${orderID} removed from internal tracking`,
     });
   } catch (err) {
+    next(err);
+  }
+};
+
+// Create Venmo order using Raw REST API
+export const createVenmoOrder = async (req, res, next) => {
+  console.log('Create Venmo Order Request (Raw API)');
+  console.log('Request body:', JSON.stringify(req.body, null, 2));
+
+  try {
+    const order = await createVenmoOrderRawApi(req.body);
+    console.log('Venmo order created:', order.id);
+    res.json(order);
+  } catch (err) {
+    console.error('Venmo order creation failed:', err.message);
+    next(err);
+  }
+};
+
+// Capture Venmo payment using Raw REST API
+export const captureVenmoPayment = async (req, res, next) => {
+  console.log('Capture Venmo Payment Request (Raw API)');
+  const { orderID } = req.params;
+
+  try {
+    const captureData = await captureVenmoPaymentRawApi(orderID);
+    console.log('Venmo payment captured:', orderID);
+    res.json(captureData);
+  } catch (err) {
+    console.error('Venmo payment capture failed:', err.message);
+    next(err);
+  }
+};
+
+// Authorize Venmo payment using Raw REST API
+export const authorizeVenmoPayment = async (req, res, next) => {
+  console.log('Authorize Venmo Payment Request (Raw API)');
+  const { orderID } = req.params;
+
+  try {
+    const authorizeData = await authorizeVenmoPaymentRawApi(orderID);
+    console.log('Venmo payment authorized:', orderID);
+    res.json(authorizeData);
+  } catch (err) {
+    console.error('Venmo payment authorization failed:', err.message);
     next(err);
   }
 };

@@ -6,6 +6,23 @@ import { handleResponse } from '../utils/responseHandler.js';
 // set some important variables
 const base = 'https://api-m.sandbox.paypal.com';
 
+/**
+ * 3D SECURE API APPROACH
+ *
+ * This file demonstrates the API-driven approach for 3D Secure authentication.
+ * All 3DS parameters are configured and passed via server-side PayPal API calls.
+ *
+ * Key API Parameters:
+ * - verification_method: "SCA_ALWAYS" | "SCA_WHEN_REQUIRED"
+ *   (passed in POST /v3/vault/setup-tokens)
+ *
+ * - stored_credential: { payment_initiator, payment_type, usage }
+ *   (passed in POST /v2/checkout/orders when using vaulted cards)
+ *
+ * This approach allows customers to control 3DS behavior entirely through
+ * backend API configuration, not client-side SDK options.
+ */
+
 // create vault setup token
 export const createVaultSetupToken = async ({ paymentSource }) => {
   console.log('[SERVER SDK] Creating vault setup token for:', paymentSource);
@@ -69,11 +86,88 @@ export const createVaultSetupToken = async ({ paymentSource }) => {
   }
 };
 
+// create vault setup token with 3D Secure (SCA_ALWAYS)
+// This demonstrates the API-driven approach where 3DS parameters are passed server-side
+export const create3DSVaultSetupToken = async ({
+  paymentSource,
+  verificationMethod = 'SCA_ALWAYS',
+}) => {
+  console.log('='.repeat(80));
+  console.log(
+    '[3DS API APPROACH] Creating vault setup token with 3DS enforcement',
+  );
+  console.log('[3DS API APPROACH] Payment Source:', paymentSource);
+  console.log(
+    '[3DS API APPROACH] Verification Method (passed via API):',
+    verificationMethod,
+  );
+  console.log('='.repeat(80));
+
+  const paymentSources = {
+    card: {
+      // 3DS Configuration passed via API (not client-side)
+      verification_method: verificationMethod, // SCA_ALWAYS = Force 3DS challenge
+      experience_context: {
+        shipping_preference: 'NO_SHIPPING',
+        return_url: 'https://example.com/returnUrl',
+        cancel_url: 'https://example.com/cancelUrl',
+      },
+    },
+  };
+
+  // Only support card for 3DS testing
+  if (paymentSource !== 'card') {
+    throw new Error(
+      '3D Secure vault setup tokens only support card payment source',
+    );
+  }
+
+  const setupTokenPayload = {
+    payment_source: {
+      [paymentSource]: paymentSources[paymentSource],
+    },
+  };
+
+  console.log('[3DS API APPROACH] Setup Token API Payload:');
+  console.log(JSON.stringify(setupTokenPayload, null, 2));
+
+  try {
+    console.log(
+      '[3DS API APPROACH] Calling PayPal Vault API: POST /v3/vault/setup-tokens',
+    );
+    const { body: tokenResponse } = await vaultController.createSetupToken({
+      body: setupTokenPayload,
+    });
+    const token =
+      typeof tokenResponse === 'string'
+        ? JSON.parse(tokenResponse)
+        : tokenResponse;
+
+    console.log('[3DS API APPROACH] Setup token created successfully');
+    console.log('[3DS API APPROACH] Token ID:', token.id);
+    console.log('[3DS API APPROACH] Status:', token.status);
+
+    // Log 3DS verification details if present
+    if (token.payment_source?.card) {
+      console.log(
+        '[3DS API APPROACH] Card verification method:',
+        token.payment_source.card.verification_method,
+      );
+    }
+    console.log('='.repeat(80));
+
+    return token;
+  } catch (error) {
+    console.error('[3DS API APPROACH] Error creating 3DS setup token:', error);
+    throw error;
+  }
+};
+
 // create vault payment token
 export const createVaultPaymentToken = async vaultSetupToken => {
   console.log(
     '[SERVER SDK] Creating payment token from setup token:',
-    vaultSetupToken
+    vaultSetupToken,
   );
 
   const paymentTokenPayload = {
@@ -161,9 +255,8 @@ export const getPaymentTokenDetails = async vaultId => {
   console.log('[SERVER SDK] Getting payment token details for:', vaultId);
 
   try {
-    const { body: tokenResponse } = await vaultController.getPaymentToken(
-      vaultId
-    );
+    const { body: tokenResponse } =
+      await vaultController.getPaymentToken(vaultId);
     const tokenDetails =
       typeof tokenResponse === 'string'
         ? JSON.parse(tokenResponse)
@@ -180,7 +273,7 @@ export const getPaymentTokenDetails = async vaultId => {
 export const createRecurringOrder = async paymentTokenId => {
   console.log(
     'Creating order with payment token for recurring payment:',
-    paymentTokenId
+    paymentTokenId,
   );
 
   const accessToken = await generateAccessToken();
@@ -216,7 +309,7 @@ export const createRecurringOrder = async paymentTokenId => {
 
   console.log(
     'Create Recurring Order Response: ',
-    await response.clone().text()
+    await response.clone().text(),
   );
   return handleResponse(response);
 };
@@ -225,7 +318,7 @@ export const createRecurringOrder = async paymentTokenId => {
 export const createRecurringSetupToken = async ({ paymentSource }) => {
   console.log(
     'Creating recurring payment setup token for payment source:',
-    paymentSource
+    paymentSource,
   );
 
   // Current date
@@ -303,7 +396,7 @@ export const createRecurringSetupToken = async ({ paymentSource }) => {
 
   console.log(
     'Create Recurring Setup Token Response: ',
-    JSON.stringify(await response.clone().json(), null, 2)
+    JSON.stringify(await response.clone().json(), null, 2),
   );
   return handleResponse(response);
 };
@@ -335,7 +428,7 @@ export const getPaymentTokensByCustomerIds = async customerIds => {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       );
       const data = await response.json();
 
