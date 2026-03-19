@@ -60,7 +60,7 @@ const VenmoButton = {
 
         createOrder: (data, actions) => {
           const amount = document.getElementById('payment-amount').value;
-          const customerId = `venmo-customer-${Date.now()}`;
+          const customerId = `test-${Date.now()}`;
 
           console.log('Creating Venmo order with client-side SDK');
           Utils.clearMessages();
