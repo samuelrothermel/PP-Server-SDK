@@ -9,6 +9,7 @@ import {
   createVenmoOrderRawApi,
   captureVenmoPaymentRawApi,
   authorizeVenmoPaymentRawApi,
+  createCryptoOrderRawApi,
 } from '../services/ordersApi.js';
 
 // Create order request
@@ -192,6 +193,21 @@ export const captureVenmoPayment = async (req, res, next) => {
     res.json(captureData);
   } catch (err) {
     console.error('Venmo payment capture failed:', err.message);
+    next(err);
+  }
+};
+
+// Create Crypto order using Raw REST API
+export const createCryptoOrder = async (req, res, next) => {
+  console.log('Create Crypto Order Request (Raw API)');
+  console.log('Request body:', JSON.stringify(req.body, null, 2));
+
+  try {
+    const order = await createCryptoOrderRawApi(req.body);
+    console.log('Crypto order created:', order.id);
+    res.json(order);
+  } catch (err) {
+    console.error('Crypto order creation failed:', err.message);
     next(err);
   }
 };

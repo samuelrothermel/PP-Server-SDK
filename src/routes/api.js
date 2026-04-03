@@ -13,6 +13,7 @@ import {
   createVenmoOrder,
   captureVenmoPayment,
   authorizeVenmoPayment,
+  createCryptoOrder,
 } from '../controllers/orderController.js';
 import {
   createVaultSetupToken,
@@ -85,6 +86,9 @@ router.post('/orders/:orderID/capture', capturePayment);
 router.post('/orders/:orderID/capture-authorized', captureAuthorizedPayment); // New route for capturing authorized payments
 router.post('/orders/:orderID/authorize', authorizePayment);
 router.delete('/orders/:orderID/delete', deleteOrder); // New route for deleting orders from localStorage
+
+// Crypto Raw API routes (crypto not yet in Server SDK)
+router.post('/crypto/orders', createCryptoOrder);
 
 // Venmo Raw API routes (avoids SDK compatibility issues)
 router.post('/venmo/orders', createVenmoOrder);

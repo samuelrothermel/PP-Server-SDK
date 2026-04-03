@@ -32,3 +32,4 @@ export const renderVault = renderPage('vault');
 export const renderVault3DS = renderPage('vault-3ds');
 export const renderPayouts = renderPage('payouts');
 export const renderVenmo = renderPage('venmo');
+export const renderCrypto = renderPage('crypto');

@@ -1118,6 +1118,60 @@ export const getOrdersByIds = async orderIds => {
   };
 };
 
+// Create Crypto order using Raw REST API (crypto not yet in Server SDK)
+export const createCryptoOrderRawApi = async orderData => {
+  const accessToken = await generateAccessToken();
+  const {
+    totalAmount = '10.00',
+    givenName = 'Test',
+    surname = 'Buyer',
+    countryCode = 'US',
+  } = orderData;
+
+  const payload = {
+    intent: 'CAPTURE',
+    processing_instruction: 'ORDER_COMPLETE_ON_PAYMENT_APPROVAL',
+    purchase_units: [
+      {
+        amount: {
+          currency_code: 'USD',
+          value: totalAmount,
+        },
+      },
+    ],
+    payment_source: {
+      crypto: {
+        name: {
+          given_name: givenName,
+          surname: surname,
+        },
+        country_code: countryCode,
+        experience_context: {
+          return_url: `${baseUrl}/crypto`,
+          cancel_url: `${baseUrl}/crypto`,
+        },
+      },
+    },
+  };
+
+  console.log('[RAW API] Creating Crypto order with payload:', JSON.stringify(payload, null, 2));
+
+  const response = await fetch(`${base}/v2/checkout/orders`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'PayPal-Request-Id': `crypto-${Date.now()}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const responseData = await response.clone().json();
+  console.log('[RAW API] Crypto order response:', JSON.stringify(responseData, null, 2));
+
+  return await handleResponse(response);
+};
+
 // Create Venmo order using Raw REST API (avoids SDK camelCase conversion issues)
 export const createVenmoOrderRawApi = async orderData => {
   const accessToken = await generateAccessToken();

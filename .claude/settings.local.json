@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__observability-server__ObservabillityV2_getEventDetailWithCorrelationId"
+    ]
+  }
+}

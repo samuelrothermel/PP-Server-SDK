@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay with Crypto Sandbox Testing - PayPal Demo</title>
+    <link rel="stylesheet" href="/styles/custom.css">
+    <style>
+        .crypto-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .crypto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f5a623;
+        }
+        .crypto-header h1 {
+            color: #333;
+            margin: 0;
+        }
+        .nav-links a {
+            margin-left: 15px;
+            color: #0070ba;
+            text-decoration: none;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .info-box {
+            background: #fff8e7;
+            border: 1px solid #f5a623;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #b37400;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 8px 0;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+        .warning-box strong {
+            color: #856404;
+        }
+        .test-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #f5a623;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background: #f5a623;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #d48f1a;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: #fff;
+            margin-left: 10px;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        #message-container {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .message.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .response-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+        .response-box h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .response-box pre {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .flow-steps {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+        }
+        .flow-steps li {
+            counter-increment: step;
+            position: relative;
+            padding: 10px 10px 10px 45px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .flow-steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #f5a623;
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        code {
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .payer-action-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #f5a623;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .payer-action-link:hover {
+            background: #d48f1a;
+        }
+    </style>
+</head>
+<body>
+    <div class="crypto-container">
+        <div class="crypto-header">
+            <h1>₿ Pay with Crypto Sandbox Testing</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/checkout" class="nav-link">Checkout</a>
+                <a href="/orders" class="nav-link">Orders</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>Pay with Crypto — Direct Merchant Integration (Limited Release)</h3>
+            <p>Tests the <strong>Orders V2 API</strong> with <code>payment_source.crypto</code>. The flow is:</p>
+            <ol class="flow-steps">
+                <li>Create an order — server returns <code>PAYER_ACTION_REQUIRED</code> + a <code>payer-action</code> link</li>
+                <li>Redirect buyer to <code>sandbox.paypal.com/payment/crypto?token=&lt;ORDER_ID&gt;</code></li>
+                <li>Buyer connects wallet (Coinbase, MetaMask, Phantom, etc.) and approves</li>
+                <li>PayPal auto-captures on approval (<code>ORDER_COMPLETE_ON_PAYMENT_APPROVAL</code>)</li>
+            </ol>
+            <ul>
+                <li><strong>Currency:</strong> USD only</li>
+                <li><strong>Refunds</strong> settle in PYUSD (not original crypto)</li>
+                <li><strong>Not supported:</strong> billing agreements, chargebacks, multi-seller</li>
+                <li><strong>US merchants only</strong> — limited release feature</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠ Sandbox prerequisite:</strong> Your sandbox merchant account must have Pay with Crypto enabled.
+            Enable it at <strong>Account Settings → Products &amp; Services → Payment Methods → Pay with crypto</strong>,
+            or via <code>sandbox.paypal.com/bizsignup/add-product?product=CRYPTO_PYMTS</code>.
+        </div>
+
+        <div id="message-container"></div>
+
+        <!-- Step 1: Create Order -->
+        <div class="test-section">
+            <h2>Step 1 — Create Crypto Order</h2>
+            <p>Creates an order with <code>payment_source.crypto</code> and <code>processing_instruction: ORDER_COMPLETE_ON_PAYMENT_APPROVAL</code>.</p>
+
+            <div class="form-group">
+                <label for="payment-amount">Amount (USD)</label>
+                <input type="number" id="payment-amount" value="10.00" step="0.01" min="1.00">
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="given-name">Buyer First Name</label>
+                    <input type="text" id="given-name" value="Test">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="surname">Buyer Last Name</label>
+                    <input type="text" id="surname" value="Buyer">
+                </div>
+                <div class="form-group" style="flex: 0 0 100px;">
+                    <label for="country-code">Country</label>
+                    <input type="text" id="country-code" value="US" maxlength="2">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="create-order-btn" onclick="CryptoFlow.createOrder()">
+                Create Crypto Order
+            </button>
+
+            <div class="response-box" id="create-order-response">
+                <h3>Order Response</h3>
+                <pre id="create-order-json"></pre>
+                <div id="payer-action-section" style="display:none; margin-top: 15px;">
+                    <p><strong>Order Status:</strong> <code>PAYER_ACTION_REQUIRED</code></p>
+                    <p>Open the PayPal-hosted crypto wallet selection page to complete the payment:</p>
+                    <a id="payer-action-link" href="#" target="_blank" class="payer-action-link">
+                        Open Crypto Payment Page ↗
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Check Order Status -->
+        <div class="test-section">
+            <h2>Step 2 — Get Order Status</h2>
+            <p>Fetches the current order state. After buyer approves in the crypto wallet, status becomes <code>COMPLETED</code>.</p>
+
+            <div class="form-group">
+                <label for="order-id-input">Order ID</label>
+                <input type="text" id="order-id-input" placeholder="Auto-filled after Step 1">
+            </div>
+
+            <button class="btn btn-primary" id="get-order-btn" onclick="CryptoFlow.getOrderStatus()">
+                Get Order Status
+            </button>
+
+            <div class="response-box" id="get-order-response">
+                <h3>Order Details</h3>
+                <pre id="get-order-json"></pre>
+            </div>
+        </div>
+
+        <!-- Webhook info -->
+        <div class="test-section">
+            <h2>Expected Webhooks</h2>
+            <p>After a successful crypto payment, PayPal fires these events (configure at <a href="/webhook-testing" target="_blank">Webhook Dashboard</a>):</p>
+            <ul>
+                <li><code>CHECKOUT.ORDER.APPROVED</code> — buyer approved in crypto wallet</li>
+                <li><code>PAYMENT.CAPTURE.COMPLETED</code> — capture settled (auto-triggered by <code>ORDER_COMPLETE_ON_PAYMENT_APPROVAL</code>)</li>
+                <li><code>PAYMENT.CAPTURE.REFUNDED</code> — after a refund (settles in PYUSD)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="/crypto.js"></script>
+</body>
+</html>
