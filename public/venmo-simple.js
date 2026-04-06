@@ -126,20 +126,11 @@ const VenmoButton = {
         await venmoButton.render('#venmo-button-container');
         console.log('✅ Venmo button rendered');
       } else {
-        venmoButton.updateProps({
-          onShippingAddress: () => true,
-        });
-
-        if (venmoButton.isEligible()) {
-          await venmoButton.render('#venmo-button-container');
-          console.log('✅ Venmo button rendered (after updateProps)');
-        } else {
-          Utils.showMessage(
-            'Venmo is not available in this environment. Please test on mobile or check sandbox settings.',
-            'info',
-          );
-          console.warn('Venmo button not eligible');
-        }
+        Utils.showMessage(
+          'Venmo is not available in this environment. Please test on mobile or check sandbox settings.',
+          'info',
+        );
+        console.warn('Venmo button not eligible');
       }
     } catch (error) {
       console.error('Error initializing Venmo button:', error);
