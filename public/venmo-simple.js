@@ -78,8 +78,9 @@ const VenmoButton = {
                   },
                 },
                 experience_context: {
-                  return_url: window.location.origin + '/venmo',
-                  cancel_url: window.location.origin + '/venmo',
+                  return_url: 'https://example.com/returnUrl',
+                  cancel_url: 'https://example.com/cancelUrl',
+                  shipping_preference: 'NO_SHIPPING',
                 },
               },
             },
