@@ -40,6 +40,14 @@
           <span class="sdk-badge separate-sdk">◆ Fastlane SDK</span>
           <span style="font-size: 0.9em; color: #666;">Separate SDK product</span>
         </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
+          <span style="font-size: 0.9em; color: #666;">JavaScript SDK v5 (legacy)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <span style="font-size: 0.9em; color: #666;">JavaScript SDK v6 integration</span>
+        </div>
       </div>
     </div>
 
@@ -52,6 +60,7 @@
         <!-- Product Page -->
         <a href="/product" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Product</h3>
           <p><strong>Simple Product Display</strong></p>
           <p>Product page with PayPal button stack</p>
@@ -65,6 +74,7 @@
         <!-- Cart Page -->
         <a href="/cart" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Cart</h3>
           <p><strong>Full Shopping Cart Experience</strong></p>
           <p>Cart with complete pricing breakdown and checkout options.</p>
@@ -78,6 +88,7 @@
         <!-- Checkout Integration -->
         <a href="/checkout" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Checkout Page</h3>
           <p><strong>Multi-Payment Checkout</strong></p>
           <p>Full-featured checkout supporting multiple payment methods with vaulting.</p>
@@ -106,6 +117,7 @@
         <!-- Subscriptions -->
         <a href="/subscriptions" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Subscriptions</h3>
           <p><strong>Recurring Billing Plans</strong></p>
           <p>Create and manage subscription plans with automated billing.</p>
@@ -119,6 +131,7 @@
         <!-- Save Without Purchase -->
         <a href="/save-wo-purchase" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Save Without Purchase</h3>
           <p><strong>Payment Method Vaulting</strong></p>
           <p>Save payment methods without immediate purchase.</p>
@@ -196,6 +209,7 @@
         <!-- Venmo Testing -->
         <a href="/venmo" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Venmo Sandbox</h3>
           <p><strong>Venmo Payment Testing</strong></p>
           <p>Dedicated Venmo testing page with vaulting and shipping options.</p>
@@ -272,6 +286,57 @@
             <li>Batch payouts to multiple recipients</li>
             <li>Track payout status</li>
             <li>Marketplace and affiliate support</li>
+          </ul>
+        </a>
+
+      </section>
+
+      <!-- JavaScript SDK v6 Section -->
+      <h2 style="margin-top: 3rem; margin-bottom: 1rem; color: #6f42c1; border-bottom: 2px solid #6f42c1; padding-bottom: 0.5rem;">JavaScript SDK v6 Integrations</h2>
+      <section class="integrations-gallery">
+
+        <!-- JS SDK v6 Standard / Configuration -->
+        <a href="/js-sdk-v6/standard" class="integration-card">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <h3>Standard Checkout</h3>
+          <p><strong>Core SDK v6 Integration</strong></p>
+          <p>Standard checkout using the new JS SDK v6 with <code>createInstance()</code> and web components.</p>
+          <ul>
+            <li>Client ID &amp; Client Token auth</li>
+            <li>Eligibility checking via <code>findEligibleMethods()</code></li>
+            <li>PayPal, Venmo, Cards, Google Pay, Apple Pay</li>
+            <li>Promotional messaging component</li>
+            <li>Production go-live checklist included</li>
+          </ul>
+        </a>
+
+        <!-- JS SDK v6 iFrame -->
+        <a href="/js-sdk-v6/iframe" class="integration-card">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <h3>Sandboxed iFrame</h3>
+          <p><strong>Isolated Payment Processing</strong></p>
+          <p>High-security integration isolating the SDK inside a sandboxed <code>&lt;iframe&gt;</code> with postMessage communication.</p>
+          <ul>
+            <li>PCI DSS &amp; SOC 2 compliant architecture</li>
+            <li>Dual-app setup (merchant + payment frame)</li>
+            <li>Origin-validated cross-frame messaging</li>
+            <li>Ideal for banking &amp; financial services</li>
+            <li>Production go-live checklist included</li>
+          </ul>
+        </a>
+
+        <!-- JS SDK v6 Advanced -->
+        <a href="/js-sdk-v6/advanced" class="integration-card">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <h3>Advanced Configuration</h3>
+          <p><strong>Custom Presentation Modes</strong></p>
+          <p>Fine-grained control over how payment flows are presented with fallback logic.</p>
+          <ul>
+            <li>Popup, modal, and payment-handler modes</li>
+            <li>Custom fallback via <code>isRecoverable</code></li>
+            <li>Sequential mode attempt patterns</li>
+            <li>Advanced error handling</li>
+            <li>Production go-live checklist included</li>
           </ul>
         </a>
 

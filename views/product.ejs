@@ -3,41 +3,213 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
-    <title>Product - Rainforest Bowl</title>
+    <title>Product - Wooden Bowl</title>
+    <style>
+      /* ── Page header ── */
+      .page-header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      .page-header h1 { font-size: 2em; margin-bottom: 8px; color: #1a1a1a; }
+      .page-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+      .page-header p { color: #666; margin: 0; }
+
+      /* ── Two-column layout ── */
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 32px;
+        align-items: start;
+      }
+      @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+      /* ── Product card ── */
+      .product-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .product-card-inner { display: flex; }
+      .product-image {
+        width: 220px;
+        min-width: 220px;
+        object-fit: cover;
+        border-right: 1px solid #e0e0e0;
+      }
+      .product-details { padding: 24px; flex: 1; }
+      .product-details h2 { margin: 0 0 4px; color: #1a1a1a; font-size: 1.4em; }
+      .product-details .category { font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+      .product-details .price { font-size: 1.6em; font-weight: 700; color: #0070ba; margin-bottom: 16px; }
+      .product-details p { color: #555; font-size: 0.95em; line-height: 1.6; margin: 0 0 16px; }
+      .product-details ul { color: #555; font-size: 0.9em; padding-left: 18px; margin: 0 0 16px; }
+      .product-details ul li { margin-bottom: 4px; }
+      @media (max-width: 600px) {
+        .product-card-inner { flex-direction: column; }
+        .product-image { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid #e0e0e0; max-height: 200px; }
+      }
+
+      /* ── Checkout panel ── */
+      .checkout-panel {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        background: #fff;
+        position: sticky;
+        top: 20px;
+        overflow: hidden;
+      }
+      .checkout-panel-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e0e0e0;
+        background: #f8f9fa;
+      }
+      .checkout-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
+
+      /* Order summary */
+      .order-summary { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9em;
+        color: #555;
+        margin-bottom: 8px;
+      }
+      .summary-row:last-child { margin-bottom: 0; }
+      .summary-row.total {
+        font-weight: 700;
+        font-size: 1em;
+        color: #1a1a1a;
+        padding-top: 8px;
+        margin-top: 4px;
+        border-top: 1px solid #e0e0e0;
+      }
+      .summary-qty { color: #888; font-size: 0.85em; margin-left: 4px; }
+
+      /* Pay Later messages */
+      .pay-later-area { padding: 0 20px 12px; }
+
+      /* Buttons area */
+      .buttons-area { padding: 16px 20px; }
+      #paypal-button-container { width: 100%; }
+
+      /* Dev controls */
+      .dev-controls {
+        padding: 14px 20px;
+        border-top: 1px solid #e0e0e0;
+        background: #f8f9fa;
+      }
+      .dev-controls h3 { margin: 0 0 10px; font-size: 0.85em; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+      .checkbox-control { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: #555; }
+      .customer-id-input { margin-top: 10px; }
+      .customer-id-input input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 0.9em;
+        box-sizing: border-box;
+      }
+
+      /* ── Below-fold: info sections ── */
+      .below-fold { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; }
+      .info-section {
+        padding: 12px 16px;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 0.9em;
+        color: #333;
+      }
+
+      /* Back link */
+      .back-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px;
+      }
+      .back-link:hover { text-decoration: underline; }
+    </style>
   </head>
 
   <body>
     <div class="container">
-      <header>
-        <h1>Product Demo</h1>
-      </header>
-      
-      <div class="product-layout">
-        <!-- Left Side: Image, Title, Price -->
-        <div class="product-left">
-          <img src="https://media.istockphoto.com/id/508179654/photo/wooden-bowl-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=c5BqYjY0wgzjMsWsUlj_9uFpi4kT9YWO-_ZKZg4uoxY=" 
-               alt="Wooden Bowl" 
-               class="product-image">
-          
-          <h2 class="product-title">Wooden Bowl</h2>
-          <div class="product-price">$<span id="product-price">50.00</span></div>
-          
-          <!-- PayPal Pay Later Messages -->
-          <div style="margin-top: 20px;">
-            <div
-              data-pp-message
-              data-pp-style-layout="text"
-              data-pp-style-logo-type="inline"
-              data-pp-style-text-color="black"
-              data-pp-style-text-size="12"
-              data-pp-amount="50"
-              data-pp-placement="product">
+
+      <a href="/" class="back-link">← Back to Dashboard</a>
+
+      <div class="page-header">
+        <div class="badge-row">
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
+        </div>
+        <h1>Product</h1>
+        <p>Simple product page with PayPal button stack, Pay Later messaging, and app-switch support.</p>
+      </div>
+
+      <div class="layout">
+
+        <!-- Left: product -->
+        <div class="product-card">
+          <div class="product-card-inner">
+            <img
+              class="product-image"
+              src="https://media.istockphoto.com/id/508179654/photo/wooden-bowl-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=c5BqYjY0wgzjMsWsUlj_9uFpi4kT9YWO-_ZKZg4uoxY="
+              alt="Wooden Bowl"
+            />
+            <div class="product-details">
+              <div class="category">Home &amp; Kitchen</div>
+              <h2>Wooden Bowl</h2>
+              <div class="price">$<span id="product-price">50.00</span></div>
+              <p>
+                Handcrafted from sustainably sourced hardwood, showcasing unique grain
+                patterns and rich colors that make every piece one-of-a-kind.
+              </p>
+              <ul>
+                <li>Food-safe, eco-friendly finish</li>
+                <li>12" diameter × 4" height</li>
+                <li>Hand wash recommended</li>
+              </ul>
+
+              <!-- Pay Later messaging sits naturally under product details -->
+              <div
+                data-pp-message
+                data-pp-style-layout="text"
+                data-pp-style-logo-type="inline"
+                data-pp-style-text-color="black"
+                data-pp-style-text-size="12"
+                data-pp-amount="50"
+                data-pp-placement="product">
+              </div>
             </div>
           </div>
-          
-          <!-- Development Controls - Moved higher for visibility -->
-          <div class="controls-section" style="margin-top: 30px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-            <h3 style="margin-top: 0; font-size: 16px; color: #333;">Development Options</h3>
+        </div>
+
+        <!-- Right: checkout panel -->
+        <div class="checkout-panel">
+          <div class="checkout-panel-header">
+            <h2>Order Summary</h2>
+          </div>
+
+          <div class="order-summary">
+            <div class="summary-row">
+              <span>Wooden Bowl <span class="summary-qty">× 1</span></span>
+              <span>$50.00</span>
+            </div>
+            <div class="summary-row">
+              <span>Shipping</span>
+              <span>Free</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total</span>
+              <span>$50.00 USD</span>
+            </div>
+          </div>
+
+          <div class="buttons-area">
+            <div id="paypal-button-container"></div>
+          </div>
+
+          <div class="dev-controls">
+            <h3>Dev Options</h3>
             <div class="checkbox-control">
               <input type="checkbox" id="returning-user-checkbox">
               <label for="returning-user-checkbox">Returning User Flow</label>
@@ -47,40 +219,11 @@
             </div>
           </div>
         </div>
-        
-        <!-- Right Side: Product Description and PayPal Buttons -->
-        <div class="product-right">
-          <div class="product-description">
-            <h3>Product Description</h3>
-            <p>
-              Experience the natural beauty of our handcrafted Wooden Bowl. Each bowl is carefully 
-              made from sustainably sourced hardwood, showcasing the unique grain patterns and 
-              rich colors that make every piece one-of-a-kind.
-            </p>
-            <p>
-              Perfect for serving salads, fruits, snacks, or as a stunning decorative 
-              centerpiece. The eco-friendly finish ensures it's food-safe while highlighting the wood's 
-              natural beauty.
-            </p>
-            <ul>
-              <li>Made from sustainable hardwood</li>
-              <li>Unique natural grain patterns and color variations</li>
-              <li>Food-safe, eco-friendly finish</li>
-              <li>Easy to clean and maintain</li>
-              <li>Dimensions: 12" diameter x 4" height</li>
-              <li>Hand wash recommended</li>
-              <li>Perfect for everyday use</li>
-            </ul>
-          </div>
-          
-          <div class="paypal-section">
-            <div id="paypal-button-container" class="paypal-button-container"></div>
-          </div>
-        </div>
+
       </div>
-      
-      <!-- Order Information Sections -->
-      <div class="info-sections">
+
+      <!-- Below-fold: order/capture info sections -->
+      <div class="below-fold">
         <div id="order-info-section" class="info-section" style="display: none;">
           <div id="create-order-info"></div>
         </div>
@@ -96,11 +239,10 @@
           <p>Check Console Log for full API Response</p>
         </div>
       </div>
+
     </div>
-    
-    <!-- StorageManager for enhanced localStorage functionality -->
+
     <script src="/modules/storage-manager.js"></script>
-    
     <script>
       const clientId = '<%= clientId %>';
     </script>

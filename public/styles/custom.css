@@ -34,6 +34,16 @@ body {
   color: white;
 }
 
+.sdk-badge.js-sdk-v6 {
+  background-color: #6f42c1;
+  color: white;
+}
+
+.sdk-badge.js-sdk-v5 {
+  background-color: #e83e8c;
+  color: white;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

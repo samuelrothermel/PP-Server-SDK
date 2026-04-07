@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "mcp__observability-server__ObservabillityV2_getEventDetailWithCorrelationId"
+      "mcp__observability-server__ObservabillityV2_getEventDetailWithCorrelationId",
+      "WebFetch(domain:docs.paypal.ai)"
     ]
   }
 }
