@@ -77,21 +77,13 @@ function loadPayPalSDK() {
 const onApprove = (data, actions) => {
   console.log('onApprove callback triggered');
 
-  return fetch(`/api/orders/${data.orderID}/capture`, {
+  return fetch(`/api/orders/${data.orderID}/authorize`, {
     method: 'POST',
   })
     .then(response => response.json())
     .then(orderData => {
-      if (orderData.error && orderData.error === 'INSTRUMENT_DECLINED') {
-        console.error('Instrument Declined. Restarting checkout.');
-        document.getElementById('capture-order-info').textContent =
-          'Payment declined. Please try again.';
-        paypal.Buttons().render('#paypal-button-container'); // Re-render buttons
-        return;
-      }
-
       console.log(
-        'Capture Order Response: ',
+        'Authorize Order Response: ',
         JSON.stringify(orderData, null, 2)
       );
 
@@ -113,7 +105,7 @@ const onApprove = (data, actions) => {
         }
 
         const amount =
-          orderData.purchase_units?.[0]?.payments?.captures?.[0]?.amount
+          orderData.purchase_units?.[0]?.payments?.authorizations?.[0]?.amount
             ?.value ||
           document.getElementById('product-price')?.textContent ||
           '0.00';
@@ -121,7 +113,7 @@ const onApprove = (data, actions) => {
         const orderMetadata = {
           amount: amount,
           paymentMethod: paymentMethod,
-          status: 'captured',
+          status: 'authorized',
         };
 
         console.log(
