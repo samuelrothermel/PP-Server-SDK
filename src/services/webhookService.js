@@ -147,6 +147,79 @@ export const handleCreditCardCreated = async eventData => {
 };
 
 /**
+ * Handle checkout.order.approved webhook event
+ * @param {object} eventData - Webhook event data
+ */
+export const handleOrderApproved = async eventData => {
+  console.log(
+    'Processing checkout.order.approved webhook:',
+    JSON.stringify(eventData, null, 2)
+  );
+
+  try {
+    const resource = eventData.resource;
+    const orderId = resource.id;
+    const status = resource.status;
+    const payer = resource.payer;
+
+    console.log(`Order approved: ${orderId}, status: ${status}`);
+
+    if (payer) {
+      console.log(`Payer: ${payer.email_address} (${payer.payer_id})`);
+    }
+
+    // TODO: Trigger capture or any post-approval logic here
+
+    return {
+      success: true,
+      message: `Order ${orderId} approved event processed successfully`,
+    };
+  } catch (error) {
+    console.error('Error processing order approved event:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Handle checkout.order.completed webhook event
+ * @param {object} eventData - Webhook event data
+ */
+export const handleOrderCompleted = async eventData => {
+  console.log(
+    'Processing checkout.order.completed webhook:',
+    JSON.stringify(eventData, null, 2)
+  );
+
+  try {
+    const resource = eventData.resource;
+    const orderId = resource.id;
+    const status = resource.status;
+    const purchaseUnits = resource.purchase_units;
+
+    console.log(`Order completed: ${orderId}, status: ${status}`);
+
+    if (purchaseUnits?.length > 0) {
+      const capture = purchaseUnits[0].payments?.captures?.[0];
+      if (capture) {
+        console.log(
+          `Capture ID: ${capture.id}, amount: ${capture.amount.value} ${capture.amount.currency_code}`
+        );
+      }
+    }
+
+    // TODO: Fulfill the order, update your database, send confirmation email, etc.
+
+    return {
+      success: true,
+      message: `Order ${orderId} completed event processed successfully`,
+    };
+  } catch (error) {
+    console.error('Error processing order completed event:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
  * Process incoming webhook events
  * @param {object} eventData - Webhook event data
  * @returns {object} - Processing result
@@ -162,6 +235,12 @@ export const processWebhookEvent = async eventData => {
 
     case 'VAULT.CREDIT-CARD.CREATED':
       return await handleCreditCardCreated(eventData);
+
+    case 'CHECKOUT.ORDER.APPROVED':
+      return await handleOrderApproved(eventData);
+
+    case 'CHECKOUT.ORDER.COMPLETED':
+      return await handleOrderCompleted(eventData);
 
     default:
       console.log(`Unhandled webhook event type: ${eventType}`);
