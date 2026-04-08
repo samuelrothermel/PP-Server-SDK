@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JS SDK v6 — iFrame Buttons</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: transparent; }
+
+    #sdk-loading { text-align: center; padding: 12px 0; color: #888; font-size: 0.9em; }
+
+    .button-stack { display: flex; flex-direction: column; gap: 10px; }
+    .button-stack paypal-button,
+    .button-stack paypal-pay-later-button,
+    .button-stack venmo-button { display: block; width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="sdk-loading">Loading payment methods…</div>
+
+  <div class="button-stack">
+    <paypal-button id="paypal-button" hidden></paypal-button>
+    <paypal-pay-later-button id="pay-later-button" hidden></paypal-pay-later-button>
+    <venmo-button id="venmo-button" hidden></venmo-button>
+  </div>
+
+  <script src="https://www.sandbox.paypal.com/web-sdk/v6/core"></script>
+  <script>const CLIENT_ID = '<%= clientId %>';</script>
+  <script src="/js-sdk-v6-iframe-buttons.js"></script>
+</body>
+</html>

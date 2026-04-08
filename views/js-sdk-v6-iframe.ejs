@@ -3,66 +3,305 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>JS SDK v6 — iFrame Buttons</title>
+  <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+  <title>JS SDK v6 — iFrame Checkout</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: transparent;
-    }
-
-    /* Loading */
-    #sdk-loading {
+    /* ── Page header ── */
+    .page-header {
       text-align: center;
-      padding: 12px 0;
-      color: #888;
-      font-size: 0.9em;
+      margin-bottom: 32px;
+    }
+    .page-header h1 { font-size: 2em; margin-bottom: 8px; color: #1a1a1a; }
+    .page-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .page-header p { color: #666; margin: 0; }
+
+    /* ── Two-column layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+    /* ── Product card ── */
+    .product-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .product-card-inner {
+      display: flex;
+      gap: 0;
+    }
+    .product-image {
+      width: 220px;
+      min-width: 220px;
+      object-fit: cover;
+      border-right: 1px solid #e0e0e0;
+    }
+    .product-details {
+      padding: 24px;
+      flex: 1;
+    }
+    .product-details h2 { margin: 0 0 4px; color: #1a1a1a; font-size: 1.4em; }
+    .product-details .category { font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .product-details .price { font-size: 1.6em; font-weight: 700; color: #0070ba; margin-bottom: 16px; }
+    .product-details p { color: #555; font-size: 0.95em; line-height: 1.6; margin: 0 0 16px; }
+    .product-details ul { color: #555; font-size: 0.9em; padding-left: 18px; margin: 0; }
+    .product-details ul li { margin-bottom: 4px; }
+    @media (max-width: 600px) {
+      .product-card-inner { flex-direction: column; }
+      .product-image { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid #e0e0e0; max-height: 200px; }
     }
 
-    /* Button stack */
-    .button-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    /* ── Checkout panel ── */
+    .checkout-panel {
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      position: sticky;
+      top: 20px;
+      overflow: hidden;
     }
-    .button-stack paypal-button,
-    .button-stack paypal-pay-later-button,
-    .button-stack venmo-button {
-      display: block;
+    .checkout-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f8f9fa;
+    }
+    .checkout-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
+
+    /* Order summary */
+    .order-summary { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9em;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    .summary-row:last-child { margin-bottom: 0; }
+    .summary-row.total {
+      font-weight: 700;
+      font-size: 1em;
+      color: #1a1a1a;
+      padding-top: 8px;
+      margin-top: 4px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .summary-item-name { color: #333; }
+    .summary-qty { color: #888; font-size: 0.85em; margin-left: 4px; }
+
+    /* Buttons area */
+    .buttons-area { padding: 16px 20px; }
+
+    /* iFrame */
+    #paypal-iframe {
       width: 100%;
+      min-height: 60px;
+      border: none;
+      display: block;
+      overflow: hidden;
     }
 
     /* Status */
-    #status-area {
-      margin-top: 10px;
-      padding: 8px 12px;
+    .status-area {
+      margin-top: 12px;
+      padding: 10px 12px;
       border-radius: 6px;
-      font-size: 0.85em;
+      font-size: 0.88em;
       display: none;
     }
-    #status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; }
-    #status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
-    #status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+    .status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; }
+    .status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
+    .status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+
+    /* ── Below-fold ── */
+    .below-fold { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+
+    .dev-note {
+      padding: 12px 16px;
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.85em;
+      color: #888;
+    }
+    .dev-note strong { color: #555; }
+
+    /* Production checklist */
+    .production-checklist { border: 1px solid #d6bcfa; border-radius: 10px; overflow: hidden; }
+    .production-checklist summary {
+      padding: 14px 20px;
+      background: #f5f0ff;
+      font-weight: 600;
+      font-size: 0.95em;
+      color: #6f42c1;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .production-checklist summary::after { content: '▼'; font-size: 0.75em; }
+    .production-checklist[open] summary::after { content: '▲'; }
+    .checklist-body { padding: 20px; background: #fff; }
+    .checklist-body h4 { margin: 16px 0 8px; color: #444; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }
+    .checklist-body h4:first-child { margin-top: 0; }
+    .checklist-body ul { margin: 0 0 8px; padding-left: 20px; }
+    .checklist-body ul li { font-size: 0.9em; color: #555; margin-bottom: 4px; }
+
+    /* Response panel */
+    .response-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; display: none; }
+    .response-panel h3 { margin: 0; padding: 14px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #333; }
+    .response-panel pre {
+      margin: 0; padding: 16px 20px;
+      background: #1e1e1e; color: #d4d4d4;
+      font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5;
+      overflow: auto; max-height: 400px;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px;
+    }
+    .back-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div id="sdk-loading">Loading payment methods…</div>
+  <div class="container">
 
-  <div class="button-stack">
-    <paypal-button id="paypal-button" hidden></paypal-button>
-    <paypal-pay-later-button id="pay-later-button" hidden></paypal-pay-later-button>
-    <venmo-button id="venmo-button" hidden></venmo-button>
+    <a href="/" class="back-link">← Back to Dashboard</a>
+
+    <div class="page-header">
+      <div class="badge-row">
+        <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+      </div>
+      <h1>JS SDK v6 — iFrame Checkout</h1>
+      <p>Isolated payment environment using an <code>&lt;iframe&gt;</code> with cross-frame <code>postMessage</code> communication.</p>
+    </div>
+
+    <div class="layout">
+
+      <!-- Left: product -->
+      <div class="product-card">
+        <div class="product-card-inner">
+          <img
+            class="product-image"
+            src="https://media.istockphoto.com/id/508179654/photo/wooden-bowl-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=c5BqYjY0wgzjMsWsUlj_9uFpi4kT9YWO-_ZKZg4uoxY="
+            alt="Wooden Bowl"
+          />
+          <div class="product-details">
+            <div class="category">Home &amp; Kitchen</div>
+            <h2>Wooden Bowl</h2>
+            <div class="price">$50.00</div>
+            <p>
+              Handcrafted from sustainably sourced hardwood, showcasing unique grain
+              patterns and rich colors that make every piece one-of-a-kind.
+            </p>
+            <ul>
+              <li>Food-safe, eco-friendly finish</li>
+              <li>12" diameter × 4" height</li>
+              <li>Hand wash recommended</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: checkout panel -->
+      <div class="checkout-panel">
+        <div class="checkout-panel-header">
+          <h2>Order Summary</h2>
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-row">
+            <span class="summary-item-name">Wooden Bowl <span class="summary-qty">× 1</span></span>
+            <span>$50.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span>Free</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>$50.00 USD</span>
+          </div>
+        </div>
+
+        <div class="buttons-area">
+          <!-- PayPal buttons run in an isolated iframe -->
+          <iframe
+            id="paypal-iframe"
+            src="/js-sdk-v6/iframe-buttons"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"
+            allow="payment"
+            scrolling="no"
+          ></iframe>
+
+          <div id="status-area" class="status-area"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Below-fold -->
+    <div class="below-fold">
+
+      <div class="dev-note">
+        <strong>iFrame isolation.</strong> PayPal buttons run in a sandboxed <code>&lt;iframe&gt;</code> at <code>/js-sdk-v6/iframe-buttons</code>. The merchant page listens for <code>postMessage</code> events and updates the UI. Origin is validated on every message.
+      </div>
+
+      <details class="production-checklist">
+        <summary>Production Go-Live Checklist</summary>
+        <div class="checklist-body">
+          <h4>Environment</h4>
+          <ul>
+            <li>Replace sandbox SDK URL with production: <code>https://www.paypal.com/web-sdk/v6/core</code></li>
+            <li>Replace sandbox <code>clientId</code> with live credentials</li>
+            <li>Update server-side API base URL to <code>https://api-m.paypal.com</code></li>
+          </ul>
+          <h4>iFrame Security</h4>
+          <ul>
+            <li>Set <code>sandbox</code> attribute: <code>allow-scripts allow-same-origin allow-popups allow-forms</code></li>
+            <li>Always validate <code>event.origin</code> in your <code>postMessage</code> listener</li>
+            <li>Never use <code>targetOrigin: '*'</code> in production — set the exact origin</li>
+            <li>Set <code>allow="payment"</code> permission on the iframe element</li>
+          </ul>
+          <h4>Error Handling</h4>
+          <ul>
+            <li>Handle all postMessage events: <code>payment-flow-approved</code>, <code>payment-flow-canceled</code>, <code>payment-flow-error</code></li>
+            <li>Show user-friendly messages for declines and errors</li>
+            <li>Log errors to your monitoring system (Datadog, Sentry, etc.)</li>
+          </ul>
+          <h4>Webhooks</h4>
+          <ul>
+            <li>Configure <code>PAYMENT.CAPTURE.COMPLETED</code> webhook for order fulfillment</li>
+            <li>Configure <code>PAYMENT.CAPTURE.DENIED</code> for decline handling</li>
+            <li>Validate webhook signatures server-side</li>
+          </ul>
+          <h4>Monitoring &amp; Analytics</h4>
+          <ul>
+            <li>Set up alerting on payment error rates</li>
+            <li>Track conversion funnel (button shown → approved → captured)</li>
+            <li>Test on real devices: iOS Safari, Android Chrome, desktop browsers</li>
+          </ul>
+        </div>
+      </details>
+
+      <div id="response-panel" class="response-panel">
+        <h3>API Response</h3>
+        <pre id="response-content"></pre>
+      </div>
+
+    </div>
+
   </div>
 
-  <div id="status-area"></div>
-
-  <!-- JS SDK v6 (sandbox) -->
-  <script src="https://www.sandbox.paypal.com/web-sdk/v6/core"></script>
-
-  <script>
-    const CLIENT_ID = '<%= clientId %>';
-  </script>
-  <script src="/js-sdk-v6-iframe.js"></script>
+  <script src="/js-sdk-v6-iframe-demo.js"></script>
 </body>
 </html>

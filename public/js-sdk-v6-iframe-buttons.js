@@ -1,26 +1,25 @@
 /**
- * JS SDK v6 — iFrame Buttons (guest-only)
+ * JS SDK v6 — iFrame content page
  *
- * Minimal button-only page for embedding in an iframe.
- * Same flow as the standard page but without page chrome.
+ * Runs inside an iframe embedded in the merchant/host page.
+ * Communicates with the parent via postMessage using standardised event types.
  *
- * Flow:
- *   1. createInstance() with clientId
- *   2. findEligibleMethods() — only show buttons the buyer can use
- *   3. createPayPalOneTimePaymentSession() / createPayLaterOneTimePaymentSession() / createVenmoOneTimePaymentSession()
- *   4. Wire each button click → session.start()
- *   5. onApprove → POST /api/orders/:id/capture → show result
+ * postMessage events sent to parent:
+ *   { type: 'payment-flow-start' }
+ *   { type: 'payment-flow-approved', orderId }
+ *   { type: 'payment-flow-canceled' }
+ *   { type: 'payment-flow-error', message }
+ *   { type: 'presentationMode-changed', mode }
+ *   { type: 'iframe-ready' }
  */
 
 const sdkLoadingEl = document.getElementById('sdk-loading');
-const statusArea = document.getElementById('status-area');
+const PARENT_ORIGIN = window.location.origin;
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function showStatus(message, type = 'info') {
-  statusArea.textContent = message;
-  statusArea.className = type;
-  statusArea.style.display = 'block';
+function postToParent(payload) {
+  if (window.parent !== window) {
+    window.parent.postMessage(payload, PARENT_ORIGIN);
+  }
 }
 
 function hideSdkLoading() {
@@ -37,23 +36,14 @@ async function createOrder() {
       paymentSource: 'paypal',
       totalAmount: '50.00',
       currency: 'USD',
-      items: [
-        {
-          name: 'Wooden Bowl',
-          quantity: 1,
-          unitAmount: '50.00',
-        },
-      ],
+      items: [{ name: 'Wooden Bowl', quantity: 1, unitAmount: '50.00' }],
     }),
   });
 
-  if (!response.ok) {
-    throw new Error(`Order creation failed: ${response.status}`);
-  }
+  if (!response.ok) throw new Error(`Order creation failed: ${response.status}`);
 
   const order = await response.json();
   console.log('[v6-iframe] Order created:', order.id);
-
   return { orderId: order.id };
 }
 
@@ -63,10 +53,7 @@ async function captureOrder(orderId) {
     headers: { 'Content-Type': 'application/json' },
   });
 
-  if (!response.ok) {
-    throw new Error(`Capture failed: ${response.status}`);
-  }
-
+  if (!response.ok) throw new Error(`Capture failed: ${response.status}`);
   return response.json();
 }
 
@@ -75,36 +62,28 @@ async function captureOrder(orderId) {
 function buildPaymentSessionOptions() {
   return {
     async createOrder() {
-      showStatus('Creating order…', 'info');
+      postToParent({ type: 'payment-flow-start' });
       return createOrder();
     },
 
     async onApprove({ orderId }) {
-      showStatus('Payment approved — capturing…', 'info');
       try {
         const captureData = await captureOrder(orderId);
         console.log('[v6-iframe] Capture response:', captureData);
-        showStatus('Payment captured successfully!', 'success');
-        // Notify parent frame if embedded
-        if (window.parent !== window) {
-          window.parent.postMessage({ type: 'PAYPAL_CAPTURE_COMPLETE', data: captureData }, '*');
-        }
+        postToParent({ type: 'payment-flow-approved', orderId, captureData });
       } catch (err) {
         console.error('[v6-iframe] Capture error:', err);
-        showStatus(`Capture failed: ${err.message}`, 'error');
+        postToParent({ type: 'payment-flow-error', message: err.message });
       }
     },
 
     onCancel() {
-      showStatus('Payment cancelled by buyer.', 'info');
-      if (window.parent !== window) {
-        window.parent.postMessage({ type: 'PAYPAL_CANCELLED' }, '*');
-      }
+      postToParent({ type: 'payment-flow-canceled' });
     },
 
     onError(error) {
       console.error('[v6-iframe] Payment error:', error);
-      showStatus(`Payment error: ${error.message || 'Unknown error'}`, 'error');
+      postToParent({ type: 'payment-flow-error', message: error.message || 'Unknown error' });
     },
   };
 }
@@ -113,7 +92,7 @@ function buildPaymentSessionOptions() {
 
 async function init() {
   if (!window.paypal) {
-    showStatus('PayPal JS SDK v6 failed to load.', 'error');
+    postToParent({ type: 'payment-flow-error', message: 'PayPal JS SDK v6 failed to load.' });
     hideSdkLoading();
     return;
   }
@@ -143,10 +122,11 @@ async function init() {
 
       paypalButton.addEventListener('click', async () => {
         try {
+          postToParent({ type: 'presentationMode-changed', mode: 'auto' });
           await paypalSession.start({ presentationMode: 'auto' }, sessionOptions.createOrder());
         } catch (err) {
           if (!err.isRecoverable) {
-            showStatus(`PayPal error: ${err.message}`, 'error');
+            postToParent({ type: 'payment-flow-error', message: err.message });
           }
         }
       });
@@ -163,10 +143,11 @@ async function init() {
 
       payLaterButton.addEventListener('click', async () => {
         try {
+          postToParent({ type: 'presentationMode-changed', mode: 'auto' });
           await payLaterSession.start({ presentationMode: 'auto' }, sessionOptions.createOrder());
         } catch (err) {
           if (!err.isRecoverable) {
-            showStatus(`Pay Later error: ${err.message}`, 'error');
+            postToParent({ type: 'payment-flow-error', message: err.message });
           }
         }
       });
@@ -180,27 +161,22 @@ async function init() {
 
       venmoButton.addEventListener('click', async () => {
         try {
+          postToParent({ type: 'presentationMode-changed', mode: 'auto' });
           await venmoSession.start({ presentationMode: 'auto' }, sessionOptions.createOrder());
         } catch (err) {
           if (!err.isRecoverable) {
-            showStatus(`Venmo error: ${err.message}`, 'error');
+            postToParent({ type: 'payment-flow-error', message: err.message });
           }
         }
       });
     }
 
-    if (
-      !eligibleMethods.isEligible('paypal') &&
-      !eligibleMethods.isEligible('paylater') &&
-      !eligibleMethods.isEligible('venmo')
-    ) {
-      showStatus('No eligible payment methods for this buyer / region.', 'info');
-    }
+    postToParent({ type: 'iframe-ready' });
 
   } catch (err) {
     console.error('[v6-iframe] Init error:', err);
     hideSdkLoading();
-    showStatus(`SDK initialization failed: ${err.message}`, 'error');
+    postToParent({ type: 'payment-flow-error', message: err.message });
   }
 }
 
