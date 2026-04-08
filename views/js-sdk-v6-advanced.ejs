@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/styles/checkout.css" />
+  <title>JS SDK v6 — Advanced Checkout</title>
+  <style>
+    /* ── v6 badge row ── */
+    .v6-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .v6-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .sdk-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.78em;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .sdk-badge.js-sdk-v6  { background: #e8f0fe; color: #1a56db; border: 1px solid #c3d3fc; }
+    .sdk-badge.server-sdk { background: #e6f4ea; color: #1e7e34; border: 1px solid #b7dfbf; }
+
+    /* ── Presentation mode selector ── */
+    .mode-selector {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .mode-selector h4 { margin: 0 0 10px; font-size: 0.95em; color: #333; font-weight: 600; }
+    .mode-options { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mode-options label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.88em; color: #555; cursor: pointer;
+      padding: 5px 10px; border: 1px solid #dee2e6; border-radius: 6px;
+      background: #fff; transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-options label:hover { border-color: #0070ba; background: #f0f7ff; }
+    .mode-options input[type=radio]:checked + span {
+      color: #0070ba; font-weight: 600;
+    }
+    .mode-options label:has(input:checked) { border-color: #0070ba; background: #e3f2fd; }
+
+    /* ── v6 button web components inside payment options ── */
+    .payment-method-buttons paypal-button,
+    .payment-method-buttons paypal-pay-later-button,
+    .payment-method-buttons venmo-button {
+      display: block;
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto;
+    }
+
+    /* ── Status / response ── */
+    .status-bar {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.88em;
+      margin-top: 10px;
+      display: none;
+    }
+    .status-bar.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; }
+    .status-bar.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
+    .status-bar.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+
+    /* ── Below-fold ── */
+    .dev-note {
+      padding: 12px 16px;
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.85em;
+      color: #888;
+      margin-top: 24px;
+    }
+    .dev-note strong { color: #555; }
+
+    .response-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; display: none; margin-top: 16px; }
+    .response-panel h3 { margin: 0; padding: 12px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #333; }
+    .response-panel pre {
+      margin: 0; padding: 16px 20px;
+      background: #1e1e1e; color: #d4d4d4;
+      font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5;
+      overflow: auto; max-height: 400px;
+    }
+
+    /* back link */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 20px;
+    }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <a href="/" class="back-link">← Back to Dashboard</a>
+
+    <div class="v6-header">
+      <div class="badge-row">
+        <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+      </div>
+      <header>
+        <h1>JS SDK v6 — Advanced Checkout</h1>
+      </header>
+    </div>
+
+    <div class="checkout-layout">
+
+      <!-- ── LEFT: order summary + presentation mode + shipping options ── -->
+      <div class="checkout-left">
+
+        <div class="order-summary">
+          <h3>Order Summary</h3>
+          <div class="order-row">
+            <span>Cart Total:</span>
+            <span>$<span id="cart-total">100.00</span></span>
+          </div>
+          <div class="order-row">
+            <span>Shipping:</span>
+            <span>$<span id="shipping-amount">0.00</span></span>
+          </div>
+          <div class="order-row total">
+            <span>Checkout Total:</span>
+            <span>$<span id="amount-total">100.00</span></span>
+          </div>
+        </div>
+
+        <!-- Presentation Mode Selector -->
+        <div class="mode-selector">
+          <h4>Presentation Mode</h4>
+          <div class="mode-options">
+            <label>
+              <input type="radio" name="presentation-mode" value="auto" checked>
+              <span>auto</span>
+            </label>
+            <label>
+              <input type="radio" name="presentation-mode" value="payment-handler">
+              <span>payment-handler</span>
+            </label>
+            <label>
+              <input type="radio" name="presentation-mode" value="popup">
+              <span>popup</span>
+            </label>
+            <label>
+              <input type="radio" name="presentation-mode" value="modal">
+              <span>modal</span>
+            </label>
+            <label>
+              <input type="radio" name="presentation-mode" value="fallback">
+              <span>fallback loop</span>
+            </label>
+          </div>
+          <p style="margin: 8px 0 0; font-size: 0.8em; color: #999;">
+            <em>fallback loop</em> tries payment-handler → popup → modal, skipping unrecoverable errors.
+          </p>
+        </div>
+
+        <!-- Shipping Options -->
+        <div class="checkout-section">
+          <h4>Shipping Options</h4>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" id="free-shipping" name="shipping-option" value="0" checked />
+              <label for="free-shipping">Free Shipping ($0)</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="expedited-shipping" name="shipping-option" value="10" />
+              <label for="expedited-shipping">Expedited Shipping ($10)</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- SDK Loading indicator -->
+        <div id="sdk-loading" style="text-align:center; padding:12px; color:#888; font-size:0.9em;">
+          Loading payment methods…
+        </div>
+
+        <div id="status-bar" class="status-bar"></div>
+
+      </div>
+
+      <!-- ── RIGHT: shipping info + payment methods ── -->
+      <div class="checkout-right">
+
+        <!-- Shipping Information -->
+        <div class="checkout-section">
+          <h4>Shipping Information</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="shipping-first-name">First Name</label>
+              <input type="text" id="shipping-first-name" value="Theodor" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="shipping-last-name">Last Name</label>
+              <input type="text" id="shipping-last-name" value="Adorno" class="form-control" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="shipping-email">Email Address</label>
+              <input type="email" id="shipping-email" value="theodor.adorno@example.com" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="shipping-phone">Phone Number</label>
+              <input type="text" id="shipping-phone" value="1234567890" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:15px;">
+            <label for="shipping-address-line1">Street Address</label>
+            <input type="text" id="shipping-address-line1" value="123 Main St" class="form-control" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="shipping-city">City</label>
+              <input type="text" id="shipping-city" value="Springfield" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="shipping-state">State</label>
+              <input type="text" id="shipping-state" value="IL" class="form-control" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="shipping-postal-code">Zip Code</label>
+              <input type="text" id="shipping-postal-code" value="62701" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="shipping-country-code">Country</label>
+              <input type="text" id="shipping-country-code" value="US" class="form-control" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="checkout-section">
+          <h4>Select Payment Method</h4>
+
+          <div id="payment-methods-container">
+
+            <!-- PayPal -->
+            <div class="payment-method-option" id="paypal-option" style="display:none;">
+              <input type="radio" name="payment-method" id="paypal-radio" value="paypal" checked>
+              <label for="paypal-radio" class="payment-method-label">
+                <div>PayPal</div>
+              </label>
+              <div class="payment-method-buttons">
+                <paypal-button id="paypal-button" style="display:block;width:100%;max-width:350px;margin:0 auto;"></paypal-button>
+              </div>
+            </div>
+
+            <!-- Pay Later -->
+            <div class="payment-method-option" id="paylater-option" style="display:none;">
+              <input type="radio" name="payment-method" id="paylater-radio" value="paylater">
+              <label for="paylater-radio" class="payment-method-label">
+                <div>Pay Later</div>
+              </label>
+              <div class="payment-method-buttons">
+                <paypal-pay-later-button id="pay-later-button" style="display:block;width:100%;max-width:350px;margin:0 auto;"></paypal-pay-later-button>
+              </div>
+            </div>
+
+            <!-- Venmo -->
+            <div class="payment-method-option" id="venmo-option" style="display:none;">
+              <input type="radio" name="payment-method" id="venmo-radio" value="venmo">
+              <label for="venmo-radio" class="payment-method-label">
+                <div>Venmo</div>
+              </label>
+              <div class="payment-method-buttons">
+                <venmo-button id="venmo-button" style="display:block;width:100%;max-width:350px;margin:0 auto;"></venmo-button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Below-fold -->
+    <div class="dev-note">
+      <strong>Presentation modes.</strong> The advanced integration lets you choose how PayPal opens the payment UI: <code>auto</code> (SDK decides), <code>payment-handler</code> (Payment Request API), <code>popup</code>, <code>modal</code>, or a <strong>fallback loop</strong> that tries each mode in order and skips unrecoverable errors per the SDK v6 docs.
+    </div>
+
+    <div id="response-panel" class="response-panel">
+      <h3>API Response</h3>
+      <pre id="response-content"></pre>
+    </div>
+
+  </div>
+
+  <!-- JS SDK v6 (sandbox) -->
+  <script src="https://www.sandbox.paypal.com/web-sdk/v6/core"></script>
+
+  <script>
+    const CLIENT_ID = '<%= clientId %>';
+  </script>
+  <script src="/js-sdk-v6-advanced.js"></script>
+</body>
+</html>

@@ -36,3 +36,4 @@ export const renderCrypto = renderPage('crypto');
 export const renderJsSdkV6Standard = renderPage('js-sdk-v6-standard');
 export const renderJsSdkV6Iframe = renderPage('js-sdk-v6-iframe');
 export const renderJsSdkV6IframeButtons = renderPage('js-sdk-v6-iframe-buttons');
+export const renderJsSdkV6Advanced = renderPage('js-sdk-v6-advanced');
