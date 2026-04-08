@@ -31,19 +31,40 @@
       padding: 15px;
       margin-bottom: 20px;
     }
-    .mode-selector h4 { margin: 0 0 10px; font-size: 0.95em; color: #333; font-weight: 600; }
-    .mode-options { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mode-selector h4 { margin: 0 0 12px; font-size: 0.95em; color: #333; font-weight: 600; }
+    .mode-options { display: flex; flex-direction: column; gap: 8px; }
     .mode-options label {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 0.88em; color: #555; cursor: pointer;
-      padding: 5px 10px; border: 1px solid #dee2e6; border-radius: 6px;
-      background: #fff; transition: border-color 0.15s, background 0.15s;
+      display: grid;
+      grid-template-columns: 16px 1fr;
+      gap: 0 10px;
+      align-items: start;
+      cursor: pointer;
+      padding: 10px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 7px;
+      background: #fff;
+      transition: border-color 0.15s, background 0.15s;
     }
     .mode-options label:hover { border-color: #0070ba; background: #f0f7ff; }
-    .mode-options input[type=radio]:checked + span {
-      color: #0070ba; font-weight: 600;
+    .mode-options label:has(input:checked) { border-color: #0070ba; background: #e8f4fd; }
+    .mode-options input[type=radio] { margin-top: 3px; accent-color: #0070ba; }
+    .mode-label-body { display: flex; flex-direction: column; gap: 2px; }
+    .mode-label-title {
+      font-size: 0.88em; font-weight: 600; color: #1a1a1a;
+      display: flex; align-items: center; gap: 6px;
     }
-    .mode-options label:has(input:checked) { border-color: #0070ba; background: #e3f2fd; }
+    .mode-label-title code {
+      font-family: 'Courier New', monospace; font-size: 0.95em;
+      background: #f1f3f5; padding: 1px 5px; border-radius: 3px; color: #0070ba;
+    }
+    .mode-badge {
+      font-size: 0.7em; font-weight: 600; padding: 1px 6px; border-radius: 10px;
+      vertical-align: middle; white-space: nowrap;
+    }
+    .mode-badge.chrome-only { background: #fef9e7; color: #b7770d; border: 1px solid #f9e4a0; }
+    .mode-badge.all-browsers { background: #e6f4ea; color: #1e7e34; border: 1px solid #b7dfbf; }
+    .mode-badge.recommended { background: #e8f4fd; color: #1a56db; border: 1px solid #c3d3fc; }
+    .mode-label-desc { font-size: 0.8em; color: #666; line-height: 1.45; }
 
     /* ── v6 button web components inside payment options ── */
     .payment-method-buttons paypal-button,
@@ -136,30 +157,64 @@
         <div class="mode-selector">
           <h4>Presentation Mode</h4>
           <div class="mode-options">
+
             <label>
               <input type="radio" name="presentation-mode" value="auto" checked>
-              <span>auto</span>
+              <div class="mode-label-body">
+                <div class="mode-label-title">
+                  <code>auto</code>
+                  <span class="mode-badge recommended">Recommended</span>
+                  <span class="mode-badge all-browsers">All browsers</span>
+                </div>
+                <div class="mode-label-desc">SDK picks the best mode for the current browser and device. Use this in production unless you have a specific reason to override.</div>
+              </div>
             </label>
+
             <label>
               <input type="radio" name="presentation-mode" value="payment-handler">
-              <span>payment-handler</span>
+              <div class="mode-label-body">
+                <div class="mode-label-title">
+                  <code>payment-handler</code>
+                  <span class="mode-badge chrome-only">Chrome only</span>
+                </div>
+                <div class="mode-label-desc">Uses the browser's Payment Handler API to open PayPal as a native payment sheet — no pop-up or redirect. Requires Chrome; other browsers will throw a recoverable error.</div>
+              </div>
             </label>
+
             <label>
               <input type="radio" name="presentation-mode" value="popup">
-              <span>popup</span>
+              <div class="mode-label-body">
+                <div class="mode-label-title">
+                  <code>popup</code>
+                  <span class="mode-badge all-browsers">All browsers</span>
+                </div>
+                <div class="mode-label-desc">Opens the PayPal login and review flow in a classic browser pop-up window. May be blocked by pop-up blockers if not triggered directly from a user click.</div>
+              </div>
             </label>
+
             <label>
               <input type="radio" name="presentation-mode" value="modal">
-              <span>modal</span>
+              <div class="mode-label-body">
+                <div class="mode-label-title">
+                  <code>modal</code>
+                  <span class="mode-badge all-browsers">All browsers</span>
+                </div>
+                <div class="mode-label-desc">Renders the PayPal flow in an in-page overlay modal. Keeps the buyer on your page throughout the experience — no new window or redirect.</div>
+              </div>
             </label>
+
             <label>
               <input type="radio" name="presentation-mode" value="fallback">
-              <span>fallback loop</span>
+              <div class="mode-label-body">
+                <div class="mode-label-title">
+                  <code>fallback loop</code>
+                  <span class="mode-badge all-browsers">All browsers</span>
+                </div>
+                <div class="mode-label-desc">Tries <code>payment-handler</code> → <code>popup</code> → <code>modal</code> in order. If a mode fails with a recoverable error (e.g. unsupported browser) it moves to the next. Demonstrates the SDK's <code>isRecoverable</code> error flag.</div>
+              </div>
             </label>
+
           </div>
-          <p style="margin: 8px 0 0; font-size: 0.8em; color: #999;">
-            <em>fallback loop</em> tries payment-handler → popup → modal, skipping unrecoverable errors.
-          </p>
         </div>
 
         <!-- Shipping Options -->
