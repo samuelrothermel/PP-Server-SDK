@@ -34,3 +34,4 @@ export const renderPayouts = renderPage('payouts');
 export const renderVenmo = renderPage('venmo');
 export const renderCrypto = renderPage('crypto');
 export const renderJsSdkV6Standard = renderPage('js-sdk-v6-standard');
+export const renderJsSdkV6Iframe = renderPage('js-sdk-v6-iframe');

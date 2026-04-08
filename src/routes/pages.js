@@ -20,6 +20,7 @@ import {
   renderVenmo,
   renderCrypto,
   renderJsSdkV6Standard,
+  renderJsSdkV6Iframe,
 } from '../controllers/pageController.js';
 
 const router = express.Router();
@@ -45,6 +46,7 @@ router.get('/payouts', renderPayouts);
 router.get('/venmo', renderVenmo);
 router.get('/crypto', renderCrypto);
 router.get('/js-sdk-v6/standard', renderJsSdkV6Standard);
+router.get('/js-sdk-v6/iframe', renderJsSdkV6Iframe);
 router.get('/api/payouts/oauth/callback', (req, res) => {
   res.render('paypal-oauth-callback');
 });

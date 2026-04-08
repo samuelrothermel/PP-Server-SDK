@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JS SDK v6 — iFrame Buttons</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: transparent;
+    }
+
+    /* Loading */
+    #sdk-loading {
+      text-align: center;
+      padding: 12px 0;
+      color: #888;
+      font-size: 0.9em;
+    }
+
+    /* Button stack */
+    .button-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .button-stack paypal-button,
+    .button-stack paypal-pay-later-button,
+    .button-stack venmo-button {
+      display: block;
+      width: 100%;
+    }
+
+    /* Status */
+    #status-area {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      display: none;
+    }
+    #status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; }
+    #status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
+    #status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+  </style>
+</head>
+<body>
+  <div id="sdk-loading">Loading payment methods…</div>
+
+  <div class="button-stack">
+    <paypal-button id="paypal-button" hidden></paypal-button>
+    <paypal-pay-later-button id="pay-later-button" hidden></paypal-pay-later-button>
+    <venmo-button id="venmo-button" hidden></venmo-button>
+  </div>
+
+  <div id="status-area"></div>
+
+  <!-- JS SDK v6 (sandbox) -->
+  <script src="https://www.sandbox.paypal.com/web-sdk/v6/core"></script>
+
+  <script>
+    const CLIENT_ID = '<%= clientId %>';
+  </script>
+  <script src="/js-sdk-v6-iframe.js"></script>
+</body>
+</html>
