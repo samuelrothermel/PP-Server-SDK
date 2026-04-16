@@ -17,54 +17,6 @@
     }
     .back-link:hover { text-decoration: underline; }
 
-    .layout {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 24px;
-      align-items: start;
-    }
-    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
-
-    /* Config panel */
-    .config-panel {
-      border: 1px solid #e0e0e0;
-      border-radius: 10px;
-      background: #fff;
-      position: sticky;
-      top: 20px;
-      overflow: hidden;
-    }
-    .config-panel-header {
-      padding: 14px 20px;
-      border-bottom: 1px solid #e0e0e0;
-      background: #f8f9fa;
-    }
-    .config-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
-    .config-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
-
-    .field-group label {
-      display: block;
-      font-size: 0.82em;
-      font-weight: 600;
-      color: #555;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      margin-bottom: 5px;
-    }
-    .field-group select {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #d0d0d0;
-      border-radius: 6px;
-      font-size: 0.9em;
-      box-sizing: border-box;
-    }
-    .field-group select:focus {
-      outline: none;
-      border-color: #0070ba;
-      box-shadow: 0 0 0 2px rgba(0,112,186,0.15);
-    }
-
     .run-btn {
       width: 100%;
       padding: 10px;
@@ -180,36 +132,10 @@
       <p>Test <code>isEligible()</code> keys for Guest Card Fields (BCDC) and Advanced Card Fields (ACDC).</p>
     </div>
 
-    <div class="layout">
-
-      <!-- Config -->
-      <div class="config-panel">
-        <div class="config-panel-header">
-          <h2>Parameters</h2>
-        </div>
-        <div class="config-body">
-          <div class="field-group">
-            <label>Currency</label>
-            <select id="currency-code">
-              <option value="USD" selected>USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-              <option value="CAD">CAD</option>
-              <option value="AUD">AUD</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label>Page Type</label>
-            <select id="page-type">
-              <option value="checkout" selected>checkout</option>
-              <option value="product-listing">product-listing</option>
-              <option value="cart">cart</option>
-              <option value="home">home</option>
-            </select>
-          </div>
-          <button id="run-btn" class="run-btn">Run Tests</button>
-          <div id="status-area" class="status-area"></div>
-        </div>
+    <div style="max-width: 600px; margin: 0 auto;">
+      <div style="text-align:center; margin-bottom: 20px;">
+        <button id="run-btn" class="run-btn" style="width:auto; padding: 10px 32px;">Run Tests</button>
+        <div id="status-area" class="status-area" style="margin-top: 12px;"></div>
       </div>
 
       <!-- Results -->

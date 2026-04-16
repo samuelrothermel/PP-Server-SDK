@@ -61,20 +61,17 @@ async function runTests() {
   advBody.innerHTML = '';
   showStatus('Initializing SDK…', 'info');
 
-  const currency = document.getElementById('currency-code').value;
-  const pageType = document.getElementById('page-type').value;
-
   try {
     const sdkInstance = await window.paypal.createInstance({
       clientId: CLIENT_ID,
       components: ['paypal-payments'],
-      pageType,
+      pageType: 'checkout',
       locale: 'en-US',
       clientMetadataId: crypto.randomUUID(),
     });
 
     showStatus('Calling findEligibleMethods()…', 'info');
-    const pm = await sdkInstance.findEligibleMethods({ currency, paymentFlow: 'ONE_TIME_PAYMENT' });
+    const pm = await sdkInstance.findEligibleMethods({ currency: 'USD', paymentFlow: 'ONE_TIME_PAYMENT' });
     console.log('[v6] findEligibleMethods() object:', pm);
 
     GUEST_CANDIDATES.forEach(key => {
