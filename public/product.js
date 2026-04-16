@@ -77,7 +77,7 @@ function loadPayPalSDK() {
 const onApprove = (data, actions) => {
   console.log('onApprove callback triggered');
 
-  return fetch(`/api/orders/${data.orderID}/authorize`, {
+  return fetch(`/api/orders/${data.orderID}/capture`, {
     method: 'POST',
   })
     .then(response => response.json())
@@ -105,7 +105,7 @@ const onApprove = (data, actions) => {
         }
 
         const amount =
-          orderData.purchase_units?.[0]?.payments?.authorizations?.[0]?.amount
+          orderData.purchase_units?.[0]?.payments?.captures?.[0]?.amount
             ?.value ||
           document.getElementById('product-price')?.textContent ||
           '0.00';
@@ -113,7 +113,7 @@ const onApprove = (data, actions) => {
         const orderMetadata = {
           amount: amount,
           paymentMethod: paymentMethod,
-          status: 'authorized',
+          status: 'captured',
         };
 
         console.log(

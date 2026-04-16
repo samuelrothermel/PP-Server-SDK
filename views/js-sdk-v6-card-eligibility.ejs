@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+  <title>JS SDK v6 — Card Eligibility Testing (BCDC &amp; ACDC)</title>
+  <style>
+    /* ── Page header ── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .page-header h1 { font-size: 2em; margin-bottom: 8px; color: #1a1a1a; }
+    .page-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .page-header p { color: #666; margin: 0; }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+    /* ── Config panel ── */
+    .config-panel {
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fff;
+      position: sticky;
+      top: 20px;
+      overflow: hidden;
+    }
+    .config-panel-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f8f9fa;
+    }
+    .config-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
+    .config-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+    .field-group label {
+      display: block;
+      font-size: 0.82em;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 5px;
+    }
+    .field-group input, .field-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 0.9em;
+      box-sizing: border-box;
+    }
+    .field-group input:focus, .field-group select:focus {
+      outline: none;
+      border-color: #0070ba;
+      box-shadow: 0 0 0 2px rgba(0,112,186,0.15);
+    }
+
+    .run-btn {
+      width: 100%;
+      padding: 10px;
+      background: #0070ba;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .run-btn:hover { background: #005ea6; }
+    .run-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    .status-area {
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      display: none;
+    }
+    .status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; display: block; }
+    .status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; display: block; }
+    .status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; display: block; }
+
+    /* ── Results area ── */
+    .results-area { display: flex; flex-direction: column; gap: 20px; }
+
+    /* Section cards */
+    .result-section {
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .result-section-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .result-section-header h3 {
+      margin: 0;
+      font-size: 0.95em;
+      color: #333;
+      font-weight: 600;
+    }
+    .section-tag {
+      font-size: 0.75em;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .tag-acdc { background: #e9d8fd; color: #6b21a8; }
+    .tag-bcdc { background: #dbeafe; color: #1e3a8a; }
+    .tag-details { background: #fef3c7; color: #92400e; }
+
+    .result-body { padding: 16px 20px; }
+
+    /* ── Candidate rows ── */
+    .candidate-table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+    .candidate-table th {
+      text-align: left;
+      padding: 6px 10px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e0e0e0;
+      color: #555;
+      font-size: 0.8em;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .candidate-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+    .candidate-table tr:last-child td { border-bottom: none; }
+
+    .candidate-key {
+      font-family: 'Courier New', monospace;
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #333;
+    }
+
+    .badge-true {
+      display: inline-block;
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+      border-radius: 4px;
+      padding: 1px 8px;
+      font-size: 0.85em;
+      font-weight: 700;
+    }
+    .badge-false {
+      display: inline-block;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      border-radius: 4px;
+      padding: 1px 8px;
+      font-size: 0.85em;
+      font-weight: 700;
+    }
+    .badge-pending {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #9ca3af;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 1px 8px;
+      font-size: 0.85em;
+    }
+
+    /* ── getDetails panels ── */
+    .details-block {
+      margin-top: 8px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.82em;
+      line-height: 1.5;
+      overflow: auto;
+      max-height: 200px;
+      display: none;
+    }
+
+    /* ── Notes box ── */
+    .notes-box {
+      padding: 12px 16px;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      font-size: 0.85em;
+      color: #78350f;
+      line-height: 1.6;
+    }
+    .notes-box strong { color: #92400e; }
+
+    /* ── Below fold ── */
+    .below-fold { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+    .raw-log-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; }
+    .raw-log-panel summary {
+      padding: 14px 20px;
+      background: #f8f9fa;
+      font-weight: 600;
+      font-size: 0.95em;
+      color: #333;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .raw-log-panel summary::after { content: '▼'; font-size: 0.75em; }
+    .raw-log-panel[open] summary::after { content: '▲'; }
+    .raw-log-panel pre {
+      margin: 0; padding: 16px 20px;
+      background: #1e1e1e; color: #d4d4d4;
+      font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5;
+      overflow: auto; max-height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <a href="/" class="back-link">← Back to Dashboard</a>
+
+    <div class="page-header">
+      <div class="badge-row">
+        <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+      </div>
+      <h1>Card Eligibility Testing — BCDC &amp; ACDC</h1>
+      <p>Probe <code>isEligible()</code> and <code>getDetails()</code> for all known and candidate card-field keys.</p>
+    </div>
+
+    <div class="layout">
+
+      <!-- Left: config panel -->
+      <div class="config-panel">
+        <div class="config-panel-header">
+          <h2>Test Parameters</h2>
+        </div>
+        <div class="config-body">
+
+          <div class="field-group">
+            <label>Currency Code</label>
+            <select id="currency-code">
+              <option value="USD" selected>USD (recommended)</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="CAD">CAD</option>
+              <option value="AUD">AUD</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Country Code</label>
+            <select id="country-code">
+              <option value="US" selected>US (recommended)</option>
+              <option value="GB">GB</option>
+              <option value="DE">DE</option>
+              <option value="CA">CA</option>
+              <option value="AU">AU</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Amount</label>
+            <input type="text" id="amount" value="100.00" placeholder="e.g. 100.00" />
+          </div>
+
+          <div class="field-group">
+            <label>Page Type</label>
+            <select id="page-type">
+              <option value="checkout" selected>checkout</option>
+              <option value="product-listing">product-listing</option>
+              <option value="cart">cart</option>
+              <option value="home">home</option>
+            </select>
+          </div>
+
+          <button id="run-btn" class="run-btn">Run Eligibility Tests</button>
+          <div id="status-area" class="status-area"></div>
+
+        </div>
+      </div>
+
+      <!-- Right: results -->
+      <div class="results-area" id="results-area">
+
+        <div class="notes-box">
+          <strong>How this works:</strong> Click <em>Run Eligibility Tests</em> to call
+          <code>createInstance()</code> then <code>findEligibleMethods()</code> with your chosen
+          parameters. All candidate keys for ACDC and BCDC are then probed with
+          <code>isEligible()</code>. Any key returning <code>true</code> also gets
+          <code>getDetails()</code> called automatically, and the result is shown below the row.
+        </div>
+
+        <!-- ACDC section -->
+        <div class="result-section" id="section-acdc">
+          <div class="result-section-header">
+            <h3>Advanced Card Fields (ACDC)</h3>
+            <span class="section-tag tag-acdc">ACDC</span>
+          </div>
+          <div class="result-body">
+            <table class="candidate-table">
+              <thead>
+                <tr>
+                  <th>Key passed to isEligible()</th>
+                  <th>Result</th>
+                  <th>getDetails()</th>
+                </tr>
+              </thead>
+              <tbody id="acdc-rows">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- BCDC section -->
+        <div class="result-section" id="section-bcdc">
+          <div class="result-section-header">
+            <h3>Basic / Branded Card Fields (BCDC)</h3>
+            <span class="section-tag tag-bcdc">BCDC</span>
+          </div>
+          <div class="result-body">
+            <p style="font-size:0.85em;color:#666;margin:0 0 12px;">
+              No confirmed <code>isEligible()</code> key for BCDC has been found yet — it may
+              render unconditionally for configured merchants. All candidates below are exploratory.
+            </p>
+            <table class="candidate-table">
+              <thead>
+                <tr>
+                  <th>Key passed to isEligible()</th>
+                  <th>Result</th>
+                  <th>getDetails()</th>
+                </tr>
+              </thead>
+              <tbody id="bcdc-rows">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- All methods dump -->
+        <div class="result-section" id="section-all">
+          <div class="result-section-header">
+            <h3>All Known SDK v6 Eligibility Keys</h3>
+            <span class="section-tag tag-details">Reference</span>
+          </div>
+          <div class="result-body">
+            <p style="font-size:0.85em;color:#666;margin:0 0 12px;">
+              Known working keys from the SDK v6 documentation and thread findings, tested for completeness.
+            </p>
+            <table class="candidate-table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Result</th>
+                  <th>getDetails()</th>
+                </tr>
+              </thead>
+              <tbody id="all-rows">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Below fold -->
+    <div class="below-fold">
+      <details class="raw-log-panel" id="raw-log-panel">
+        <summary>Raw Console Log / Full findEligibleMethods() Response</summary>
+        <pre id="raw-log-content">Run the tests to see the full response here.</pre>
+      </details>
+    </div>
+
+  </div>
+
+  <script src="https://www.sandbox.paypal.com/web-sdk/v6/core"></script>
+  <script>
+    const CLIENT_ID = '<%= clientId %>';
+  </script>
+  <script src="/js-sdk-v6-card-eligibility.js"></script>
+</body>
+</html>

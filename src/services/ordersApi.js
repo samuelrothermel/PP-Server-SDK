@@ -498,7 +498,7 @@ export const createUpstreamQlOrder = async (
   }
 
   const payload = {
-    intent: 'AUTHORIZE',
+    intent: 'CAPTURE',
     payment_source: payment_source,
     purchase_units: [
       {

@@ -23,6 +23,7 @@ import {
   renderJsSdkV6Iframe,
   renderJsSdkV6IframeButtons,
   renderJsSdkV6Advanced,
+  renderJsSdkV6CardEligibility,
 } from '../controllers/pageController.js';
 
 const router = express.Router();
@@ -51,6 +52,7 @@ router.get('/js-sdk-v6/standard', renderJsSdkV6Standard);
 router.get('/js-sdk-v6/iframe', renderJsSdkV6Iframe);
 router.get('/js-sdk-v6/iframe-buttons', renderJsSdkV6IframeButtons);
 router.get('/js-sdk-v6/advanced', renderJsSdkV6Advanced);
+router.get('/js-sdk-v6/card-eligibility', renderJsSdkV6CardEligibility);
 router.get('/api/payouts/oauth/callback', (req, res) => {
   res.render('paypal-oauth-callback');
 });
