@@ -265,7 +265,7 @@
         <div class="config-body">
 
           <div class="field-group">
-            <label>Currency Code</label>
+            <label>Currency</label>
             <select id="currency-code">
               <option value="USD" selected>USD (recommended)</option>
               <option value="EUR">EUR</option>
@@ -273,22 +273,6 @@
               <option value="CAD">CAD</option>
               <option value="AUD">AUD</option>
             </select>
-          </div>
-
-          <div class="field-group">
-            <label>Country Code</label>
-            <select id="country-code">
-              <option value="US" selected>US (recommended)</option>
-              <option value="GB">GB</option>
-              <option value="DE">DE</option>
-              <option value="CA">CA</option>
-              <option value="AU">AU</option>
-            </select>
-          </div>
-
-          <div class="field-group">
-            <label>Amount</label>
-            <input type="text" id="amount" value="100.00" placeholder="e.g. 100.00" />
           </div>
 
           <div class="field-group">
@@ -300,6 +284,11 @@
               <option value="home">home</option>
             </select>
           </div>
+
+          <p style="font-size:0.8em;color:#888;margin:0;">
+            <code>findEligibleMethods()</code> only accepts <code>currency</code> as a documented
+            parameter in SDK v6. Country and amount are not passed.
+          </p>
 
           <button id="run-btn" class="run-btn">Run Eligibility Tests</button>
           <div id="status-area" class="status-area"></div>

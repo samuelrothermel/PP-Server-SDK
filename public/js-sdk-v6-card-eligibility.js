@@ -110,10 +110,14 @@ function resetTables() {
   [acdcTbody, bcdcTbody, allTbody].forEach(clearTable);
 }
 
+function rowDataKey(key) {
+  return key.replace(/[^a-z0-9]/gi, '_');
+}
+
 function appendPendingRows(tbody, candidates) {
   candidates.forEach(key => {
     const tr = document.createElement('tr');
-    tr.id = `row-${key.replace(/[^a-z0-9]/gi, '_')}`;
+    tr.dataset.key = rowDataKey(key);
     tr.innerHTML = `
       <td><span class="candidate-key">"${key}"</span></td>
       <td><span class="badge-pending">…</span></td>
@@ -124,10 +128,10 @@ function appendPendingRows(tbody, candidates) {
 }
 
 function updateRow(tbody, key, eligible, details) {
-  const id = `row-${key.replace(/[^a-z0-9]/gi, '_')}`;
-  const existing = document.getElementById(id);
+  const dataKey = rowDataKey(key);
+  const existing = tbody.querySelector(`tr[data-key="${dataKey}"]`);
   const newRow = buildRow(key, eligible, details);
-  newRow.id = id;
+  newRow.dataset.key = dataKey;
   if (existing) {
     tbody.replaceChild(newRow, existing);
   } else {
@@ -178,10 +182,8 @@ async function runTests() {
   appendPendingRows(bcdcTbody, BCDC_CANDIDATES);
   appendPendingRows(allTbody,  ALL_KNOWN_KEYS);
 
-  const currencyCode = document.getElementById('currency-code').value;
-  const countryCode  = document.getElementById('country-code').value;
-  const amount       = document.getElementById('amount').value.trim() || '100.00';
-  const pageType     = document.getElementById('page-type').value;
+  const currency  = document.getElementById('currency-code').value;
+  const pageType  = document.getElementById('page-type').value;
 
   try {
     const sdkInstance = await window.paypal.createInstance({
@@ -195,11 +197,8 @@ async function runTests() {
 
     showStatus('Calling findEligibleMethods()…', 'info');
 
-    const paymentMethods = await sdkInstance.findEligibleMethods({
-      currencyCode,
-      countryCode,
-      amount,
-    });
+    // SDK v6 accepts { currency } — countryCode/amount are not documented params.
+    const paymentMethods = await sdkInstance.findEligibleMethods({ currency });
 
     console.log('[v6][eligibility] findEligibleMethods() response object:', paymentMethods);
 
