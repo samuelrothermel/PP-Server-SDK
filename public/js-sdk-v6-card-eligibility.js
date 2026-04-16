@@ -4,22 +4,11 @@
  */
 
 const GUEST_CANDIDATES = [
-  'card',
-  'bcdc',
-  'branded_cards',
-  'standard_cards',
-  'debit_credit',
-  'credit_card',
-  'inline_guest_checkout',
+  'card',        // BCDC — the only valid key per SDK FundingSource types
 ];
 
 const ADVANCED_CANDIDATES = [
-  'advanced_cards',
-  'advanced-cards',
-  'acdc',
-  'card_fields',
-  'cards',
-  'hosted_fields',
+  'advanced_cards', // ACDC — correct key; requires merchant account enablement
 ];
 
 const runBtn = document.getElementById('run-btn');
@@ -85,7 +74,7 @@ async function runTests() {
     });
 
     showStatus('Calling findEligibleMethods()…', 'info');
-    const pm = await sdkInstance.findEligibleMethods({ currency });
+    const pm = await sdkInstance.findEligibleMethods({ currency, paymentFlow: 'ONE_TIME_PAYMENT' });
     console.log('[v6] findEligibleMethods() object:', pm);
 
     GUEST_CANDIDATES.forEach(key => {
