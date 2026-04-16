@@ -22,14 +22,12 @@ const ADVANCED_CANDIDATES = [
   'hosted_fields',
 ];
 
-const runBtn    = document.getElementById('run-btn');
-const statusEl  = document.getElementById('status-area');
-const guestBody = document.getElementById('guest-rows');
-const advBody   = document.getElementById('advanced-rows');
+const runBtn = document.getElementById('run-btn');
 
 function showStatus(msg, type = 'info') {
-  statusEl.textContent = msg;
-  statusEl.className = `status-area ${type}`;
+  const el = document.getElementById('status-area');
+  el.textContent = msg;
+  el.className = `status-area ${type}`;
 }
 
 function appendResult(tbody, key, eligible, details) {
@@ -57,6 +55,15 @@ function appendResult(tbody, key, eligible, details) {
 async function runTests() {
   if (!window.paypal) {
     showStatus('PayPal JS SDK v6 failed to load.', 'error');
+    return;
+  }
+
+  const guestBody = document.getElementById('guest-rows');
+  const advBody   = document.getElementById('advanced-rows');
+
+  if (!guestBody || !advBody) {
+    console.error('[v6] DOM elements not found. guest-rows:', guestBody, 'advanced-rows:', advBody);
+    showStatus('Page error: result table elements not found. Check console.', 'error');
     return;
   }
 
