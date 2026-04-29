@@ -439,8 +439,12 @@ export const createCheckoutOrder = async orderData => {
 export const createUpstreamQlOrder = async (
   totalAmount,
   paymentSource = 'paypal',
+  declineType = '',
 ) => {
   const accessToken = await generateAccessToken();
+  const callbackUrl = declineType
+    ? `${CALLBACK_URL}?declineType=${encodeURIComponent(declineType)}`
+    : CALLBACK_URL;
 
   // Build payment_source object based on the payment method
   let payment_source = {};
@@ -490,7 +494,7 @@ export const createUpstreamQlOrder = async (
           order_update_callback_config: {
             callback_events: ['SHIPPING_ADDRESS'],
             // callback_events: ['SHIPPING_ADDRESS', 'SHIPPING_OPTIONS'],
-            callback_url: CALLBACK_URL,
+            callback_url: callbackUrl,
           },
         },
       },

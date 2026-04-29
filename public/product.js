@@ -1,6 +1,8 @@
 const createOrder = (data, actions) => {
   console.log('Client-Side Create Order Raw Request: ', data);
 
+  const declineType = document.getElementById('decline-type-select')?.value || '';
+
   const requestBody = {
     source: data.paymentSource, //paypal / venmo / etc.
     cart: [
@@ -12,6 +14,7 @@ const createOrder = (data, actions) => {
     totalAmount: parseFloat(
       document.getElementById('product-price').textContent
     ).toFixed(2),
+    declineType: declineType || undefined,
   };
 
   return fetch('/api/upstream-ql-orders', {

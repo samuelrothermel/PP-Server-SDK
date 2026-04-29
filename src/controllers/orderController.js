@@ -64,10 +64,11 @@ export const createUpstreamOrder = async (req, res, next) => {
 // Create upstream order request (server-side callbacks only)
 export const createUpstreamQlOrder = async (req, res, next) => {
   console.log('Upstream Server-Side Callback Create Order Request');
-  const { totalAmount, source } = req.body;
+  const { totalAmount, source, declineType } = req.body;
   console.log('Payment source:', source);
+  if (declineType) console.log('Shipping callback decline type:', declineType);
   try {
-    const order = await createUpstreamQlOrderApi(totalAmount, source);
+    const order = await createUpstreamQlOrderApi(totalAmount, source, declineType);
     res.json(order);
   } catch (err) {
     next(err);

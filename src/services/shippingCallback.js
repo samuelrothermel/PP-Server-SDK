@@ -4,8 +4,18 @@ import { handleError } from '../config/errorHandler.js';
  * Handle shipping callback from PayPal
  * Updates shipping costs based on selected address and options
  */
+const SHIPPING_DECLINE_EVENTS = {
+  ADDRESS_ERROR: 'SHIPPING_ADDRESS',
+  COUNTRY_ERROR: 'SHIPPING_ADDRESS',
+  STATE_ERROR: 'SHIPPING_ADDRESS',
+  ZIP_ERROR: 'SHIPPING_ADDRESS',
+  METHOD_UNAVAILABLE: 'SHIPPING_OPTION',
+  STORE_UNAVAILABLE: 'SHIPPING_OPTION',
+};
+
 export const handleShippingCallback = async (req, res) => {
   const { id, shipping_address, shipping_option, purchase_units } = req.body;
+  const { declineType } = req.query;
 
   try {
     // Log the shipping callback data
@@ -14,16 +24,21 @@ export const handleShippingCallback = async (req, res) => {
     console.log('Shipping Address:', shipping_address);
     console.log('Shipping Option:', shipping_option);
     console.log('Purchase Units:', purchase_units);
+    if (declineType) console.log('Decline type override:', declineType);
 
-    // Check if the shipping address country is not USA
+    // Return a merchant decline 422 if a declineType was requested
+    if (declineType && SHIPPING_DECLINE_EVENTS[declineType]) {
+      return res.status(422).json({
+        name: 'UNPROCESSABLE_ENTITY',
+        details: [{ issue: declineType }],
+      });
+    }
+
+    // Default: decline non-US countries
     if (shipping_address?.country_code !== 'US') {
       return res.status(422).json({
         name: 'UNPROCESSABLE_ENTITY',
-        details: [
-          {
-            issue: 'COUNTRY_ERROR',
-          },
-        ],
+        details: [{ issue: 'COUNTRY_ERROR' }],
       });
     }
 
