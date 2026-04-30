@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { generateAccessToken } from './authApi.js';
 import { WEBHOOK_ID } from '../config/constants.js';
+import { recordInvoiceWebhook } from '../controllers/invoicingController.js';
 
 // PayPal webhook configuration
 const base = 'https://api-m.sandbox.paypal.com';
@@ -241,6 +242,16 @@ export const processWebhookEvent = async eventData => {
 
     case 'CHECKOUT.ORDER.COMPLETED':
       return await handleOrderCompleted(eventData);
+
+    case 'INVOICING.INVOICE.PAID':
+    case 'INVOICING.INVOICE.MARKED_AS_PAID': {
+      const invoiceId = eventData.resource?.id;
+      if (invoiceId) {
+        recordInvoiceWebhook(invoiceId, eventData);
+      }
+      console.log(`Invoice paid webhook received for invoice: ${invoiceId}`);
+      return { success: true, message: `Invoice ${invoiceId} paid event recorded` };
+    }
 
     default:
       console.log(`Unhandled webhook event type: ${eventType}`);

@@ -72,6 +72,11 @@ import {
   getPayPalUserInfo,
   getOAuthConfig,
 } from '../controllers/payoutsController.js';
+import {
+  generatePayLink,
+  getInvoiceStatus,
+  getInvoiceWebhookEvents,
+} from '../controllers/invoicingController.js';
 
 const router = express.Router();
 
@@ -174,6 +179,11 @@ router.post('/test-legacy-vs-v3', testLegacyVsV3);
 
 // Create capture order with payee
 router.post('/create-capture-order-with-payee', createCaptureOrderWithPayee);
+
+// Invoicing routes
+router.post('/invoicing/generate-pay-link', generatePayLink);
+router.post('/invoicing/status', getInvoiceStatus);
+router.get('/invoicing/webhook-events/:invoiceId', getInvoiceWebhookEvents);
 
 // Payouts API routes
 router.post('/payouts/create', createPayoutBatch);

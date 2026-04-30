@@ -38,3 +38,4 @@ export const renderJsSdkV6Iframe = renderPage('js-sdk-v6-iframe');
 export const renderJsSdkV6IframeButtons = renderPage('js-sdk-v6-iframe-buttons');
 export const renderJsSdkV6Advanced = renderPage('js-sdk-v6-advanced');
 export const renderJsSdkV6CardEligibility = renderPage('js-sdk-v6-card-eligibility');
+export const renderInvoicing = renderPage('invoicing');
