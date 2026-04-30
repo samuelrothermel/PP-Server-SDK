@@ -48,7 +48,6 @@ export async function generatePayLink(req, res) {
         note: note || '',
         payment_term: { term_type: 'DUE_ON_RECEIPT' },
       },
-      invoicer: {},
       primary_recipients: [{
         billing_info: {
           email_address: customerEmail,
@@ -56,12 +55,6 @@ export async function generatePayLink(req, res) {
         },
       }],
       items: lineItems,
-      amount: {
-        currency_code: currency,
-        breakdown: {
-          item_total: { currency_code: currency, value: subtotal.toFixed(2) },
-        },
-      },
     };
 
     // 1. Create draft invoice
@@ -83,7 +76,7 @@ export async function generatePayLink(req, res) {
       throw new Error('Could not extract invoice ID from Location header');
     }
 
-    // 2. Send invoice (required to get payer_view_url)
+    // 2. Send invoice — response body contains the payer_view_url
     const sendUrl = `${SANDBOX_BASE}/v2/invoicing/invoices/${invoiceId}/send`;
     const sendRes = await fetch(sendUrl, {
       method: 'POST',
@@ -91,25 +84,39 @@ export async function generatePayLink(req, res) {
       body: JSON.stringify({ send_to_invoicer: false }),
     });
     apiLog.push({ method: 'POST', url: `/v2/invoicing/invoices/${invoiceId}/send`, description: 'Send invoice', status: sendRes.status });
-    // 200 or 204 are both success; no body on 204
 
-    // 3. Fetch invoice details to get payer_view_url
-    const getUrl = `${SANDBOX_BASE}/v2/invoicing/invoices/${invoiceId}`;
-    const getRes = await fetch(getUrl, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    apiLog.push({ method: 'GET', url: `/v2/invoicing/invoices/${invoiceId}`, description: 'Fetch invoice (get payer_view_url)', status: getRes.status });
-    if (!getRes.ok) {
-      const text = await getRes.text();
-      throw new Error(`Get invoice failed (${getRes.status}): ${text}`);
+    let payerViewUrl = '';
+    const sendText = await sendRes.text();
+    if (sendText) {
+      try {
+        const sendData = JSON.parse(sendText);
+        payerViewUrl = sendData.href
+          || sendData.links?.find(l => l.rel === 'payer-view')?.href
+          || '';
+      } catch (_) {}
     }
-    const invoiceData   = await getRes.json();
-    console.log('[Invoicing] detail keys:', Object.keys(invoiceData.detail || {}));
-    console.log('[Invoicing] links:', JSON.stringify(invoiceData.links));
-    const payerViewUrl  = invoiceData.detail?.payer_view_url
-      || invoiceData.links?.find(l => l.rel === 'payer-view')?.href
-      || invoiceData.links?.find(l => l.rel === 'payer_view')?.href
-      || '';
+
+    // 3. If not in send response, fetch the invoice and check all link rels
+    if (!payerViewUrl) {
+      const getUrl = `${SANDBOX_BASE}/v2/invoicing/invoices/${invoiceId}`;
+      const getRes = await fetch(getUrl, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      apiLog.push({ method: 'GET', url: `/v2/invoicing/invoices/${invoiceId}`, description: 'Fetch invoice (find payer URL)', status: getRes.status });
+      if (getRes.ok) {
+        const invoiceData = await getRes.json();
+        payerViewUrl = invoiceData.detail?.payer_view_url
+          || invoiceData.links?.find(l => l.rel === 'payer-view')?.href
+          || invoiceData.links?.find(l => l.rel === 'payer_view')?.href
+          || invoiceData.links?.find(l => l.href?.includes('paypal.com/invoice'))?.href
+          || '';
+      }
+    }
+
+    // 4. Fallback: construct the well-known sandbox payer URL directly
+    if (!payerViewUrl) {
+      payerViewUrl = `https://www.sandbox.paypal.com/invoice/payerView/details/${invoiceId}`;
+    }
 
     res.json({
       invoiceId,
