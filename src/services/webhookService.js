@@ -245,10 +245,7 @@ export const processWebhookEvent = async eventData => {
 
     case 'INVOICING.INVOICE.PAID':
     case 'INVOICING.INVOICE.MARKED_AS_PAID': {
-      const invoiceId = eventData.resource?.id;
-      console.log(`[Invoicing Webhook] event_type: ${eventType}`);
-      console.log(`[Invoicing Webhook] resource.id: ${invoiceId}`);
-      console.log(`[Invoicing Webhook] full resource keys: ${Object.keys(eventData.resource || {}).join(', ')}`);
+      const invoiceId = eventData.resource?.invoice?.id || eventData.resource?.id;
       if (invoiceId) {
         recordInvoiceWebhook(invoiceId, eventData);
       }
