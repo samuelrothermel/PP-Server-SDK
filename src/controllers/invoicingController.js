@@ -76,10 +76,12 @@ export async function generatePayLink(req, res) {
       const text = await createRes.text();
       throw new Error(`Create invoice failed (${createRes.status}): ${text}`);
     }
-    const createData = await createRes.json();
-    const invoiceId  = createData.href
-      ? createData.href.split('/').pop()
-      : createData.id;
+    // The create endpoint returns 201 with a Location header; body is empty.
+    const location  = createRes.headers.get('location') || '';
+    const invoiceId = location.split('/').pop();
+    if (!invoiceId) {
+      throw new Error('Could not extract invoice ID from Location header');
+    }
 
     // 2. Send invoice (required to get payer_view_url)
     const sendUrl = `${SANDBOX_BASE}/v2/invoicing/invoices/${invoiceId}/send`;
