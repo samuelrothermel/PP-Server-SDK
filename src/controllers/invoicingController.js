@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { generateAccessToken } from '../services/authApi.js';
 
 const SANDBOX_BASE = 'https://api-m.sandbox.paypal.com';
 
@@ -23,31 +24,13 @@ export function getInvoiceWebhookEvents(req, res) {
   res.json({ events });
 }
 
-async function getAccessToken(clientId, clientSecret, apiLog) {
-  const url = `${SANDBOX_BASE}/v1/oauth2/token`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'grant_type=client_credentials',
-  });
-  apiLog.push({ method: 'POST', url: '/v1/oauth2/token', description: 'Get access token', status: res.status });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Auth failed (${res.status}): ${text}`);
-  }
-  const data = await res.json();
-  return data.access_token;
-}
-
 export async function generatePayLink(req, res) {
-  const { clientId, clientSecret, customerEmail, customerName, currency, note, items } = req.body;
+  const { customerEmail, customerName, currency, note, items } = req.body;
   const apiLog = [];
 
   try {
-    const token = await getAccessToken(clientId, clientSecret, apiLog);
+    const token = await generateAccessToken();
+    apiLog.push({ method: 'POST', url: '/v1/oauth2/token', description: 'Get access token', status: 200 });
 
     // Build invoice payload
     const lineItems = (items || []).map(item => ({
@@ -137,11 +120,12 @@ export async function generatePayLink(req, res) {
 }
 
 export async function getInvoiceStatus(req, res) {
-  const { clientId, clientSecret, invoiceId } = req.body;
+  const { invoiceId } = req.body;
   const apiLog = [];
 
   try {
-    const token  = await getAccessToken(clientId, clientSecret, apiLog);
+    const token  = await generateAccessToken();
+    apiLog.push({ method: 'POST', url: '/v1/oauth2/token', description: 'Get access token', status: 200 });
     const getUrl = `${SANDBOX_BASE}/v2/invoicing/invoices/${invoiceId}`;
     const getRes = await fetch(getUrl, {
       headers: { 'Authorization': `Bearer ${token}` },

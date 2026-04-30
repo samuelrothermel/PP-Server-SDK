@@ -23,16 +23,6 @@
 .inv-section h2 { margin: 0 0 16px; font-size: 1.1rem; color: #003087; }
 .inv-section h3 { margin: 20px 0 10px; font-size: 1rem; color: #333; }
 
-/* Credentials grid */
-.inv-creds-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-@media (max-width: 600px) {
-  .inv-creds-grid { grid-template-columns: 1fr; }
-}
-
 /* Main 2-col layout */
 .inv-main-layout {
   display: grid;

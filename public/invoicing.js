@@ -82,18 +82,12 @@ function logApiCall(method, url, description, status) {
 
 // ── Generate Pay Link ───────────────────────────────────────────────────────
 async function generatePayLink() {
-  const clientId     = document.getElementById('clientId').value.trim();
-  const clientSecret = document.getElementById('clientSecret').value.trim();
   const customerEmail = document.getElementById('customerEmail').value.trim();
   const customerName  = document.getElementById('customerName').value.trim();
   const currency      = document.getElementById('invoiceCurrency').value;
   const note          = document.getElementById('invoiceNote').value.trim();
   const items         = getLineItems();
 
-  if (!clientId || !clientSecret) {
-    showPayLinkError('Please enter your Sandbox Client ID and Client Secret.');
-    return;
-  }
   if (!customerEmail) {
     showPayLinkError('Please enter a customer email (sandbox buyer account).');
     return;
@@ -113,7 +107,7 @@ async function generatePayLink() {
     const res = await fetch('/api/invoicing/generate-pay-link', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId, clientSecret, customerEmail, customerName, currency, note, items }),
+      body: JSON.stringify({ customerEmail, customerName, currency, note, items }),
     });
 
     const data = await res.json();
@@ -214,14 +208,11 @@ function stopPolling() {
 async function pollStatus() {
   if (!currentInvoiceId) return;
 
-  const clientId     = document.getElementById('clientId').value.trim();
-  const clientSecret = document.getElementById('clientSecret').value.trim();
-
   try {
     const res = await fetch('/api/invoicing/status', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId, clientSecret, invoiceId: currentInvoiceId }),
+      body: JSON.stringify({ invoiceId: currentInvoiceId }),
     });
     const data = await res.json();
 
