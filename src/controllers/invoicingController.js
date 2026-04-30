@@ -104,8 +104,11 @@ export async function generatePayLink(req, res) {
       throw new Error(`Get invoice failed (${getRes.status}): ${text}`);
     }
     const invoiceData   = await getRes.json();
+    console.log('[Invoicing] detail keys:', Object.keys(invoiceData.detail || {}));
+    console.log('[Invoicing] links:', JSON.stringify(invoiceData.links));
     const payerViewUrl  = invoiceData.detail?.payer_view_url
       || invoiceData.links?.find(l => l.rel === 'payer-view')?.href
+      || invoiceData.links?.find(l => l.rel === 'payer_view')?.href
       || '';
 
     res.json({
