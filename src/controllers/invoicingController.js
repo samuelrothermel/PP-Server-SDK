@@ -21,6 +21,7 @@ export function recordInvoiceWebhook(invoiceId, eventPayload) {
 export function getInvoiceWebhookEvents(req, res) {
   const { invoiceId } = req.params;
   const events = invoiceWebhookEvents.get(invoiceId) || [];
+  console.log(`[Invoicing] webhook-events poll — invoiceId: ${invoiceId}, stored keys: [${[...invoiceWebhookEvents.keys()].join(', ')}], events: ${events.length}`);
   res.json({ events });
 }
 
