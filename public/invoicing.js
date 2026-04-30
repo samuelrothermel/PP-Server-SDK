@@ -104,15 +104,18 @@ async function generatePayLink() {
   document.getElementById('webhookSimSection').style.display = 'none';
 
   try {
+    console.log('[Invoicing] POST /api/invoicing/generate-pay-link', { customerEmail, customerName, currency, items });
+
     const res = await fetch('/api/invoicing/generate-pay-link', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ customerEmail, customerName, currency, note, items }),
     });
 
+    console.log('[Invoicing] Response status:', res.status);
     const data = await res.json();
+    console.log('[Invoicing] Response body:', data);
 
-    // Log each API call the server made
     if (data.apiLog) {
       data.apiLog.forEach(entry => logApiCall(entry.method, entry.url, entry.description, entry.status));
     }
@@ -121,6 +124,9 @@ async function generatePayLink() {
       throw new Error(data.error || `Server returned ${res.status}`);
     }
 
+    console.log('[Invoicing] Invoice ID:', data.invoiceId);
+    console.log('[Invoicing] Payer view URL:', data.payerViewUrl || '(empty — URL missing)');
+
     currentInvoiceId = data.invoiceId;
     showPayLinkResult(data);
     revealStatusPanel();
@@ -128,6 +134,7 @@ async function generatePayLink() {
     startWebhookPolling(data.invoiceId);
 
   } catch (err) {
+    console.error('[Invoicing] Error:', err.message);
     showPayLinkError(err.message);
   } finally {
     setPayLinkLoading(false);
