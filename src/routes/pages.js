@@ -25,6 +25,7 @@ import {
   renderJsSdkV6Advanced,
   renderJsSdkV6CardEligibility,
   renderInvoicing,
+  renderTransactionReports,
 } from '../controllers/pageController.js';
 
 const router = express.Router();
@@ -55,6 +56,7 @@ router.get('/js-sdk-v6/iframe-buttons', renderJsSdkV6IframeButtons);
 router.get('/js-sdk-v6/advanced', renderJsSdkV6Advanced);
 router.get('/js-sdk-v6/card-eligibility', renderJsSdkV6CardEligibility);
 router.get('/invoicing', renderInvoicing);
+router.get('/transaction-reports', renderTransactionReports);
 router.get('/api/payouts/oauth/callback', (req, res) => {
   res.render('paypal-oauth-callback');
 });

@@ -77,6 +77,11 @@ import {
   getInvoiceStatus,
   getInvoiceWebhookEvents,
 } from '../controllers/invoicingController.js';
+import {
+  getTransactions,
+  getBalance,
+  getTransactionSummary,
+} from '../controllers/transactionReportsController.js';
 
 const router = express.Router();
 
@@ -184,6 +189,11 @@ router.post('/create-capture-order-with-payee', createCaptureOrderWithPayee);
 router.post('/invoicing/generate-pay-link', generatePayLink);
 router.post('/invoicing/status', getInvoiceStatus);
 router.get('/invoicing/webhook-events/:invoiceId', getInvoiceWebhookEvents);
+
+// Transaction Reports API routes
+router.get('/reports/transactions', getTransactions);
+router.get('/reports/balance', getBalance);
+router.get('/reports/summary', getTransactionSummary);
 
 // Payouts API routes
 router.post('/payouts/create', createPayoutBatch);

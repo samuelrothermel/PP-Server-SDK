@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Reports - PayPal Demo</title>
+    <link rel="stylesheet" href="/styles/custom.css">
+    <link rel="stylesheet" href="/styles/transaction-reports.css">
+</head>
+<body>
+    <div class="reports-container">
+        <div class="reports-header">
+            <div>
+                <span class="sdk-badge rest-api">REST API</span>
+                <h1>Transaction Reports</h1>
+                <p class="subtitle">Query disbursements and settlements via the PayPal Transaction Search API</p>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/payouts" class="nav-link">Payouts</a>
+            </div>
+        </div>
+
+        <!-- Query Builder -->
+        <section class="card query-card">
+            <h2>Query Parameters</h2>
+            <div class="query-grid">
+                <div class="field-group">
+                    <label for="start-date">Start Date</label>
+                    <input type="datetime-local" id="start-date" />
+                </div>
+                <div class="field-group">
+                    <label for="end-date">End Date</label>
+                    <input type="datetime-local" id="end-date" />
+                </div>
+                <div class="field-group">
+                    <label for="transaction-type">Transaction Type</label>
+                    <select id="transaction-type">
+                        <option value="">All Types</option>
+                        <option value="T0001">T0001 - PayPal payment</option>
+                        <option value="T0002">T0002 - Currency conversion</option>
+                        <option value="T0007">T0007 - Payment to PayPal account</option>
+                        <option value="T0100">T0100 - Bank deposit (disbursement)</option>
+                        <option value="T0106">T0106 - Transfer to bank account</option>
+                        <option value="T0200">T0200 - Reversal</option>
+                        <option value="T0400">T0400 - General withdrawal</option>
+                        <option value="T1106">T1106 - Reversal of bank withdrawal</option>
+                        <option value="T1107">T1107 - Payment refund</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label for="transaction-status">Status</label>
+                    <select id="transaction-status">
+                        <option value="">All Statuses</option>
+                        <option value="S">S - Successful</option>
+                        <option value="P">P - Pending</option>
+                        <option value="V">V - Reversed</option>
+                        <option value="F">F - Failed</option>
+                        <option value="D">D - Denied</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label for="page-size">Page Size</label>
+                    <select id="page-size">
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="500">500</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label for="currency-code">Currency</label>
+                    <select id="currency-code">
+                        <option value="">All Currencies</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="CAD">CAD</option>
+                        <option value="AUD">AUD</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="preset-row">
+                <span class="presets-label">Quick ranges:</span>
+                <button class="preset-btn" data-days="1">Today</button>
+                <button class="preset-btn" data-days="7">Last 7 days</button>
+                <button class="preset-btn" data-days="30">Last 30 days</button>
+                <button class="preset-btn disbursement-preset">Disbursements only</button>
+            </div>
+
+            <div class="action-row">
+                <button id="search-btn" class="primary-btn" onclick="searchTransactions()">Search Transactions</button>
+                <button class="secondary-btn" onclick="getAccountBalance()">Get Account Balance</button>
+                <button class="secondary-btn" onclick="getDailySummary()">Daily Summary</button>
+            </div>
+        </section>
+
+        <!-- Account Balance Panel -->
+        <section id="balance-panel" class="card" style="display:none;">
+            <h2>Account Balance</h2>
+            <div id="balance-content" class="balance-grid"></div>
+        </section>
+
+        <!-- Daily Summary Panel -->
+        <section id="summary-panel" class="card" style="display:none;">
+            <h2>Daily Summary</h2>
+            <div id="summary-content"></div>
+        </section>
+
+        <!-- Results -->
+        <section class="card results-card">
+            <div class="results-header">
+                <h2>Results <span id="result-count" class="result-count"></span></h2>
+                <div class="results-actions">
+                    <button id="export-btn" class="secondary-btn" onclick="exportCSV()" style="display:none;">Export CSV</button>
+                </div>
+            </div>
+
+            <div id="message-container"></div>
+            <div id="loading" class="loading" style="display:none;">Querying PayPal Transaction Search API...</div>
+
+            <div id="results-content" style="display:none;">
+                <!-- Summary stats -->
+                <div id="stats-row" class="stats-row"></div>
+
+                <!-- Transactions table -->
+                <div class="table-wrapper">
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Gross</th>
+                                <th>Fee</th>
+                                <th>Net</th>
+                                <th>Currency</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="pagination"></div>
+            </div>
+
+            <div id="empty-state" class="empty-state" style="display:none;">
+                <p>No transactions found for the selected criteria.</p>
+            </div>
+        </section>
+
+        <!-- Raw API Response -->
+        <section class="card">
+            <div class="raw-header">
+                <h2>Raw API Response</h2>
+                <button class="secondary-btn" onclick="toggleRaw()">Toggle</button>
+            </div>
+            <pre id="raw-response" class="raw-response" style="display:none;"></pre>
+        </section>
+    </div>
+
+    <script src="/transaction-reports.js"></script>
+</body>
+</html>
