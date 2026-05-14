@@ -1,0 +1,160 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/styles/checkout.css" />
+    <title>Wallets Checkout - Apple Pay &amp; Google Pay</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Checkout</h1>
+        <p style="margin:0;font-size:0.9em;color:#666;">Apple Pay &amp; Google Pay</p>
+      </header>
+
+      <div class="checkout-layout">
+        <!-- Left Side: Order Summary -->
+        <div class="checkout-left">
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="order-row">
+              <span>Cart Total:</span>
+              <span>$<span id="cart-total">100</span></span>
+            </div>
+            <div class="order-row">
+              <span>Shipping:</span>
+              <span>$<span id="shipping-amount">0.00</span></span>
+            </div>
+            <div class="order-row total">
+              <span>Checkout Total:</span>
+              <span>$<span id="amount-total">100</span></span>
+            </div>
+          </div>
+
+          <!-- Shipping Options -->
+          <div class="checkout-section">
+            <h4>Shipping Options</h4>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="free-shipping" name="shipping-option" value="0" checked />
+                <label for="free-shipping">Free Shipping ($0)</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="expedited-shipping" name="shipping-option" value="10" />
+                <label for="expedited-shipping">Expedited Shipping ($10)</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Shipping Info, Payment Methods -->
+        <div class="checkout-right">
+          <!-- Shipping Information -->
+          <div class="checkout-section">
+            <h4>Shipping Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-first-name">First Name</label>
+                <input type="text" id="shipping-first-name" name="shipping-first-name" value="Theodor" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-last-name">Last Name</label>
+                <input type="text" id="shipping-last-name" name="shipping-last-name" value="Adorno" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-email">Email Address</label>
+                <input type="email" id="shipping-email" name="shipping-email" value="theodor.adorno@example.com" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-phone">Phone Number</label>
+                <input type="text" id="shipping-phone" name="shipping-phone" value="1234567890" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="shipping-address-line1">Street Address</label>
+              <input type="text" id="shipping-address-line1" name="shipping-address-line1" value="123 Main St" class="form-control" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-admin-area2">City</label>
+                <input type="text" id="shipping-admin-area2" name="shipping-admin-area2" value="Springfield" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-admin-area1">State</label>
+                <input type="text" id="shipping-admin-area1" name="shipping-admin-area1" value="IL" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipping-postal-code">Zip Code</label>
+                <input type="text" id="shipping-postal-code" name="shipping-postal-code" value="62701" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="shipping-country-code">Country Code</label>
+                <input type="text" id="shipping-country-code" name="shipping-country-code" value="US" class="form-control" required />
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Methods: Apple Pay and Google Pay only -->
+          <div class="checkout-section">
+            <h4>Select Payment Method</h4>
+
+            <div id="payment-methods-container">
+              <div class="payment-method-option" id="applepay-option" style="display: none;">
+                <input type="radio" name="payment-method" id="applepay-radio" value="applepay" checked>
+                <label for="applepay-radio" class="payment-method-label">
+                  <div>Apple Pay</div>
+                </label>
+                <div class="payment-method-buttons" id="applepay-button-container"></div>
+              </div>
+
+              <div class="payment-method-option" id="googlepay-option" style="display: none;">
+                <input type="radio" name="payment-method" id="googlepay-radio" value="googlepay">
+                <label for="googlepay-radio" class="payment-method-label">
+                  <div>Google Pay</div>
+                </label>
+                <div class="payment-method-buttons" id="googlepay-button-container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Information Sections -->
+      <div class="info-sections">
+        <div id="order-info-section" class="info-section" style="display: none;">
+          <div id="create-order-info"></div>
+        </div>
+        <div id="capture-info-section" class="info-section" style="display: none;">
+          <div id="capture-order-info"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const clientId = '<%= clientId %>';
+
+      window.onGooglePayLoaded = function() {
+        console.log('💳 Google Pay SDK loaded (early callback)');
+      };
+    </script>
+
+    <!-- Google Pay JavaScript SDK -->
+    <script async src="https://pay.google.com/gp/p/js/pay.js" onload="onGooglePayLoaded()"></script>
+
+    <!-- PayPal JavaScript SDK with Apple Pay and Google Pay components only -->
+    <script src="https://www.paypal.com/sdk/js?client-id=<%= clientId %>&currency=USD&components=applepay,googlepay&intent=authorize"></script>
+
+    <!-- Apple Pay JS (required for apple-pay-button custom element) -->
+    <script async crossorigin src="https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-session.js"></script>
+
+    <!-- StorageManager -->
+    <script src="/modules/storage-manager.js"></script>
+
+    <script src="/checkout-wallets.js"></script>
+  </body>
+</html>

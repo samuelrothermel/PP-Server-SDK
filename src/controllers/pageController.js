@@ -40,3 +40,4 @@ export const renderJsSdkV6Advanced = renderPage('js-sdk-v6-advanced');
 export const renderJsSdkV6CardEligibility = renderPage('js-sdk-v6-card-eligibility');
 export const renderInvoicing = renderPage('invoicing');
 export const renderTransactionReports = renderPage('transaction-reports');
+export const renderCheckoutWallets = renderPage('checkout-wallets');
