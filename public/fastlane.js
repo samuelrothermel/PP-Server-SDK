@@ -828,12 +828,20 @@ class FastlaneIntegration {
    * Show fallback payment form when Fastlane is not available
    */
   showFallbackPaymentForm() {
-    document.getElementById('fastlane-card-container').style.display = 'none';
-    document.getElementById('fastlane-identity-container').style.display =
-      'none';
-    document.getElementById('manual-payment-form').style.display = 'block';
-    document.getElementById('fastlane-pay-button').style.display = 'none';
-    document.getElementById('manual-pay-button').style.display = 'block';
+    const hide = id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    };
+    const show = (id, display = 'block') => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = display;
+    };
+
+    hide('fastlane-card-container');
+    hide('fastlane-identity-container');
+    hide('fastlane-pay-button');
+    show('manual-payment-form');
+    show('manual-pay-button');
 
     this.showStatus('ℹ️ Loading standard payment form...', 'info');
     this.loadCardFieldsSDK();

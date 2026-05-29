@@ -64,7 +64,7 @@ async function runTests() {
   try {
     const sdkInstance = await window.paypal.createInstance({
       clientId: CLIENT_ID,
-      components: ['paypal-payments'],
+      components: ['paypal-payments', 'card-payments', 'advanced-card-payments'],
       pageType: 'checkout',
       locale: 'en-US',
       clientMetadataId: crypto.randomUUID(),
