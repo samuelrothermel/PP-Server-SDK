@@ -64,14 +64,14 @@ async function runTests() {
   try {
     const sdkInstance = await window.paypal.createInstance({
       clientId: CLIENT_ID,
-      components: ['paypal-payments', 'card-payments', 'advanced-card-payments'],
+      components: ['paypal-payments', 'card-fields'],
       pageType: 'checkout',
       locale: 'en-US',
       clientMetadataId: crypto.randomUUID(),
     });
 
     showStatus('Calling findEligibleMethods()…', 'info');
-    const pm = await sdkInstance.findEligibleMethods({ currency: 'USD', paymentFlow: 'ONE_TIME_PAYMENT' });
+    const pm = await sdkInstance.findEligibleMethods({ currencyCode: 'USD' });
     console.log('[v6] findEligibleMethods() object:', pm);
 
     GUEST_CANDIDATES.forEach(key => {
