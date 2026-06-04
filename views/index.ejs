@@ -384,19 +384,18 @@
           </ul>
         </a>
 
-        <!-- ACH Bank Payment -->
+        <!-- ACH Direct Debit -->
         <a href="/ach" class="integration-card">
-          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
-          <span class="sdk-badge server-sdk">✓ Server SDK</span>
-          <h3>ACH Bank Payment</h3>
-          <p><strong>US Bank Transfer via Open Banking</strong></p>
-          <p>One-time ACH payment using the <code>bankAchPayments</code> v6 component — powered by Finicity (Mastercard).</p>
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <h3>ACH Direct Debit</h3>
+          <p><strong>Bank Account Debit via Orders v2</strong></p>
+          <p>Merchant-collected bank details passed via <code>payment_source.bank.ach_debit</code> — no JS SDK required.</p>
           <ul>
-            <li>US only — US merchant, US buyer, USD</li>
-            <li>Requires Expanded Checkout + ACCEPT_PYMTS_VIA_ACH provisioning</li>
-            <li>Bank-link UI via Finicity (Yodlee in sandbox)</li>
-            <li>ACH limit check before button renders (Phase 2)</li>
-            <li>Server SDK handles order create &amp; capture</li>
+            <li>US only — limited release, requires PayPal approval</li>
+            <li>Supports WEB, TEL, CCD, PPD SEC codes</li>
+            <li>Vault support for recurring debits</li>
+            <li>Capture settles in ~5 calendar days (PENDING → COMPLETED)</li>
+            <li>Marketplace &amp; Platforms (Managed Path) product</li>
           </ul>
         </a>
 

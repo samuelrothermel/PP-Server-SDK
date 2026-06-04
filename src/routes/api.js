@@ -82,6 +82,10 @@ import {
   getBalance,
   getTransactionSummary,
 } from '../controllers/transactionReportsController.js';
+import {
+  createAchOrder,
+  captureAchOrder,
+} from '../controllers/achController.js';
 
 const router = express.Router();
 
@@ -189,6 +193,10 @@ router.post('/create-capture-order-with-payee', createCaptureOrderWithPayee);
 router.post('/invoicing/generate-pay-link', generatePayLink);
 router.post('/invoicing/status', getInvoiceStatus);
 router.get('/invoicing/webhook-events/:invoiceId', getInvoiceWebhookEvents);
+
+// ACH Direct Debit routes (direct REST API — no JS SDK)
+router.post('/ach/orders', createAchOrder);
+router.post('/ach/orders/:orderId/capture', captureAchOrder);
 
 // Transaction Reports API routes
 router.get('/reports/transactions', getTransactions);

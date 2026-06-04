@@ -4,88 +4,96 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
-  <title>ACH Bank Payment — JS SDK v6</title>
+  <title>ACH Direct Debit — Sandbox Testing</title>
   <style>
-    .page-header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    .page-header { text-align: center; margin-bottom: 32px; }
     .page-header h1 { font-size: 2em; margin-bottom: 8px; color: #1a1a1a; }
     .page-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
     .page-header p { color: #666; margin: 0; }
 
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 32px;
-      align-items: start;
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px;
     }
-    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+    .back-link:hover { text-decoration: underline; }
 
-    .product-card {
+    .info-banner {
+      padding: 14px 18px;
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 8px;
+      font-size: 0.88em;
+      color: #0d47a1;
+      margin-bottom: 16px;
+    }
+    .info-banner strong { color: #0a2d6e; }
+    .info-banner ul { margin: 8px 0 0; padding-left: 18px; }
+    .info-banner ul li { margin-bottom: 3px; }
+
+    .warning-banner {
+      padding: 12px 16px;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      font-size: 0.85em;
+      color: #795548;
+      margin-bottom: 24px;
+    }
+    .warning-banner strong { color: #5d4037; }
+
+    .test-section {
+      background: #fff;
       border: 1px solid #e0e0e0;
       border-radius: 10px;
-      overflow: hidden;
-      background: #fff;
+      padding: 24px;
+      margin-bottom: 20px;
     }
-    .product-card-inner { display: flex; gap: 0; }
-    .product-image {
-      width: 220px;
-      min-width: 220px;
-      object-fit: cover;
-      border-right: 1px solid #e0e0e0;
-    }
-    .product-details { padding: 24px; flex: 1; }
-    .product-details h2 { margin: 0 0 4px; color: #1a1a1a; font-size: 1.4em; }
-    .product-details .category { font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-    .product-details .price { font-size: 1.6em; font-weight: 700; color: #0070ba; margin-bottom: 16px; }
-    .product-details p { color: #555; font-size: 0.95em; line-height: 1.6; margin: 0 0 16px; }
-    .product-details ul { color: #555; font-size: 0.9em; padding-left: 18px; margin: 0; }
-    .product-details ul li { margin-bottom: 4px; }
-    @media (max-width: 600px) {
-      .product-card-inner { flex-direction: column; }
-      .product-image { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid #e0e0e0; max-height: 200px; }
-    }
-
-    .checkout-panel {
-      border: 1px solid #e0e0e0;
-      border-radius: 10px;
-      background: #fff;
-      position: sticky;
-      top: 20px;
-      overflow: hidden;
-    }
-    .checkout-panel-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #e0e0e0;
-      background: #f8f9fa;
-    }
-    .checkout-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
-
-    .order-summary { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.9em;
-      color: #555;
-      margin-bottom: 8px;
-    }
-    .summary-row:last-child { margin-bottom: 0; }
-    .summary-row.total {
-      font-weight: 700;
-      font-size: 1em;
+    .test-section h2 {
+      margin: 0 0 4px;
+      font-size: 1.05em;
       color: #1a1a1a;
-      padding-top: 8px;
-      margin-top: 4px;
-      border-top: 1px solid #e0e0e0;
+      border-bottom: 2px solid #0070ba;
+      padding-bottom: 10px;
     }
-    .summary-item-name { color: #333; }
-    .summary-qty { color: #888; font-size: 0.85em; margin-left: 4px; }
+    .test-section p { color: #555; font-size: 0.9em; margin: 10px 0 16px; }
 
-    .buttons-area { padding: 16px 20px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+    }
+    .form-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+    @media (max-width: 640px) {
+      .form-grid, .form-grid.three-col { grid-template-columns: 1fr; }
+    }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.82em; font-weight: 600; color: #444; }
+    .form-group input, .form-group select {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #1a1a1a;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #0070ba;
+      box-shadow: 0 0 0 2px rgba(0,112,186,0.15);
+    }
 
-    .sdk-loading { text-align: center; padding: 16px 0; color: #888; font-size: 0.9em; }
+    .btn {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.92em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary { background: #0070ba; color: #fff; margin-top: 16px; }
+    .btn-primary:hover { background: #005ea6; }
+    .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
 
     .status-area {
       margin-top: 12px;
@@ -94,80 +102,54 @@
       font-size: 0.88em;
       display: none;
     }
-    .status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; }
-    .status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
-    .status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+    .status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; display: block; }
+    .status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; display: block; }
+    .status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; display: block; }
 
-    /* ACH bank button container */
-    .ach-button-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .ach-button-container bank-payment-button {
-      display: block;
-      width: 100%;
-    }
-
-    .below-fold { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
-
-    .requirements-banner {
-      padding: 14px 18px;
-      background: #fff8e1;
-      border: 1px solid #ffe082;
-      border-radius: 8px;
-      font-size: 0.88em;
-      color: #795548;
-    }
-    .requirements-banner strong { color: #5d4037; }
-    .requirements-banner ul { margin: 8px 0 0; padding-left: 18px; }
-    .requirements-banner ul li { margin-bottom: 3px; }
-
-    .sandbox-note {
-      padding: 12px 16px;
-      background: #e8f5e9;
-      border: 1px solid #a5d6a7;
-      border-radius: 8px;
-      font-size: 0.85em;
-      color: #2e7d32;
-    }
-    .sandbox-note strong { color: #1b5e20; }
-
-    .production-checklist { border: 1px solid #d6bcfa; border-radius: 10px; overflow: hidden; }
-    .production-checklist summary {
-      padding: 14px 20px;
-      background: #f5f0ff;
-      font-weight: 600;
-      font-size: 0.95em;
-      color: #6f42c1;
-      cursor: pointer;
-      list-style: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .production-checklist summary::after { content: '▼'; font-size: 0.75em; }
-    .production-checklist[open] summary::after { content: '▲'; }
-    .checklist-body { padding: 20px; background: #fff; }
-    .checklist-body h4 { margin: 16px 0 8px; color: #444; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }
-    .checklist-body h4:first-child { margin-top: 0; }
-    .checklist-body ul { margin: 0 0 8px; padding-left: 20px; }
-    .checklist-body ul li { font-size: 0.9em; color: #555; margin-bottom: 4px; }
-
-    .response-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; display: none; }
-    .response-panel h3 { margin: 0; padding: 14px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #333; }
+    .response-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; margin-top: 16px; display: none; }
+    .response-panel h3 { margin: 0; padding: 12px 18px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-size: 0.9em; color: #333; }
     .response-panel pre {
-      margin: 0; padding: 16px 20px;
+      margin: 0; padding: 14px 18px;
       background: #1e1e1e; color: #d4d4d4;
       font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5;
-      overflow: auto; max-height: 400px;
+      overflow: auto; max-height: 360px;
     }
 
-    .back-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px;
+    .flow-steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+      margin: 0 0 16px;
     }
-    .back-link:hover { text-decoration: underline; }
+    .flow-steps li {
+      counter-increment: step;
+      position: relative;
+      padding: 8px 8px 8px 40px;
+      margin-bottom: 8px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #444;
+    }
+    .flow-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0070ba;
+      color: #fff;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+    }
+
+    .sec-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 8px; }
+    .sec-table th { background: #f0f4fa; padding: 8px 12px; text-align: left; color: #444; font-weight: 600; border-bottom: 2px solid #dde3ed; }
+    .sec-table td { padding: 8px 12px; border-bottom: 1px solid #eee; color: #555; vertical-align: top; }
+    .sec-table tr:last-child td { border-bottom: none; }
+    code { background: #eef; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
   </style>
 </head>
 <body>
@@ -177,169 +159,170 @@
 
     <div class="page-header">
       <div class="badge-row">
-        <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+        <span class="sdk-badge rest-api">⚠ Direct REST API</span>
         <span class="sdk-badge server-sdk">✓ Server SDK</span>
       </div>
-      <h1>ACH Bank Payment</h1>
-      <p>US bank transfer via PayPal's Open Banking layer — powered by Finicity (Mastercard). V6 SDK only.</p>
+      <h1>ACH Direct Debit</h1>
+      <p>Merchant-collected bank account details passed via <code>payment_source.bank.ach_debit</code> on capture. No JS SDK required.</p>
     </div>
 
-    <!-- Merchant requirements callout -->
-    <div class="requirements-banner">
-      <strong>Merchant provisioning required before this button renders.</strong>
+    <div class="info-banner">
+      <strong>Integration path:</strong> Marketplace &amp; Platforms (Managed Path) — limited release.
       <ul>
-        <li>US merchant + US buyer + USD transactions only</li>
-        <li>PPCP / Unbranded product — requires Expanded Checkout approval</li>
-        <li>Account must have <code>ACCEPT_PYMTS_VIA_ACH</code> feature + a 10-digit NACHA Company ID</li>
-        <li>Onboarding via Partner Referrals API with <code>products["ach"]</code> — not self-serve</li>
-        <li>V6 SDK component: <code>bankAchPayments</code> (sourced from internal altpay docs — not listed in public developer.paypal.com docs)</li>
+        <li>Merchant collects routing + account number directly; passes them server-side to PayPal</li>
+        <li><code>attributes.verification.external.status: "VERIFIED"</code> — merchant asserts they verified the account externally</li>
+        <li>Capture status is <code>PENDING</code> initially; funds settle in ~5 calendar days</li>
+        <li>Requires PayPal approval — contact your CSM or Sales before going live</li>
       </ul>
     </div>
 
-    <!-- Unconfirmed API surface warning -->
-    <div style="padding:12px 16px; background:#fff3e0; border:1px solid #ffb74d; border-radius:8px; font-size:0.85em; color:#e65100; margin-bottom:24px;">
-      <strong>Component name unconfirmed from public docs.</strong>
-      The <code>bank-ach-payments</code> component and <code>bank-payment-button</code> web component used here are derived from internal PayPal altpay documentation —
-      they do not appear in the public <a href="https://developer.paypal.com/docs/checkout/advanced/sdk/v6/" target="_blank" rel="noopener">JS SDK v6 reference</a>.
-      The button will only render if your merchant account is provisioned for ACH <em>and</em> the component name matches the internal SDK build on your account.
-      Confirm the exact component name with the PayPal altpay team before relying on this integration.
+    <div class="warning-banner">
+      <strong>Sandbox sandbox:</strong> Use test routing number <code>021000021</code> (Chase) and any 10-digit account number.
+      ACH approval is required on your sandbox account — if capture returns a permission error, ACH has not been provisioned for this account.
     </div>
 
-    <div class="layout">
+    <!-- Flow overview -->
+    <div class="test-section">
+      <h2>Integration Flow</h2>
+      <p>Two API calls: create order (no payment_source), then capture with bank details.</p>
+      <ol class="flow-steps">
+        <li>Merchant UI collects buyer's bank routing number, account number, account type, and authorization</li>
+        <li><code>POST /v2/checkout/orders</code> — create order with amount only (no payment_source yet)</li>
+        <li><code>POST /v2/checkout/orders/:id/capture</code> — send <code>payment_source.bank.ach_debit</code> with bank details</li>
+        <li>Response status is <code>PENDING</code> — listen for <code>PAYMENT.CAPTURE.COMPLETED</code> webhook to confirm settlement</li>
+      </ol>
 
-      <!-- Left: product -->
-      <div class="product-card">
-        <div class="product-card-inner">
-          <img
-            class="product-image"
-            src="https://media.istockphoto.com/id/508179654/photo/wooden-bowl-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=c5BqYjY0wgzjMsWsUlj_9uFpi4kT9YWO-_ZKZg4uoxY="
-            alt="Wooden Bowl"
-          />
-          <div class="product-details">
-            <div class="category">Home &amp; Kitchen</div>
-            <h2>Wooden Bowl</h2>
-            <div class="price">$50.00</div>
-            <p>
-              Handcrafted from sustainably sourced hardwood, showcasing unique grain
-              patterns and rich colors that make every piece one-of-a-kind.
-            </p>
-            <ul>
-              <li>Food-safe, eco-friendly finish</li>
-              <li>12" diameter × 4" height</li>
-              <li>Hand wash recommended</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: checkout panel -->
-      <div class="checkout-panel">
-        <div class="checkout-panel-header">
-          <h2>Order Summary</h2>
-        </div>
-
-        <div class="order-summary">
-          <div class="summary-row">
-            <span class="summary-item-name">Wooden Bowl <span class="summary-qty">× 1</span></span>
-            <span>$50.00</span>
-          </div>
-          <div class="summary-row">
-            <span>Shipping</span>
-            <span>Free</span>
-          </div>
-          <div class="summary-row total">
-            <span>Total</span>
-            <span>$50.00 USD</span>
-          </div>
-        </div>
-
-        <div class="buttons-area">
-          <div id="sdk-loading" class="sdk-loading">Loading ACH payment method…</div>
-
-          <div class="ach-button-container">
-            <bank-payment-button id="ach-button" hidden></bank-payment-button>
-          </div>
-
-          <div id="status-area" class="status-area"></div>
-        </div>
-      </div>
-
+      <table class="sec-table">
+        <thead><tr><th>SEC Code</th><th>Use Case</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>WEB</code></td><td>Online-initiated</td><td>Default for e-commerce; requires digital authorization proof</td></tr>
+          <tr><td><code>TEL</code></td><td>Phone-authorized</td><td>Requires oral or written authorization before settlement</td></tr>
+          <tr><td><code>CCD</code></td><td>Business accounts</td><td>Set <code>ownership_type: BUSINESS</code>; 2-day unauthorized window</td></tr>
+          <tr><td><code>PPD</code></td><td>Standing authorizations</td><td>Consumer accounts; recurring or single entry</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Below-fold: sandbox note, go-live checklist, API response -->
-    <div class="below-fold">
+    <!-- Step 1: Create Order -->
+    <div class="test-section">
+      <h2>Step 1 — Create Order</h2>
+      <p>Creates a standard order with <code>intent: CAPTURE</code> and amount. No bank details yet.</p>
 
-      <div class="sandbox-note">
-        <strong>Sandbox testing:</strong> Finicity (the production bank-link provider) is not available in sandbox.
-        PayPal uses <strong>Yodlee</strong> for sandbox ACH testing. Use Yodlee test credentials when the bank-link
-        UI appears to simulate a successful bank connection.
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="amount">Amount (USD)</label>
+          <input type="number" id="amount" value="50.00" step="0.01" min="0.01" />
+        </div>
       </div>
 
-      <details class="production-checklist">
-        <summary>Production Go-Live Checklist</summary>
-        <div class="checklist-body">
-          <h4>Merchant Account</h4>
-          <ul>
-            <li>Expanded Checkout approval granted by PayPal account team</li>
-            <li><code>ACCEPT_PYMTS_VIA_ACH</code> feature provisioned on the merchant account</li>
-            <li>10-digit NACHA Company ID configured in account settings</li>
-            <li>Onboarded via Partner Referrals API with <code>products["ach"]</code></li>
-          </ul>
-          <h4>SDK Configuration</h4>
-          <ul>
-            <li>Replace sandbox SDK URL with production: <code>https://www.paypal.com/web-sdk/v6/core</code></li>
-            <li>Replace sandbox <code>clientId</code> with live credentials</li>
-            <li>Ensure <code>bankAchPayments</code> is in the <code>components</code> array passed to <code>createInstance()</code></li>
-            <li>Call <code>findEligibleMethods()</code> and check <code>isEligible('ach')</code> before rendering the button</li>
-          </ul>
-          <h4>ACH Limits</h4>
-          <ul>
-            <li>Per-transaction ACH limit tiers: $10k / $99k (dynamic, enforced by RALS/RADD)</li>
-            <li>Check eligibility before rendering — the SDK performs an ACH limit check automatically (Phase 2, live Oct 29 2025)</li>
-            <li>Display a clear fallback payment option if ACH is ineligible for a given transaction amount</li>
-          </ul>
-          <h4>Open Banking / Bank-Link Flow</h4>
-          <ul>
-            <li>The Finicity bank-link UI is client-side only — no server SDK equivalent for this step</li>
-            <li>Server SDK (or Orders v2 REST API directly) handles order create &amp; capture bookends</li>
-            <li>Vault without purchase and one-time purchase are GA; vault with purchase — confirm current status with altpay team</li>
-          </ul>
-          <h4>Error Handling &amp; Webhooks</h4>
-          <ul>
-            <li>Handle <code>onApprove</code>, <code>onCancel</code>, and <code>onError</code> callbacks</li>
-            <li>ACH payments can take 1–3 business days to settle — do not fulfill immediately on capture</li>
-            <li>Configure <code>PAYMENT.CAPTURE.COMPLETED</code> and <code>PAYMENT.CAPTURE.DENIED</code> webhooks</li>
-            <li>Handle ACH returns (NSF, account closed) via <code>PAYMENT.CAPTURE.REVERSED</code> webhook</li>
-          </ul>
-          <h4>Environment</h4>
-          <ul>
-            <li>ACH is US-only — confirm buyer is US-based before showing the button</li>
-            <li>Transactions must be USD</li>
-            <li>Update server-side API base URL to <code>https://api-m.paypal.com</code></li>
-          </ul>
+      <button class="btn btn-primary" id="create-btn">Create Order</button>
+
+      <div id="create-status" class="status-area"></div>
+      <div id="create-response" class="response-panel">
+        <h3>Create Order Response</h3>
+        <pre id="create-response-content"></pre>
+      </div>
+    </div>
+
+    <!-- Step 2: Capture with ACH -->
+    <div class="test-section">
+      <h2>Step 2 — Capture with Bank Details</h2>
+      <p>
+        Sends <code>payment_source.bank.ach_debit</code> with the bank account details.
+        Order ID is auto-filled from Step 1.
+      </p>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="order-id">Order ID</label>
+          <input type="text" id="order-id" placeholder="Auto-filled from Step 1" />
+        </div>
+        <div class="form-group">
+          <label for="account-holder">Account Holder Name</label>
+          <input type="text" id="account-holder" value="Jane Doe" />
+        </div>
+        <div class="form-group">
+          <label for="routing-number">Routing Number</label>
+          <input type="text" id="routing-number" value="021000021" maxlength="9" />
+        </div>
+        <div class="form-group">
+          <label for="account-number">Account Number</label>
+          <input type="text" id="account-number" value="1234567890" />
+        </div>
+        <div class="form-group">
+          <label for="account-type">Account Type</label>
+          <select id="account-type">
+            <option value="CHECKING">CHECKING</option>
+            <option value="SAVINGS">SAVINGS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ownership-type">Ownership Type</label>
+          <select id="ownership-type">
+            <option value="PERSONAL">PERSONAL</option>
+            <option value="BUSINESS">BUSINESS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sec-code">SEC Code</label>
+          <select id="sec-code">
+            <option value="WEB">WEB — Online</option>
+            <option value="TEL">TEL — Phone</option>
+            <option value="CCD">CCD — Business</option>
+            <option value="PPD">PPD — Standing auth</option>
+          </select>
+        </div>
+      </div>
+
+      <details style="margin-top:16px;">
+        <summary style="cursor:pointer; font-size:0.88em; color:#555; font-weight:600;">Billing Address (optional)</summary>
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="form-group full">
+            <label for="addr-line1">Address Line 1</label>
+            <input type="text" id="addr-line1" value="2211 N First Street" />
+          </div>
+          <div class="form-group">
+            <label for="addr-city">City</label>
+            <input type="text" id="addr-city" value="San Jose" />
+          </div>
+          <div class="form-group">
+            <label for="addr-state">State</label>
+            <input type="text" id="addr-state" value="CA" maxlength="2" />
+          </div>
+          <div class="form-group">
+            <label for="addr-zip">Postal Code</label>
+            <input type="text" id="addr-zip" value="95131" />
+          </div>
+          <div class="form-group">
+            <label for="addr-country">Country</label>
+            <input type="text" id="addr-country" value="US" maxlength="2" />
+          </div>
         </div>
       </details>
 
-      <div id="probe-panel" class="response-panel" style="display:none;">
-        <h3>SDK Probe Results <span style="font-size:0.8em; font-weight:400; color:#888;">(instance methods + eligibility keys)</span></h3>
-        <pre id="probe-content"></pre>
-      </div>
+      <button class="btn btn-primary" id="capture-btn">Capture with ACH</button>
 
-      <div id="response-panel" class="response-panel">
-        <h3>API Response</h3>
-        <pre id="response-content"></pre>
+      <div id="capture-status" class="status-area"></div>
+      <div id="capture-response" class="response-panel">
+        <h3>Capture Response</h3>
+        <pre id="capture-response-content"></pre>
       </div>
+    </div>
 
+    <!-- Webhooks reference -->
+    <div class="test-section">
+      <h2>Expected Webhooks</h2>
+      <p>ACH captures start as <code>PENDING</code> and settle asynchronously. Configure at <a href="/webhook-testing" target="_blank">Webhook Dashboard</a>.</p>
+      <ul style="font-size:0.9em; color:#555; padding-left:20px;">
+        <li><code>PAYMENT.CAPTURE.PENDING</code> — initial state after capture; funds in transit (~5 days)</li>
+        <li><code>PAYMENT.CAPTURE.COMPLETED</code> — settlement confirmed; safe to fulfill the order</li>
+        <li><code>PAYMENT.CAPTURE.DENIED</code> — payment rejected by the bank</li>
+        <li><code>PAYMENT.CAPTURE.REVERSED</code> — ACH return (NSF, account closed, unauthorized)</li>
+      </ul>
     </div>
 
   </div>
 
-  <!-- JS SDK v6 (sandbox) — bankAchPayments component -->
-  <script src="https://www.sandbox.paypal.com/web-sdk/v6/core"></script>
-
-  <script>
-    const CLIENT_ID = '<%= clientId %>';
-  </script>
   <script src="/ach.js"></script>
 </body>
 </html>
