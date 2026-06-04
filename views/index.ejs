@@ -304,6 +304,21 @@
           </ul>
         </a>
 
+        <!-- ACH Direct Debit -->
+        <a href="/ach" class="integration-card">
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <h3>ACH Direct Debit</h3>
+          <p><strong>Bank Account Debit via Orders v2</strong></p>
+          <p>Merchant-collected bank details passed via <code>payment_source.bank.ach_debit</code> — no JS SDK required.</p>
+          <ul>
+            <li>US only — limited release, requires PayPal approval</li>
+            <li>Supports WEB, TEL, CCD, PPD SEC codes</li>
+            <li>Vault support for recurring debits</li>
+            <li>Capture settles in ~5 calendar days (PENDING → COMPLETED)</li>
+            <li>Marketplace &amp; Platforms (Managed Path) product</li>
+          </ul>
+        </a>
+
         <!-- PayPal Payouts API Integration -->
         <a href="/payouts" class="integration-card">
           <span class="sdk-badge rest-api">⚠ Direct REST API</span>
@@ -384,20 +399,6 @@
           </ul>
         </a>
 
-        <!-- ACH Direct Debit -->
-        <a href="/ach" class="integration-card">
-          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
-          <h3>ACH Direct Debit</h3>
-          <p><strong>Bank Account Debit via Orders v2</strong></p>
-          <p>Merchant-collected bank details passed via <code>payment_source.bank.ach_debit</code> — no JS SDK required.</p>
-          <ul>
-            <li>US only — limited release, requires PayPal approval</li>
-            <li>Supports WEB, TEL, CCD, PPD SEC codes</li>
-            <li>Vault support for recurring debits</li>
-            <li>Capture settles in ~5 calendar days (PENDING → COMPLETED)</li>
-            <li>Marketplace &amp; Platforms (Managed Path) product</li>
-          </ul>
-        </a>
 
       </section>
     </div>
