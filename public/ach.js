@@ -1,30 +1,22 @@
 /**
- * ACH Bank Payment — JS SDK v6
+ * ACH Bank Payment — JS SDK v6 (discovery / probe mode)
  *
- * Flow:
- *   1. createInstance() with clientId + bankAchPayments component
- *   2. findEligibleMethods() — check isEligible('ach') before rendering
- *   3. createBankPaymentSession() with createOrder / onApprove callbacks
- *   4. bank-payment-button click → session.start()
- *   5. Buyer links bank via Finicity UI (Yodlee in sandbox)
- *   6. onApprove → POST /api/orders/:id/capture → show result
+ * ACH is limited-release only. The component name, eligibility key, and
+ * session method are not published in public docs. This file probes the live
+ * SDK instance to surface what's actually available, then attempts the
+ * integration if an ACH-related method is found.
  *
- * Merchant requirements: PPCP/Unbranded, US only, ACCEPT_PYMTS_VIA_ACH
- * feature provisioned, 10-digit NACHA Company ID, Expanded Checkout approval.
- *
- * IMPORTANT — unconfirmed API surface:
- * The component name 'bank-ach-payments', eligibility key 'ach', session
- * method 'createBankPaymentSession', and web component 'bank-payment-button'
- * are sourced from internal PayPal altpay docs. None of these appear in the
- * public JS SDK v6 reference at developer.paypal.com. Confirm exact names
- * with the PayPal altpay team before shipping. The button will only render
- * if the merchant account has ACH provisioned AND the names match.
+ * Component candidates tried in order: bankAchPayments, bank-ach-payments,
+ * achPayments, ach-payments (the SDK silently ignores unknown component names,
+ * so we try the most likely one and inspect the resulting instance).
  */
 
 const sdkLoadingEl = document.getElementById('sdk-loading');
 const statusArea = document.getElementById('status-area');
 const responsePanel = document.getElementById('response-panel');
 const responseContent = document.getElementById('response-content');
+const probePanel = document.getElementById('probe-panel');
+const probeContent = document.getElementById('probe-content');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -39,8 +31,29 @@ function showResponse(data) {
   responsePanel.style.display = 'block';
 }
 
+function showProbe(data) {
+  probeContent.textContent = JSON.stringify(data, null, 2);
+  probePanel.style.display = 'block';
+}
+
 function hideSdkLoading() {
   sdkLoadingEl.style.display = 'none';
+}
+
+function getMethods(obj) {
+  const names = new Set();
+  let cur = obj;
+  while (cur && cur !== Object.prototype) {
+    Object.getOwnPropertyNames(cur).forEach(n => names.add(n));
+    cur = Object.getPrototypeOf(cur);
+  }
+  return [...names].sort();
+}
+
+function findAchMethods(instance) {
+  return getMethods(instance).filter(n =>
+    /ach|bank|debit/i.test(n) && n !== 'constructor'
+  );
 }
 
 // ── Server API calls ──────────────────────────────────────────────────────────
@@ -53,24 +66,12 @@ async function createOrder() {
       paymentSource: 'paypal',
       totalAmount: '50.00',
       currency: 'USD',
-      items: [
-        {
-          name: 'Wooden Bowl',
-          quantity: 1,
-          unitAmount: '50.00',
-        },
-      ],
+      items: [{ name: 'Wooden Bowl', quantity: 1, unitAmount: '50.00' }],
     }),
   });
-
-  if (!response.ok) {
-    throw new Error(`Order creation failed: ${response.status}`);
-  }
-
+  if (!response.ok) throw new Error(`Order creation failed: ${response.status}`);
   const order = await response.json();
   console.log('[ach] Order created:', order.id);
-
-  // v6 SDK requires { orderId }
   return { orderId: order.id };
 }
 
@@ -79,11 +80,7 @@ async function captureOrder(orderId) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   });
-
-  if (!response.ok) {
-    throw new Error(`Capture failed: ${response.status}`);
-  }
-
+  if (!response.ok) throw new Error(`Capture failed: ${response.status}`);
   return response.json();
 }
 
@@ -97,35 +94,75 @@ async function init() {
   }
 
   try {
+    // Try the most likely component name; SDK silently drops unknown names.
     const sdkInstance = await window.paypal.createInstance({
       clientId: CLIENT_ID,
-      // bankAchPayments is the v6 component for ACH
-      components: ['bank-ach-payments'],
+      components: ['bankAchPayments'],
       pageType: 'checkout',
       locale: 'en-US',
       clientMetadataId: crypto.randomUUID(),
     });
-    console.log('[ach] SDK instance created');
 
-    // Dump all methods on the instance to identify the correct ACH session method name
-    console.log('[ach] sdkInstance methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(sdkInstance)).concat(Object.keys(sdkInstance)));
+    const allMethods = getMethods(sdkInstance);
+    const achMethods = findAchMethods(sdkInstance);
+    console.log('[ach] All instance methods:', allMethods);
+    console.log('[ach] ACH-related methods found:', achMethods);
 
     const eligibleMethods = await sdkInstance.findEligibleMethods({ currency: 'USD' });
-    console.log('[ach] Eligible methods:', eligibleMethods);
-    console.log('[ach] eligibleMethods keys:', Object.getOwnPropertyNames(Object.getPrototypeOf(eligibleMethods)).concat(Object.keys(eligibleMethods)));
+    const eligibilityKeys = ['ach', 'bank', 'bank_transfer', 'bank_debit', 'direct_debit'];
+    const eligibilityResults = Object.fromEntries(
+      eligibilityKeys.map(k => [k, eligibleMethods.isEligible(k)])
+    );
+    console.log('[ach] Eligibility probe:', eligibilityResults);
 
     hideSdkLoading();
 
-    if (!eligibleMethods.isEligible('ach')) {
+    // Surface probe results on the page
+    showProbe({
+      instanceMethods: allMethods,
+      achRelatedMethods: achMethods,
+      eligibilityProbe: eligibilityResults,
+      note: 'ACH component and session method names are not in public docs. ' +
+            'Use achRelatedMethods to find the correct createXxxSession() call, ' +
+            'and eligibilityProbe to find the correct isEligible() key.',
+    });
+
+    const achEligible = Object.values(eligibilityResults).some(Boolean);
+    if (!achEligible) {
       showStatus(
-        'ACH is not eligible for this merchant account or transaction. ' +
-        'Ensure ACCEPT_PYMTS_VIA_ACH is provisioned and the transaction is under the ACH limit tier.',
+        'No ACH/bank eligibility detected. This merchant account likely does not have ' +
+        'ACCEPT_PYMTS_VIA_ACH provisioned, or the component name was not recognised.',
         'info'
       );
       return;
     }
 
-    const achSession = sdkInstance.createBankPaymentSession({
+    // Find whichever session method the SDK actually exposes
+    const SESSION_METHOD_CANDIDATES = [
+      'createBankPaymentSession',
+      'createAchPaymentSession',
+      'createBankAchPaymentSession',
+      'createAchOneTimePaymentSession',
+      'createBankTransferSession',
+    ];
+    const sessionMethodName = SESSION_METHOD_CANDIDATES.find(
+      m => typeof sdkInstance[m] === 'function'
+    );
+
+    if (!sessionMethodName) {
+      showStatus(
+        `ACH is eligible but no session method was found. ` +
+        `Tried: ${SESSION_METHOD_CANDIDATES.join(', ')}. ` +
+        `Check the probe panel below for the full instance method list.`,
+        'error'
+      );
+      return;
+    }
+
+    console.log('[ach] Using session method:', sessionMethodName);
+    showStatus(`ACH eligible — using session method: ${sessionMethodName}`, 'info');
+
+    const achSession = sdkInstance[sessionMethodName]({
       async createOrder() {
         showStatus('Creating order…', 'info');
         return createOrder();
@@ -148,10 +185,7 @@ async function init() {
         }
       },
 
-      onCancel() {
-        showStatus('Bank payment cancelled by buyer.', 'info');
-      },
-
+      onCancel() { showStatus('Bank payment cancelled by buyer.', 'info'); },
       onError(error) {
         console.error('[ach] Payment error:', error);
         showStatus(`Payment error: ${error.message || 'Unknown error'}`, 'error');
@@ -165,9 +199,7 @@ async function init() {
       try {
         await achSession.start({ presentationMode: 'auto' }, achSession.createOrder());
       } catch (err) {
-        if (!err.isRecoverable) {
-          showStatus(`ACH error: ${err.message}`, 'error');
-        }
+        if (!err.isRecoverable) showStatus(`ACH error: ${err.message}`, 'error');
       }
     });
 
