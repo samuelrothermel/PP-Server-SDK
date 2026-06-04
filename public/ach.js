@@ -11,6 +11,14 @@
  *
  * Merchant requirements: PPCP/Unbranded, US only, ACCEPT_PYMTS_VIA_ACH
  * feature provisioned, 10-digit NACHA Company ID, Expanded Checkout approval.
+ *
+ * IMPORTANT — unconfirmed API surface:
+ * The component name 'bank-ach-payments', eligibility key 'ach', session
+ * method 'createBankPaymentSession', and web component 'bank-payment-button'
+ * are sourced from internal PayPal altpay docs. None of these appear in the
+ * public JS SDK v6 reference at developer.paypal.com. Confirm exact names
+ * with the PayPal altpay team before shipping. The button will only render
+ * if the merchant account has ACH provisioned AND the names match.
  */
 
 const sdkLoadingEl = document.getElementById('sdk-loading');
@@ -99,8 +107,12 @@ async function init() {
     });
     console.log('[ach] SDK instance created');
 
+    // Dump all methods on the instance to identify the correct ACH session method name
+    console.log('[ach] sdkInstance methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(sdkInstance)).concat(Object.keys(sdkInstance)));
+
     const eligibleMethods = await sdkInstance.findEligibleMethods({ currency: 'USD' });
     console.log('[ach] Eligible methods:', eligibleMethods);
+    console.log('[ach] eligibleMethods keys:', Object.getOwnPropertyNames(Object.getPrototypeOf(eligibleMethods)).concat(Object.keys(eligibleMethods)));
 
     hideSdkLoading();
 

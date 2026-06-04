@@ -192,8 +192,17 @@
         <li>PPCP / Unbranded product — requires Expanded Checkout approval</li>
         <li>Account must have <code>ACCEPT_PYMTS_VIA_ACH</code> feature + a 10-digit NACHA Company ID</li>
         <li>Onboarding via Partner Referrals API with <code>products["ach"]</code> — not self-serve</li>
-        <li>V6 SDK component: <code>bankAchPayments</code> (added to <code>components</code> array)</li>
+        <li>V6 SDK component: <code>bankAchPayments</code> (sourced from internal altpay docs — not listed in public developer.paypal.com docs)</li>
       </ul>
+    </div>
+
+    <!-- Unconfirmed API surface warning -->
+    <div style="padding:12px 16px; background:#fff3e0; border:1px solid #ffb74d; border-radius:8px; font-size:0.85em; color:#e65100; margin-bottom:24px;">
+      <strong>Component name unconfirmed from public docs.</strong>
+      The <code>bank-ach-payments</code> component and <code>bank-payment-button</code> web component used here are derived from internal PayPal altpay documentation —
+      they do not appear in the public <a href="https://developer.paypal.com/docs/checkout/advanced/sdk/v6/" target="_blank" rel="noopener">JS SDK v6 reference</a>.
+      The button will only render if your merchant account is provisioned for ACH <em>and</em> the component name matches the internal SDK build on your account.
+      Confirm the exact component name with the PayPal altpay team before relying on this integration.
     </div>
 
     <div class="layout">
