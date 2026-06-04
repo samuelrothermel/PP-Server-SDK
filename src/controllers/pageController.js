@@ -41,3 +41,4 @@ export const renderJsSdkV6CardEligibility = renderPage('js-sdk-v6-card-eligibili
 export const renderInvoicing = renderPage('invoicing');
 export const renderTransactionReports = renderPage('transaction-reports');
 export const renderCheckoutWallets = renderPage('checkout-wallets');
+export const renderAch = renderPage('ach');
