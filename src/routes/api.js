@@ -28,7 +28,7 @@ import {
   createOrderWithVaultId,
   getPaymentTokensByCustomerIds,
 } from '../controllers/vaultController.js';
-import { generateClientToken } from '../controllers/tokenController.js';
+import { generateClientToken, generateAchClientToken } from '../controllers/tokenController.js';
 import {
   createBillingToken,
   createBillingAgreement,
@@ -125,6 +125,7 @@ router.post('/first-time-user-token', createFirstTimeUserToken);
 
 // Client Token route for SDK initialization
 router.get('/client-token', generateClientToken);
+router.get('/ach/client-token', generateAchClientToken);
 
 // Billing Agreement routes
 router.post('/ba/create-billing-token', createBillingToken);

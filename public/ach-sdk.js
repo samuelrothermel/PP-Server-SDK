@@ -45,7 +45,7 @@ function hideSdkLoading() {
 // ── Server API calls ──────────────────────────────────────────────────────────
 
 async function getClientToken() {
-  const res = await fetch('/api/client-token');
+  const res = await fetch('/api/ach/client-token');
   if (!res.ok) throw new Error(`Client token fetch failed: ${res.status}`);
   return res.json(); // { clientId, clientToken }
 }
