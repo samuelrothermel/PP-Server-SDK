@@ -2,6 +2,7 @@ import { generateAccessToken } from '../services/authApi.js';
 import fetch from 'node-fetch';
 import { CLIENT_ID } from '../config/constants.js';
 
+
 // Create client token for SDK initialization
 export const generateClientToken = async (req, res, next) => {
   try {

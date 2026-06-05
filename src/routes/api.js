@@ -84,6 +84,7 @@ import {
 } from '../controllers/transactionReportsController.js';
 import {
   createAchOrder,
+  getAchOrder,
   captureAchOrder,
 } from '../controllers/achController.js';
 
@@ -196,6 +197,7 @@ router.get('/invoicing/webhook-events/:invoiceId', getInvoiceWebhookEvents);
 
 // ACH Direct Debit routes (direct REST API — no JS SDK)
 router.post('/ach/orders', createAchOrder);
+router.get('/ach/orders/:orderId', getAchOrder);
 router.post('/ach/orders/:orderId/capture', captureAchOrder);
 
 // Transaction Reports API routes

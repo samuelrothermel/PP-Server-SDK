@@ -28,6 +28,7 @@ import {
   renderTransactionReports,
   renderCheckoutWallets,
   renderAch,
+  renderAchSdk,
 } from '../controllers/pageController.js';
 
 const router = express.Router();
@@ -61,6 +62,7 @@ router.get('/invoicing', renderInvoicing);
 router.get('/transaction-reports', renderTransactionReports);
 router.get('/checkout-wallets', renderCheckoutWallets);
 router.get('/ach', renderAch);
+router.get('/ach-sdk', renderAchSdk);
 router.get('/api/payouts/oauth/callback', (req, res) => {
   res.render('paypal-oauth-callback');
 });

@@ -42,3 +42,4 @@ export const renderInvoicing = renderPage('invoicing');
 export const renderTransactionReports = renderPage('transaction-reports');
 export const renderCheckoutWallets = renderPage('checkout-wallets');
 export const renderAch = renderPage('ach');
+export const renderAchSdk = renderPage('ach-sdk');

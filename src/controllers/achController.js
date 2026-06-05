@@ -34,6 +34,22 @@ export const createAchOrder = async (req, res, next) => {
   }
 };
 
+export const getAchOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const accessToken = await generateAccessToken();
+
+    const response = await fetch(`${BASE}/v2/checkout/orders/${orderId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const captureAchOrder = async (req, res, next) => {
   try {
     const { orderId } = req.params;

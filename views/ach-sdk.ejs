@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+  <title>ACH Pay with Bank — JS SDK v6</title>
+  <style>
+    .page-header { text-align: center; margin-bottom: 32px; }
+    .page-header h1 { font-size: 2em; margin-bottom: 8px; color: #1a1a1a; }
+    .page-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .page-header p { color: #666; margin: 0; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+    .product-card { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background: #fff; }
+    .product-card-inner { display: flex; }
+    .product-image { width: 220px; min-width: 220px; object-fit: cover; border-right: 1px solid #e0e0e0; }
+    .product-details { padding: 24px; flex: 1; }
+    .product-details h2 { margin: 0 0 4px; color: #1a1a1a; font-size: 1.4em; }
+    .product-details .category { font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .product-details .price { font-size: 1.6em; font-weight: 700; color: #0070ba; margin-bottom: 16px; }
+    .product-details p { color: #555; font-size: 0.95em; line-height: 1.6; margin: 0 0 16px; }
+    .product-details ul { color: #555; font-size: 0.9em; padding-left: 18px; margin: 0; }
+    .product-details ul li { margin-bottom: 4px; }
+    @media (max-width: 600px) {
+      .product-card-inner { flex-direction: column; }
+      .product-image { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid #e0e0e0; max-height: 200px; }
+    }
+
+    .checkout-panel {
+      border: 1px solid #e0e0e0; border-radius: 10px; background: #fff;
+      position: sticky; top: 20px; overflow: hidden;
+    }
+    .checkout-panel-header { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa; }
+    .checkout-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
+
+    .order-summary { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+    .summary-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.9em; color: #555; margin-bottom: 8px;
+    }
+    .summary-row:last-child { margin-bottom: 0; }
+    .summary-row.total { font-weight: 700; font-size: 1em; color: #1a1a1a; padding-top: 8px; margin-top: 4px; border-top: 1px solid #e0e0e0; }
+    .summary-item-name { color: #333; }
+    .summary-qty { color: #888; font-size: 0.85em; margin-left: 4px; }
+
+    .buttons-area { padding: 16px 20px; }
+    .sdk-loading { text-align: center; padding: 16px 0; color: #888; font-size: 0.9em; }
+
+    .status-area {
+      margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 0.88em; display: none;
+    }
+    .status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; }
+    .status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
+    .status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+
+    .button-stack { display: flex; flex-direction: column; gap: 10px; }
+    .button-stack bank-ach-button { display: block; width: 100%; }
+
+    /* Debit authorization modal */
+    .auth-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .auth-overlay.visible { display: flex; }
+    .auth-modal {
+      background: #fff; border-radius: 12px; max-width: 520px; width: 90%;
+      padding: 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .auth-modal h3 { margin: 0 0 12px; font-size: 1.1em; color: #1a1a1a; }
+    .auth-text {
+      background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px;
+      padding: 14px; font-size: 0.85em; color: #333; line-height: 1.6; margin-bottom: 16px;
+    }
+    .auth-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 0.9em; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: #0070ba; color: #fff; }
+    .btn-primary:hover { background: #005ea6; }
+    .btn-secondary { background: #f0f0f0; color: #333; }
+    .btn-secondary:hover { background: #e0e0e0; }
+
+    .below-fold { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+
+    .sandbox-note {
+      padding: 12px 16px; background: #e8f5e9; border: 1px solid #a5d6a7;
+      border-radius: 8px; font-size: 0.85em; color: #2e7d32;
+    }
+    .sandbox-note strong { color: #1b5e20; }
+    .sandbox-note code { background: #c8e6c9; padding: 1px 5px; border-radius: 3px; }
+
+    .production-checklist { border: 1px solid #d6bcfa; border-radius: 10px; overflow: hidden; }
+    .production-checklist summary {
+      padding: 14px 20px; background: #f5f0ff; font-weight: 600; font-size: 0.95em;
+      color: #6f42c1; cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .production-checklist summary::after { content: '▼'; font-size: 0.75em; }
+    .production-checklist[open] summary::after { content: '▲'; }
+    .checklist-body { padding: 20px; background: #fff; }
+    .checklist-body h4 { margin: 16px 0 8px; color: #444; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }
+    .checklist-body h4:first-child { margin-top: 0; }
+    .checklist-body ul { margin: 0 0 8px; padding-left: 20px; }
+    .checklist-body ul li { font-size: 0.9em; color: #555; margin-bottom: 4px; }
+
+    .response-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; display: none; }
+    .response-panel h3 { margin: 0; padding: 14px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #333; }
+    .response-panel pre {
+      margin: 0; padding: 16px 20px; background: #1e1e1e; color: #d4d4d4;
+      font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5;
+      overflow: auto; max-height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <a href="/" class="back-link">← Back to Dashboard</a>
+
+    <div class="page-header">
+      <div class="badge-row">
+        <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+      </div>
+      <h1>ACH — Pay with Bank</h1>
+      <p>Open Banking popup flow via <code>createBankAchOneTimePaymentSession()</code>. Requires account provisioning.</p>
+    </div>
+
+    <div class="layout">
+
+      <!-- Left: product -->
+      <div class="product-card">
+        <div class="product-card-inner">
+          <img
+            class="product-image"
+            src="https://media.istockphoto.com/id/508179654/photo/wooden-bowl-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=c5BqYjY0wgzjMsWsUlj_9uFpi4kT9YWO-_ZKZg4uoxY="
+            alt="Wooden Bowl"
+          />
+          <div class="product-details">
+            <div class="category">Home &amp; Kitchen</div>
+            <h2>Wooden Bowl</h2>
+            <div class="price">$50.00</div>
+            <p>Handcrafted from sustainably sourced hardwood with a food-safe, eco-friendly finish.</p>
+            <ul>
+              <li>12" diameter × 4" height</li>
+              <li>Hand wash recommended</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: checkout panel -->
+      <div class="checkout-panel">
+        <div class="checkout-panel-header">
+          <h2>Order Summary</h2>
+        </div>
+        <div class="order-summary">
+          <div class="summary-row">
+            <span class="summary-item-name">Wooden Bowl <span class="summary-qty">× 1</span></span>
+            <span>$50.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span>Free</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>$50.00 USD</span>
+          </div>
+        </div>
+        <div class="buttons-area">
+          <div id="sdk-loading" class="sdk-loading">Loading payment methods…</div>
+          <div class="button-stack">
+            <bank-ach-button id="ach-button" hidden></bank-ach-button>
+          </div>
+          <div id="status-area" class="status-area"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Debit authorization modal (shown after onApprove, before capture) -->
+    <div id="auth-overlay" class="auth-overlay">
+      <div class="auth-modal">
+        <h3>Authorize Bank Debit</h3>
+        <div class="auth-text" id="auth-text">Loading authorization details…</div>
+        <p style="font-size:0.8em; color:#888; margin: 0 0 16px;">
+          By clicking "Agree and Continue" you authorize the debit described above.
+          Your authorization will be stored with the transaction timestamp.
+        </p>
+        <div class="auth-modal-actions">
+          <button class="btn btn-secondary" id="auth-cancel-btn">Cancel</button>
+          <button class="btn btn-primary" id="auth-confirm-btn">Agree and Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="below-fold">
+
+      <div class="sandbox-note">
+        <strong>Sandbox test credentials:</strong> When the bank selection popup appears, select
+        <strong>Open Finance Bank OAUTH</strong>, then use username <code>john_surname</code>
+        and password <code>ob_user</code>.
+      </div>
+
+      <details class="production-checklist">
+        <summary>Production Go-Live Checklist</summary>
+        <div class="checklist-body">
+          <h4>Account Provisioning</h4>
+          <ul>
+            <li>PayPal business account approved for Expanded Checkout</li>
+            <li>ACH payments enabled — contact your CSM or Sales for approval</li>
+            <li>Chargeback and bank unauthorized rates below 0.25%</li>
+          </ul>
+          <h4>SDK &amp; Auth</h4>
+          <ul>
+            <li>Switch SDK URL to production: <code>https://www.paypal.com/web-sdk/v6/core</code></li>
+            <li>Client token generated via <code>POST /v1/oauth2/token</code> with <code>response_type=client_token</code></li>
+            <li>Client token expires — regenerate as needed, do not cache indefinitely</li>
+          </ul>
+          <h4>NACHA Authorization Compliance</h4>
+          <ul>
+            <li>Display debit authorization text to buyer before capture (see modal on this page)</li>
+            <li>Store full authorization text with amount, bank details, and timestamp</li>
+            <li>Be prepared to provide proof of authorization to PayPal, the buyer's bank, or NACHA</li>
+          </ul>
+          <h4>Settlement</h4>
+          <ul>
+            <li>Capture status is <code>PENDING</code> initially — do not fulfill until <code>PAYMENT.CAPTURE.COMPLETED</code> webhook fires</li>
+            <li>Handle <code>PAYMENT.CAPTURE.REVERSED</code> for ACH returns (NSF, account closed, unauthorized)</li>
+            <li>Unauthorized return window: 60 days (consumer) / 2 days (business)</li>
+          </ul>
+        </div>
+      </details>
+
+      <div id="response-panel" class="response-panel">
+        <h3>API Response</h3>
+        <pre id="response-content"></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JS SDK v6 (sandbox) -->
+  <script src="https://www.sandbox.paypal.com/web-sdk/v6/core"></script>
+  <script src="/ach-sdk.js"></script>
+</body>
+</html>
