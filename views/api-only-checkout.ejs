@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+  <title>API-Only Checkout</title>
+  <style>
+    .page-header { text-align: center; margin-bottom: 32px; }
+    .page-header h1 { font-size: 2em; margin-bottom: 8px; color: #1a1a1a; }
+    .page-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .page-header p { color: #666; margin: 0; }
+
+    /* Tab nav */
+    .tab-nav { display: flex; gap: 0; border-bottom: 2px solid #e0e0e0; margin-bottom: 28px; }
+    .tab-btn {
+      padding: 10px 22px;
+      border: none;
+      background: none;
+      font-size: 0.95em;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-weight: 500;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn.active { color: #0070ba; border-bottom-color: #0070ba; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+    /* Scenario card (left) */
+    .scenario-card { border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; overflow: hidden; }
+    .scenario-card-inner { padding: 24px; }
+    .scenario-card h3 { margin: 0 0 8px; font-size: 1.2em; color: #1a1a1a; }
+    .scenario-card .scenario-meta { font-size: 0.82em; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .scenario-card p { color: #555; font-size: 0.95em; line-height: 1.6; margin: 0 0 12px; }
+
+    /* Cart items (tab 2) */
+    .cart-line { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; }
+    .cart-line:last-child { border-bottom: none; }
+    .cart-line .item-name { color: #333; font-weight: 500; }
+    .cart-line .item-qty { color: #888; font-size: 0.85em; margin-left: 6px; }
+    .cart-line .item-price { color: #0070ba; font-weight: 600; }
+
+    /* Checkout panel (right) */
+    .checkout-panel { border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; position: sticky; top: 20px; overflow: hidden; }
+    .checkout-panel-header { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa; }
+    .checkout-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
+
+    .order-summary { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 0.9em; color: #555; margin-bottom: 8px; }
+    .summary-row:last-child { margin-bottom: 0; }
+    .summary-row.total { font-weight: 700; font-size: 1em; color: #1a1a1a; padding-top: 8px; margin-top: 4px; border-top: 1px solid #e0e0e0; }
+
+    /* Form */
+    .form-section { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+    .form-section h3 { margin: 0 0 12px; font-size: 0.9em; color: #333; font-weight: 600; }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 0.82em; color: #666; margin-bottom: 4px; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 7px 9px; border: 1px solid #ccc; border-radius: 6px;
+      font-size: 0.88em; box-sizing: border-box; color: #333;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* Dev options */
+    .dev-controls { padding: 14px 20px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa; }
+    .dev-controls h3 { margin: 0 0 10px; font-size: 0.85em; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+    .dev-option { margin-bottom: 10px; }
+    .dev-option label { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: #555; cursor: pointer; }
+    .dev-option input[type="text"] { width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85em; box-sizing: border-box; margin-top: 6px; }
+    .radio-row { display: flex; gap: 16px; }
+    .radio-row label { display: flex; align-items: center; gap: 6px; font-size: 0.9em; color: #555; cursor: pointer; }
+
+    /* Actions */
+    .actions-area { padding: 16px 20px; }
+    .btn-primary {
+      width: 100%; padding: 12px; background: #0070ba; color: #fff;
+      border: none; border-radius: 6px; font-size: 0.95em; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #005ea6; }
+    .btn-secondary {
+      width: 100%; padding: 10px; background: #fff; color: #0070ba;
+      border: 1px solid #0070ba; border-radius: 6px; font-size: 0.9em;
+      cursor: pointer; margin-top: 8px; transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: #f0f8ff; }
+
+    .status-area { margin-top: 10px; padding: 10px 12px; border-radius: 6px; font-size: 0.88em; display: none; }
+    .status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; display:block; }
+    .status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; display:block; }
+    .status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; display:block; }
+
+    /* Below fold */
+    .below-fold { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+    .response-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; }
+    .response-panel h3 { margin: 0; padding: 14px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #333; }
+    .response-panel pre { margin: 0; padding: 16px 20px; background: #1e1e1e; color: #d4d4d4; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; overflow: auto; max-height: 400px; }
+
+    .info-note { padding: 12px 16px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.85em; color: #666; }
+    .info-note strong { color: #444; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <a href="/" class="back-link">← Back to Dashboard</a>
+
+    <div class="page-header">
+      <div class="badge-row">
+        <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+      </div>
+      <h1>API-Only Checkout</h1>
+      <p>No JavaScript SDK — all payment flows driven by direct REST API calls from the server. Covers product, cart, and checkout patterns.</p>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="product">Product</button>
+      <button class="tab-btn" data-tab="cart">Cart</button>
+      <button class="tab-btn" data-tab="checkout">Checkout</button>
+    </div>
+
+    <!-- Product Tab -->
+    <div id="tab-product" class="tab-panel active">
+      <div class="layout">
+        <div class="scenario-card">
+          <div class="scenario-card-inner">
+            <div class="scenario-meta">Single-item purchase</div>
+            <h3>Wooden Bowl</h3>
+            <p>A single-product API-only order. The merchant collects no payment details on-page — instead a server-side order is created and the buyer is redirected to a PayPal payer-action URL to complete payment.</p>
+            <ul style="color:#555; font-size:0.9em; padding-left:18px;">
+              <li>Server creates order via <code>POST /v2/checkout/orders</code></li>
+              <li>Returns <code>payer-action</code> approval link</li>
+              <li>Buyer approves on PayPal, returns to <code>return_url</code></li>
+              <li>Server captures or authorizes on return</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="checkout-panel">
+          <div class="checkout-panel-header"><h2>Order Summary</h2></div>
+          <div class="order-summary">
+            <div class="summary-row"><span>Wooden Bowl × 1</span><span>$50.00</span></div>
+            <div class="summary-row"><span>Shipping</span><span>Free</span></div>
+            <div class="summary-row total"><span>Total</span><span>$50.00 USD</span></div>
+          </div>
+          <div class="dev-controls">
+            <h3>Dev Options</h3>
+            <div class="dev-option">
+              <label><input type="checkbox" id="product-returning-cb"> Returning Customer</label>
+              <input type="text" id="product-customer-id" placeholder="Customer ID" style="display:none;" />
+            </div>
+            <div class="dev-option">
+              <label><input type="checkbox" id="product-vault-cb"> Vault / Tokenize on Purchase</label>
+            </div>
+            <div class="dev-option">
+              <div style="font-size:0.85em;color:#555;margin-bottom:6px;">Payment Intent</div>
+              <div class="radio-row">
+                <label><input type="radio" name="product-intent" value="capture" checked> Capture</label>
+                <label><input type="radio" name="product-intent" value="authorize"> Authorize</label>
+              </div>
+            </div>
+          </div>
+          <div class="actions-area">
+            <button class="btn-primary" onclick="createProductOrder()">Create Order &amp; Pay with PayPal</button>
+            <div id="product-status" class="status-area"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Tab -->
+    <div id="tab-cart" class="tab-panel">
+      <div class="layout">
+        <div class="scenario-card">
+          <div class="scenario-card-inner">
+            <div class="scenario-meta">Multi-item cart</div>
+            <h3>Cart (3 items)</h3>
+            <p>A multi-line-item order demonstrating how the Orders API passes item-level breakdowns. The server assembles the full cart and returns a payer-action link.</p>
+            <div style="margin-top:12px;">
+              <div class="cart-line"><span><span class="item-name">Wooden Bowl</span><span class="item-qty">× 1</span></span><span class="item-price">$50.00</span></div>
+              <div class="cart-line"><span><span class="item-name">Ceramic Mug</span><span class="item-qty">× 2</span></span><span class="item-price">$30.00</span></div>
+              <div class="cart-line"><span><span class="item-name">Bamboo Cutting Board</span><span class="item-qty">× 1</span></span><span class="item-price">$35.00</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkout-panel">
+          <div class="checkout-panel-header"><h2>Order Summary</h2></div>
+          <div class="order-summary">
+            <div class="summary-row"><span>Subtotal</span><span>$115.00</span></div>
+            <div class="summary-row"><span>Shipping</span><span>Free</span></div>
+            <div class="summary-row"><span>Tax</span><span>$9.89</span></div>
+            <div class="summary-row total"><span>Total</span><span>$124.89 USD</span></div>
+          </div>
+          <div class="dev-controls">
+            <h3>Dev Options</h3>
+            <div class="dev-option">
+              <label><input type="checkbox" id="cart-returning-cb"> Returning Customer</label>
+              <input type="text" id="cart-customer-id" placeholder="Customer ID" style="display:none;" />
+            </div>
+            <div class="dev-option">
+              <label><input type="checkbox" id="cart-vault-cb"> Vault / Tokenize on Purchase</label>
+            </div>
+            <div class="dev-option">
+              <div style="font-size:0.85em;color:#555;margin-bottom:6px;">Payment Intent</div>
+              <div class="radio-row">
+                <label><input type="radio" name="cart-intent" value="capture" checked> Capture</label>
+                <label><input type="radio" name="cart-intent" value="authorize"> Authorize</label>
+              </div>
+            </div>
+          </div>
+          <div class="actions-area">
+            <button class="btn-primary" onclick="createCartOrder()">Create Order &amp; Pay with PayPal</button>
+            <div id="cart-status" class="status-area"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkout Tab -->
+    <div id="tab-checkout" class="tab-panel">
+      <div class="layout">
+        <div class="scenario-card">
+          <div class="scenario-card-inner">
+            <div class="scenario-meta">Full checkout — merchant-collected details</div>
+            <h3>Server-side Checkout</h3>
+            <p>The merchant collects all payment and shipping information via a traditional HTML form. The server passes card or bank details directly to the Orders API — no JS SDK involved. Suitable for PCI-compliant server-to-server integrations.</p>
+            <ul style="color:#555; font-size:0.9em; padding-left:18px;">
+              <li>Card details passed via <code>payment_source.card</code></li>
+              <li>Vault via <code>payment_source.card.vault</code></li>
+              <li>Returning customer loads vaulted token from vault API</li>
+              <li>Authorize or capture set via <code>intent</code> field</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="checkout-panel">
+          <div class="checkout-panel-header"><h2>Payment Details</h2></div>
+
+          <div class="form-section">
+            <h3>Card Information</h3>
+            <div class="form-group">
+              <label>Card Number</label>
+              <input type="text" id="card-number" placeholder="4111 1111 1111 1111" maxlength="19" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Expiry (MM/YY)</label>
+                <input type="text" id="card-expiry" placeholder="12/26" maxlength="5" />
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input type="text" id="card-cvv" placeholder="123" maxlength="4" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Cardholder Name</label>
+              <input type="text" id="card-name" placeholder="Jane Doe" />
+            </div>
+          </div>
+
+          <div class="order-summary" style="border-top: 1px solid #e0e0e0;">
+            <div class="summary-row"><span>Total</span><span>$50.00 USD</span></div>
+          </div>
+
+          <div class="dev-controls">
+            <h3>Dev Options</h3>
+            <div class="dev-option">
+              <label><input type="checkbox" id="checkout-returning-cb"> Returning Customer</label>
+              <input type="text" id="checkout-customer-id" placeholder="Customer ID" style="display:none;" />
+            </div>
+            <div class="dev-option">
+              <label><input type="checkbox" id="checkout-vault-cb"> Vault / Tokenize on Purchase</label>
+            </div>
+            <div class="dev-option">
+              <div style="font-size:0.85em;color:#555;margin-bottom:6px;">Payment Intent</div>
+              <div class="radio-row">
+                <label><input type="radio" name="checkout-intent" value="capture" checked> Capture</label>
+                <label><input type="radio" name="checkout-intent" value="authorize"> Authorize</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-area">
+            <button class="btn-primary" onclick="submitCheckoutOrder()">Submit Order</button>
+            <div id="checkout-status" class="status-area"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Below fold -->
+    <div class="below-fold">
+      <div class="info-note">
+        <strong>API-Only pattern:</strong> No PayPal JS SDK is loaded on this page. All order creation, capture, and authorization calls go through the server using the PayPal Server SDK or direct REST calls. The buyer is redirected to PayPal for wallet-based approval flows.
+      </div>
+      <div id="response-panel" class="response-panel">
+        <h3>API Response</h3>
+        <pre id="response-content">No request sent yet.</pre>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Dev options wiring
+    function wireReturning(cbId, inputId) {
+      const cb = document.getElementById(cbId);
+      const input = document.getElementById(inputId);
+      cb.addEventListener('change', () => { input.style.display = cb.checked ? 'block' : 'none'; });
+    }
+    wireReturning('product-returning-cb', 'product-customer-id');
+    wireReturning('cart-returning-cb', 'cart-customer-id');
+    wireReturning('checkout-returning-cb', 'checkout-customer-id');
+
+    function showStatus(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = 'status-area ' + type;
+    }
+
+    function showResponse(data) {
+      const panel = document.getElementById('response-panel');
+      const pre = document.getElementById('response-content');
+      pre.textContent = JSON.stringify(data, null, 2);
+      panel.style.display = 'block';
+    }
+
+    function getIntent(name) {
+      return document.querySelector(`input[name="${name}"]:checked`)?.value || 'capture';
+    }
+
+    async function createProductOrder() {
+      showStatus('product-status', 'Creating order…', 'info');
+      try {
+        const intent = getIntent('product-intent');
+        const vault = document.getElementById('product-vault-cb').checked;
+        const customerId = document.getElementById('product-customer-id').value.trim();
+
+        const body = { intent: intent.toUpperCase(), amount: '50.00', currency: 'USD' };
+        if (vault && customerId) body.customerId = customerId;
+
+        const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json();
+        showResponse(data);
+
+        const approveLink = data.links?.find(l => l.rel === 'payer-action')?.href;
+        if (approveLink) {
+          showStatus('product-status', 'Order created. Redirecting to PayPal for approval…', 'success');
+          setTimeout(() => { window.location.href = approveLink; }, 1200);
+        } else {
+          showStatus('product-status', 'Order created: ' + data.id, 'success');
+        }
+      } catch (e) {
+        showStatus('product-status', 'Error: ' + e.message, 'error');
+      }
+    }
+
+    async function createCartOrder() {
+      showStatus('cart-status', 'Creating cart order…', 'info');
+      try {
+        const intent = getIntent('cart-intent');
+        const body = { intent: intent.toUpperCase(), amount: '124.89', currency: 'USD', items: true };
+        const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json();
+        showResponse(data);
+
+        const approveLink = data.links?.find(l => l.rel === 'payer-action')?.href;
+        if (approveLink) {
+          showStatus('cart-status', 'Order created. Redirecting to PayPal…', 'success');
+          setTimeout(() => { window.location.href = approveLink; }, 1200);
+        } else {
+          showStatus('cart-status', 'Order created: ' + data.id, 'success');
+        }
+      } catch (e) {
+        showStatus('cart-status', 'Error: ' + e.message, 'error');
+      }
+    }
+
+    async function submitCheckoutOrder() {
+      showStatus('checkout-status', 'Submitting order…', 'info');
+      try {
+        const intent = getIntent('checkout-intent');
+        const vault = document.getElementById('checkout-vault-cb').checked;
+        const customerId = document.getElementById('checkout-customer-id').value.trim();
+
+        const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+        const expiry = document.getElementById('card-expiry').value.split('/');
+        const body = {
+          intent: intent.toUpperCase(),
+          amount: '50.00',
+          currency: 'USD',
+          card: {
+            number: cardNumber,
+            expiry: `20${expiry[1]}-${expiry[0]}`,
+            securityCode: document.getElementById('card-cvv').value,
+            name: document.getElementById('card-name').value,
+          },
+        };
+        if (vault) body.vault = true;
+        if (customerId) body.customerId = customerId;
+
+        const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json();
+        showResponse(data);
+        showStatus('checkout-status', data.status === 'COMPLETED' ? 'Payment completed!' : 'Order created: ' + data.status, data.status === 'COMPLETED' ? 'success' : 'info');
+      } catch (e) {
+        showStatus('checkout-status', 'Error: ' + e.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+  <title>JS SDK v6 — Cart</title>
+  <style>
+    .page-header { text-align: center; margin-bottom: 32px; }
+    .page-header h1 { font-size: 2em; margin-bottom: 8px; color: #1a1a1a; }
+    .page-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .page-header p { color: #666; margin: 0; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+    /* Cart items */
+    .cart-panel { border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; overflow: hidden; }
+    .cart-panel-header { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa; }
+    .cart-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
+
+    .cart-items { padding: 16px 20px; }
+    .cart-item { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item-img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #e0e0e0; flex-shrink: 0; }
+    .cart-item-details { flex: 1; }
+    .cart-item-details .name { font-weight: 600; font-size: 0.95em; color: #1a1a1a; }
+    .cart-item-details .meta { font-size: 0.82em; color: #888; margin-top: 2px; }
+    .cart-item-price { font-weight: 600; color: #0070ba; font-size: 0.95em; white-space: nowrap; }
+
+    /* Checkout panel */
+    .checkout-panel { border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; position: sticky; top: 20px; overflow: hidden; }
+    .checkout-panel-header { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa; }
+    .checkout-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
+
+    .order-summary { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; color: #555; margin-bottom: 8px; }
+    .summary-row:last-child { margin-bottom: 0; }
+    .summary-row.total { font-weight: 700; font-size: 1em; color: #1a1a1a; padding-top: 8px; margin-top: 4px; border-top: 1px solid #e0e0e0; }
+
+    .buttons-area { padding: 16px 20px; }
+    .button-stack { display: flex; flex-direction: column; gap: 10px; }
+    .button-stack paypal-button,
+    .button-stack paypal-pay-later-button,
+    .button-stack venmo-button { display: block; width: 100%; }
+
+    .dev-controls { padding: 14px 20px; border-top: 1px solid #e0e0e0; background: #f8f9fa; }
+    .dev-controls h3 { margin: 0 0 10px; font-size: 0.85em; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+    .dev-option { margin-bottom: 10px; }
+    .dev-option label { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: #555; cursor: pointer; }
+    .dev-option input[type="text"] { width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85em; box-sizing: border-box; margin-top: 6px; }
+    .radio-row { display: flex; gap: 16px; }
+    .radio-row label { display: flex; align-items: center; gap: 6px; font-size: 0.9em; color: #555; cursor: pointer; }
+
+    .sdk-loading { text-align: center; padding: 16px 0; color: #888; font-size: 0.9em; }
+    .status-area { margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 0.88em; display: none; }
+    .status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; }
+    .status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
+    .status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; }
+
+    .below-fold { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+    .response-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; display: none; }
+    .response-panel h3 { margin: 0; padding: 14px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #333; }
+    .response-panel pre { margin: 0; padding: 16px 20px; background: #1e1e1e; color: #d4d4d4; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; overflow: auto; max-height: 400px; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <a href="/" class="back-link">← Back to Dashboard</a>
+
+    <div class="page-header">
+      <div class="badge-row">
+        <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+      </div>
+      <h1>JS SDK v6 — Cart</h1>
+      <p>Shopping cart page using <code>createInstance()</code>, eligibility checking, and web component buttons.</p>
+    </div>
+
+    <div class="layout">
+
+      <!-- Left: cart items -->
+      <div class="cart-panel">
+        <div class="cart-panel-header">
+          <h2>Your Cart (3 items)</h2>
+        </div>
+        <div class="cart-items">
+          <div class="cart-item">
+            <img class="cart-item-img" src="https://media.istockphoto.com/id/508179654/photo/wooden-bowl-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=c5BqYjY0wgzjMsWsUlj_9uFpi4kT9YWO-_ZKZg4uoxY=" alt="Wooden Bowl" />
+            <div class="cart-item-details">
+              <div class="name">Wooden Bowl</div>
+              <div class="meta">Home &amp; Kitchen · Qty 1</div>
+            </div>
+            <div class="cart-item-price">$50.00</div>
+          </div>
+          <div class="cart-item">
+            <img class="cart-item-img" src="https://media.istockphoto.com/id/497368510/photo/ceramic-cup-isolated-on-a-white-background.jpg?s=612x612&w=0&k=20&c=Y8KP6YbSJhHiHiR9RNakqRQaWbHXHE5fvDR5rkiQmjE=" alt="Ceramic Mug" />
+            <div class="cart-item-details">
+              <div class="name">Ceramic Mug</div>
+              <div class="meta">Kitchen · Qty 2</div>
+            </div>
+            <div class="cart-item-price">$30.00</div>
+          </div>
+          <div class="cart-item">
+            <img class="cart-item-img" src="https://media.istockphoto.com/id/1322636726/photo/bamboo-cutting-board-isolated-on-white.jpg?s=612x612&w=0&k=20&c=TJVlBkNcS_Vq5zJ2wFmwlGPJtpKxN7Z5Iy3-3UzXg4=" alt="Bamboo Cutting Board" />
+            <div class="cart-item-details">
+              <div class="name">Bamboo Cutting Board</div>
+              <div class="meta">Kitchen · Qty 1</div>
+            </div>
+            <div class="cart-item-price">$35.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: checkout panel -->
+      <div class="checkout-panel">
+        <div class="checkout-panel-header">
+          <h2>Order Summary</h2>
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-row">
+            <span>Subtotal (3 items)</span>
+            <span>$115.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span>Free</span>
+          </div>
+          <div class="summary-row">
+            <span>Tax</span>
+            <span>$9.89</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>$124.89 USD</span>
+          </div>
+        </div>
+
+        <div class="buttons-area">
+          <div id="sdk-loading" class="sdk-loading">Loading payment methods…</div>
+          <div class="button-stack">
+            <paypal-button id="paypal-button" hidden></paypal-button>
+            <paypal-pay-later-button id="pay-later-button" hidden></paypal-pay-later-button>
+            <venmo-button id="venmo-button" hidden></venmo-button>
+          </div>
+          <div id="status-area" class="status-area"></div>
+        </div>
+
+        <div class="dev-controls">
+          <h3>Dev Options</h3>
+
+          <div class="dev-option">
+            <label>
+              <input type="checkbox" id="returning-user-checkbox">
+              Returning Customer
+            </label>
+            <input type="text" id="customer-id-input" placeholder="Customer ID" style="display:none;" />
+          </div>
+
+          <div class="dev-option">
+            <label>
+              <input type="checkbox" id="vault-checkbox">
+              Vault / Tokenize on Purchase
+            </label>
+          </div>
+
+          <div class="dev-option">
+            <div style="font-size:0.85em; color:#555; margin-bottom:6px;">Payment Intent</div>
+            <div class="radio-row">
+              <label><input type="radio" name="intent" value="capture" checked> Capture</label>
+              <label><input type="radio" name="intent" value="authorize"> Authorize</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="below-fold">
+      <div id="response-panel" class="response-panel">
+        <h3>API Response</h3>
+        <pre id="response-content"></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://www.sandbox.paypal.com/web-sdk/v6/core"></script>
+  <script>
+    const CLIENT_ID = '<%= clientId %>';
+  </script>
+  <script src="/js-sdk-v6-standard.js"></script>
+  <script>
+    const returningCb = document.getElementById('returning-user-checkbox');
+    const customerInput = document.getElementById('customer-id-input');
+    returningCb.addEventListener('change', () => {
+      customerInput.style.display = returningCb.checked ? 'block' : 'none';
+    });
+  </script>
+</body>
+</html>

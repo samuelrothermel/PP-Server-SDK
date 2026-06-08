@@ -29,6 +29,12 @@ import {
   renderCheckoutWallets,
   renderAch,
   renderAchSdk,
+  renderJsSdkV6Product,
+  renderJsSdkV6Cart,
+  renderApiOnlyCheckout,
+  renderMitV5,
+  renderMitV6,
+  renderMitApi,
 } from '../controllers/pageController.js';
 
 const router = express.Router();
@@ -63,6 +69,12 @@ router.get('/transaction-reports', renderTransactionReports);
 router.get('/checkout-wallets', renderCheckoutWallets);
 router.get('/ach', renderAch);
 router.get('/ach-sdk', renderAchSdk);
+router.get('/js-sdk-v6/product', renderJsSdkV6Product);
+router.get('/js-sdk-v6/cart', renderJsSdkV6Cart);
+router.get('/api-only/checkout', renderApiOnlyCheckout);
+router.get('/mit/v5', renderMitV5);
+router.get('/mit/v6', renderMitV6);
+router.get('/mit/api', renderMitApi);
 router.get('/api/payouts/oauth/callback', (req, res) => {
   res.render('paypal-oauth-callback');
 });

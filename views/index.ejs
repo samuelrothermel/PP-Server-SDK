@@ -3,165 +3,438 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://www.paypalobjects.com/webstatic/en_US/developer/docs/css/cardfields.css">
   <link rel="stylesheet" href="/styles/custom.css">
   <title>PayPal Checkout Integrations</title>
+  <style>
+    .section-heading {
+      margin-top: 3rem;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      font-size: 1.4em;
+    }
+    .section-heading.blue  { color: #0070ba; border-bottom: 2px solid #0070ba; }
+    .section-heading.purple { color: #6f42c1; border-bottom: 2px solid #6f42c1; }
+    .section-heading.teal  { color: #17a2b8; border-bottom: 2px solid #17a2b8; }
+    .section-heading.orange { color: #fd7e14; border-bottom: 2px solid #fd7e14; }
+
+    .sub-heading {
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      font-size: 1em;
+      font-weight: 600;
+      color: #444;
+      letter-spacing: 0.3px;
+    }
+    .sub-heading span {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.82em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .sub-heading .tag-v5   { background: #fde8f3; color: #c0306c; }
+    .sub-heading .tag-v6   { background: #ede9f9; color: #5a32a3; }
+    .sub-heading .tag-api  { background: #fff3cd; color: #856404; }
+    .sub-heading .tag-rest { background: #e8f4fd; color: #155e8a; }
+  </style>
 </head>
 <body>
   <div class="container">
-    <!-- Add navigation header -->
+
+    <!-- Nav header -->
     <div class="nav-header">
       <div class="nav-header-content">
         <h2>PayPal Demo Dashboard</h2>
         <div class="nav-links">
-          <a href="/orders" class="nav-link">
-            Orders
-          </a>
-          <a href="/vault" class="nav-link">
-            Vault
+          <a href="/orders" class="nav-link">Orders</a>
+          <a href="/vault" class="nav-link">Vault</a>
+          <a href="https://github.com/samuelrothermel/PP-Server-SDK" target="_blank" rel="noopener" class="nav-link" style="display:inline-flex; align-items:center; gap:6px;">
+            <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
           </a>
         </div>
       </div>
     </div>
 
     <!-- SDK Status Legend -->
-    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-      <h3 style="margin-top: 0; font-size: 1.1em;">Integration Status</h3>
-      <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px;">
+      <h3 style="margin-top:0; font-size:1.1em;">Integration Status</h3>
+      <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
-          <span style="font-size: 0.9em; color: #666;">Using PayPal Server SDK v2.0.0</span>
+          <span style="font-size:0.9em; color:#666;">PayPal Server SDK v2.x</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
           <span class="sdk-badge rest-api">⚠ Direct REST API</span>
-          <span style="font-size: 0.9em; color: #666;">Not available in Server SDK yet</span>
+          <span style="font-size:0.9em; color:#666;">Not yet in Server SDK</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="sdk-badge separate-sdk">◆ Fastlane SDK</span>
-          <span style="font-size: 0.9em; color: #666;">Separate SDK product</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
           <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
-          <span style="font-size: 0.9em; color: #666;">JavaScript SDK v5 (legacy)</span>
+          <span style="font-size:0.9em; color:#666;">JavaScript SDK v5 (legacy)</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
           <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
-          <span style="font-size: 0.9em; color: #666;">JavaScript SDK v6 integration</span>
+          <span style="font-size:0.9em; color:#666;">JavaScript SDK v6</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="sdk-badge separate-sdk">◆ Fastlane SDK</span>
+          <span style="font-size:0.9em; color:#666;">Separate SDK product</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="sdk-badge limited-release">⚑ Limited Release</span>
+          <span style="font-size:0.9em; color:#666;">Requires approval / sandbox-only</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="sdk-badge payouts-api">▶ Payouts API</span>
+          <span style="font-size:0.9em; color:#666;">Batch payouts to recipients</span>
         </div>
       </div>
     </div>
 
     <div class="container">
 
-      <!-- Checkout Section -->
-      <h2 style="margin-bottom: 1rem; color: #0070ba; border-bottom: 2px solid #0070ba; padding-bottom: 0.5rem;">Checkout Integrations</h2>
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  SECTION 1 — CHECKOUT INTEGRATIONS                     -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h2 class="section-heading blue">Checkout Integrations</h2>
+      <p style="color:#666; font-size:0.9em; margin-top:-0.25rem; margin-bottom:0;">
+        Three common page patterns — Product, Cart, and Checkout — across the three primary integration approaches.
+        All patterns support returning customers, vault/tokenize on purchase, and authorize vs. capture.
+      </p>
+
+      <!-- ── JS SDK v5 ── -->
+      <div class="sub-heading">
+        <span class="tag-v5">★ JS SDK v5</span> JavaScript SDK v5 + Server SDK
+      </div>
       <section class="integrations-gallery">
-        
-        <!-- Product Page -->
+
         <a href="/product" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
           <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Product</h3>
-          <p><strong>Simple Product Display</strong></p>
-          <p>Product page with PayPal button stack</p>
+          <p><strong>Single Product Display</strong></p>
+          <p>Quickest checkout — PayPal button stack on a single product page with Pay Later messaging.</p>
           <ul>
-            <li>Quickest Checkout available</li>
-            <li>Server-side callbacks for Shipping & Tax Calculation/Rules</li>
-            <li>App-Switch Compatible</li>
+            <li>Returning customer / vault token lookup</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li>Server-side shipping &amp; tax callbacks</li>
+            <li>App-switch compatible</li>
           </ul>
         </a>
 
-        <!-- Cart Page -->
         <a href="/cart" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
           <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Cart</h3>
-          <p><strong>Full Shopping Cart Experience</strong></p>
-          <p>Cart with complete pricing breakdown and checkout options.</p>
+          <p><strong>Shopping Cart Experience</strong></p>
+          <p>Multi-item cart with line-item pricing breakdown and checkout button stack.</p>
           <ul>
-            <li>Item pricing details</li>
-            <li>Shipping cost breakdown</li>
+            <li>Returning customer / vault token lookup</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li>Item pricing &amp; shipping breakdown</li>
             <li>Order confirmation and tracking</li>
           </ul>
         </a>
 
-        <!-- Checkout Integration -->
         <a href="/checkout" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
           <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Checkout Page</h3>
-          <p><strong>Multi-Payment Checkout</strong></p>
-          <p>Full-featured checkout supporting multiple payment methods with vaulting.</p>
+          <p><strong>Full Multi-Payment Checkout</strong></p>
+          <p>Complete checkout with shipping form, all payment methods, and full developer options.</p>
           <ul>
-            <li>PayPal, Cards, Venmo, Apple Pay, Google Pay</li>
-            <li>Save payment methods for future use</li>
-            <li>Returning customer support</li>
-            <li>Complete shipping & billing forms</li>
-            <li>Clean separation between payment types</li>
+            <li>Returning customer / saved payment methods</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li>PayPal, Cards, Pay Later, Apple Pay, Google Pay</li>
+            <li>Shipping &amp; billing address forms</li>
           </ul>
         </a>
 
-        <!-- Wallets-Only Checkout -->
+      </section>
+
+      <!-- ── JS SDK v6 ── -->
+      <div class="sub-heading">
+        <span class="tag-v6">⬡ JS SDK v6</span> JavaScript SDK v6 + Server SDK
+      </div>
+      <section class="integrations-gallery">
+
+        <a href="/js-sdk-v6/product" class="integration-card">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <h3>Product</h3>
+          <p><strong>Single Product — v6 SDK</strong></p>
+          <p>Product page using <code>createInstance()</code> and web component buttons with eligibility checking.</p>
+          <ul>
+            <li>Returning customer / vault token</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li><code>findEligibleMethods()</code> before render</li>
+            <li>PayPal, Pay Later, Venmo web components</li>
+          </ul>
+        </a>
+
+        <a href="/js-sdk-v6/cart" class="integration-card">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <h3>Cart</h3>
+          <p><strong>Shopping Cart — v6 SDK</strong></p>
+          <p>Multi-item cart with v6 SDK buttons and order-summary panel.</p>
+          <ul>
+            <li>Returning customer / vault token</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li>Multi-line item breakdown</li>
+            <li>Eligibility-gated button rendering</li>
+          </ul>
+        </a>
+
+        <a href="/js-sdk-v6/standard" class="integration-card">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <h3>Checkout Page</h3>
+          <p><strong>Standard Checkout — v6 SDK</strong></p>
+          <p>Full checkout using <code>createInstance()</code>, web components, and production go-live checklist.</p>
+          <ul>
+            <li>Client ID &amp; Client Token auth</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li>PayPal, Venmo, Cards, Google Pay, Apple Pay</li>
+            <li>Promotional messaging component</li>
+          </ul>
+        </a>
+
+      </section>
+
+      <!-- ── API-Only ── -->
+      <div class="sub-heading">
+        <span class="tag-api">⚠ API-Only</span> Direct REST API — No JavaScript SDK
+      </div>
+      <section class="integrations-gallery">
+
+        <a href="/api-only/checkout" class="integration-card">
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <h3>Product</h3>
+          <p><strong>Single Product — API-Only</strong></p>
+          <p>Server creates the order; buyer redirects to PayPal payer-action link. No JS SDK loaded.</p>
+          <ul>
+            <li>Returning customer / vault token</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li>Server-side order creation via <code>POST /v2/checkout/orders</code></li>
+            <li>Buyer redirected to payer-action URL</li>
+          </ul>
+        </a>
+
+        <a href="/api-only/checkout#cart" class="integration-card">
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <h3>Cart</h3>
+          <p><strong>Cart Checkout — API-Only</strong></p>
+          <p>Multi-line-item order assembled server-side; buyer approves on PayPal.</p>
+          <ul>
+            <li>Returning customer / vault token</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li>Full item-level breakdown in order payload</li>
+            <li>No JS SDK dependency</li>
+          </ul>
+        </a>
+
+        <a href="/api-only/checkout#checkout" class="integration-card">
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <h3>Checkout Page</h3>
+          <p><strong>Server-side Checkout — API-Only</strong></p>
+          <p>Merchant-collected card details passed via <code>payment_source.card</code>. Suitable for PCI-compliant server-to-server integrations.</p>
+          <ul>
+            <li>Returning customer / vault token</li>
+            <li>Vault / tokenize on purchase</li>
+            <li>Authorize or capture</li>
+            <li>Card details via <code>payment_source.card</code></li>
+            <li>No redirect for returning vault customers</li>
+          </ul>
+        </a>
+
+      </section>
+
+      <!-- ── Additional checkout variants ── -->
+      <div class="sub-heading" style="margin-top:2rem;">Other Checkout Variants</div>
+      <section class="integrations-gallery">
+
         <a href="/checkout-wallets" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
           <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Wallets Checkout</h3>
           <p><strong>Apple Pay &amp; Google Pay Only</strong></p>
-          <p>Streamlined checkout presenting only digital wallet options.</p>
+          <p>Streamlined checkout presenting only digital wallet options — no PayPal button or card fields.</p>
           <ul>
             <li>Apple Pay (Safari / Mac)</li>
             <li>Google Pay (Chrome / Android)</li>
-            <li>No PayPal button or card fields</li>
+            <li>Clean, distraction-free UX</li>
           </ul>
         </a>
 
-        <!-- Fastlane -->
         <a href="/fastlane" class="integration-card">
           <span class="sdk-badge separate-sdk">◆ Fastlane SDK</span>
           <h3>Fastlane</h3>
           <p><strong>Accelerated Guest Checkout</strong></p>
-          <p>One-click guest checkout with automatic recognition.</p>
+          <p>One-click guest checkout with automatic shopper profile recognition.</p>
           <ul>
-            <li>No account required</li>
+            <li>No PayPal account required</li>
             <li>Automatic profile recognition</li>
-            <li>Lightning-fast checkout</li>
+            <li>Lightning-fast checkout flow</li>
           </ul>
         </a>
 
-        <!-- Subscriptions -->
+      </section>
+
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  SECTION 2 — MERCHANT INITIATED TRANSACTIONS (MIT)     -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h2 class="section-heading blue">Merchant Initiated Transactions (MIT)</h2>
+      <p style="color:#666; font-size:0.9em; margin-top:-0.25rem; margin-bottom:1rem;">
+        Off-session charges against previously vaulted payment methods using stored-credential fields
+        (<code>payment_initiator: MERCHANT</code>, <code>usage: SUBSEQUENT</code>). Requires prior customer consent at vault time.
+      </p>
+      <section class="integrations-gallery">
+
+        <a href="/mit/v5" class="integration-card">
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+<h3>MIT — JS SDK v5</h3>
+          <p><strong>Off-Session Charge (v5 Vault)</strong></p>
+          <p>Charge a payment token vaulted via the JS SDK v5 without the customer present.</p>
+          <ul>
+            <li>Lookup vaulted token by Customer ID</li>
+            <li>Stored-credential fields on order</li>
+            <li>Authorize or capture immediately</li>
+            <li>No buyer redirect needed</li>
+          </ul>
+        </a>
+
+        <a href="/mit/v6" class="integration-card">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+<h3>MIT — JS SDK v6</h3>
+          <p><strong>Off-Session Charge (v6 Vault)</strong></p>
+          <p>Charge a token vaulted during a v6 SDK session. Vault setup via web components; MIT charge is server-side.</p>
+          <ul>
+            <li>v6 SDK handles customer-present vault</li>
+            <li>Stored-credential fields on MIT order</li>
+            <li>Authorize or capture immediately</li>
+            <li>No buyer redirect needed</li>
+          </ul>
+        </a>
+
+        <a href="/mit/api" class="integration-card">
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+<h3>MIT — Direct REST API</h3>
+          <p><strong>Fully Server-Side MIT</strong></p>
+          <p>Vault and MIT charge both via REST — no JS SDK at any stage. Full control over stored-credential payload.</p>
+          <ul>
+            <li>Server-side vault setup &amp; token exchange</li>
+            <li>Full <code>stored_credential</code> block control</li>
+            <li>Network transaction ID passthrough</li>
+            <li>Authorize or capture immediately</li>
+          </ul>
+        </a>
+
+      </section>
+
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  SECTION 3 — SUBSCRIPTIONS & RECURRING PAYMENTS        -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h2 class="section-heading blue">Subscriptions &amp; Recurring Payments</h2>
+      <p style="color:#666; font-size:0.9em; margin-top:-0.25rem; margin-bottom:1rem;">
+        Recurring billing via PayPal's Subscriptions API and vault-based recurring charge patterns.
+      </p>
+
+      <!-- ── JS SDK v5 ── -->
+      <div class="sub-heading">
+        <span class="tag-v5">★ JS SDK v5</span> Subscriptions API
+      </div>
+      <section class="integrations-gallery">
+
         <a href="/subscriptions" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
           <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
           <h3>Subscriptions</h3>
           <p><strong>Recurring Billing Plans</strong></p>
-          <p>Create and manage subscription plans with automated billing.</p>
+          <p>Create and subscribe customers to billing plans with automated recurring charges.</p>
           <ul>
-            <li>Create billing plans</li>
-            <li>Subscribe customers</li>
+            <li>Create billing plans &amp; products</li>
+            <li>Subscribe customers via PayPal button</li>
             <li>Manage recurring payments</li>
+            <li>Trial periods and billing cycles</li>
           </ul>
         </a>
 
-        <!-- Save Without Purchase -->
+        <a href="/subscription-management" class="integration-card">
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <h3>Subscription Management</h3>
+          <p><strong>Manage Active Subscriptions</strong></p>
+          <p>View, update, pause, and cancel customer subscriptions.</p>
+          <ul>
+            <li>View active subscriptions</li>
+            <li>Cancel or suspend</li>
+            <li>Update billing information</li>
+            <li>Track billing cycles</li>
+          </ul>
+        </a>
+
         <a href="/save-wo-purchase" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
           <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
-          <h3>Save Without Purchase</h3>
+<h3>Save Without Purchase</h3>
           <p><strong>Payment Method Vaulting</strong></p>
-          <p>Save payment methods without immediate purchase.</p>
+          <p>Save a payment method for future charges without an immediate purchase — ideal for free trials and setup flows.</p>
           <ul>
             <li>Vault PayPal accounts</li>
-            <li>Save cards for later use</li>
-            <li>Perfect for trials and subscriptions</li>
+            <li>Save cards for future MIT charges</li>
+            <li>Perfect for trials &amp; subscriptions</li>
+            <li>Customer consent captured at vault time</li>
           </ul>
         </a>
 
-        
+      </section>
+
+      <!-- ── Admin / catalog ── -->
+      <div class="sub-heading">
+        <span class="tag-rest">⚠ REST API</span> Catalog &amp; Plan Management
+      </div>
+      <section class="integrations-gallery">
+
+        <a href="/products-management" class="integration-card">
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <h3>Products Management</h3>
+          <p><strong>Catalog Products Dashboard</strong></p>
+          <p>Create and manage products required for subscription billing plans.</p>
+          <ul>
+            <li>Create new catalog products</li>
+            <li>View existing products</li>
+            <li>Required for billing plan creation</li>
+            <li>Products API not yet in Server SDK</li>
+          </ul>
+        </a>
 
       </section>
 
-      <!-- Services Section -->
-      <h2 style="margin-top: 3rem; margin-bottom: 1rem; color: #0070ba; border-bottom: 2px solid #0070ba; padding-bottom: 0.5rem;">Services & Tools</h2>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  SECTION 4 — TOOLS, PAYOUTS & ADMIN                    -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h2 class="section-heading teal">Tools, Payouts &amp; Admin</h2>
       <section class="integrations-gallery">
 
         <!-- Orders Dashboard -->
@@ -181,9 +454,9 @@
         <!-- Vault Dashboard -->
         <a href="/vault" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
-          <h3>Vault</h3>
+<h3>Vault</h3>
           <p><strong>Payment Token Management</strong></p>
-          <p>Manage saved payment methods and vault tokens.</p>
+          <p>View and manage vaulted payment methods and payment tokens by customer.</p>
           <ul>
             <li>View all vaulted payment methods</li>
             <li>Inspect payment token details</li>
@@ -192,10 +465,10 @@
           </ul>
         </a>
 
-        <!-- Vault 3DS Testing -->
+        <!-- Vault 3DS -->
         <a href="/vault-3ds" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
-          <h3>Vault 3D Secure</h3>
+<h3>Vault 3D Secure</h3>
           <p><strong>3DS API Testing Environment</strong></p>
           <p>Test 3D Secure authentication with vault setup tokens (API-driven approach).</p>
           <ul>
@@ -206,122 +479,50 @@
           </ul>
         </a>
 
-        <!-- Pay with Crypto Testing -->
-        <a href="/crypto" class="integration-card">
-          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
-          <h3>Pay with Crypto</h3>
-          <p><strong>Crypto Payment Testing</strong></p>
-          <p>Test Pay with Crypto (limited release) using the Orders V2 API with <code>payment_source.crypto</code>.</p>
-          <ul>
-            <li>Create order → get payer-action link</li>
-            <li>Buyer connects wallet (Coinbase, MetaMask, Phantom)</li>
-            <li>Auto-capture on buyer approval</li>
-            <li>Get order status / confirm COMPLETED</li>
-          </ul>
-        </a>
-
-        <!-- Venmo Testing -->
-        <a href="/venmo" class="integration-card">
-          <span class="sdk-badge server-sdk">✓ Server SDK</span>
-          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
-          <h3>Venmo Sandbox</h3>
-          <p><strong>Venmo Payment Testing</strong></p>
-          <p>Dedicated Venmo testing page with vaulting and shipping options.</p>
-          <ul>
-            <li>Standard Venmo payments</li>
-            <li>Venmo account vaulting</li>
-            <li>Shipping address collection</li>
-            <li>Mobile-optimized testing</li>
-          </ul>
-        </a>
-
-        <!-- Payee Testing Integration -->
+        <!-- Payee Test -->
         <a href="/payee-test" class="integration-card">
           <span class="sdk-badge server-sdk">✓ Server SDK</span>
           <h3>Payee Test</h3>
           <p><strong>Security Model Testing</strong></p>
-          <p>Demonstrates PayPal's security for payments with different payee (paid-out) merchants.</p>
+          <p>Demonstrates PayPal's security model for payments with different payee merchants.</p>
           <ul>
-            <li>One-time payments: Different merchants allowed</li>
-            <li>Vaulted tokens: Tied to original merchant</li>
-            <li>Not a replacement for Partner/MultiParty Integrations</li>
+            <li>One-time payments: different merchants allowed</li>
+            <li>Vaulted tokens: tied to original merchant</li>
+            <li>Not a replacement for Partner / MultiParty</li>
           </ul>
         </a>
 
-        <!-- Invoicing / CPQ Pay-by-Link -->
+        <!-- Invoicing -->
         <a href="/invoicing" class="integration-card">
           <span class="sdk-badge rest-api">⚠ Direct REST API</span>
           <h3>Invoicing — CPQ Pay-by-Link</h3>
-          <p><strong>Invoice & Pay Link Demo</strong></p>
+          <p><strong>Invoice &amp; Pay Link Demo</strong></p>
           <p>Generate sandbox invoices and get a payer URL instantly — no customer email needed.</p>
           <ul>
             <li>Mock CPQ order summary form</li>
             <li>Calls Invoicing API (create → send → fetch link)</li>
             <li>Pay link bypasses email for sandbox testing</li>
             <li>Polls for payment status (PAID detection)</li>
-            <li>Simulated INVOICING.INVOICE.PAID webhook payload</li>
           </ul>
         </a>
 
-        <!-- Webhook Testing Integration -->
+        <!-- Webhook Dashboard -->
         <a href="/webhook-testing" class="integration-card">
           <span class="sdk-badge rest-api">⚠ Direct REST API</span>
           <h3>Webhook Dashboard</h3>
-          <p><strong>Test & Monitor Webhooks</strong></p>
-          <p>Receive and test webhook events like payment vaulting and orders.</p>
+          <p><strong>Test &amp; Monitor Webhooks</strong></p>
+          <p>Receive and inspect webhook events like payment captures and vault updates.</p>
           <ul>
             <li>Real-time webhook monitoring</li>
             <li>Event testing interface</li>
-            <li>Webhook verification</li>
+            <li>Webhook signature verification</li>
           </ul>
         </a>
 
-        <!-- Subscription Management -->
-        <a href="/subscription-management" class="integration-card">
-          <span class="sdk-badge server-sdk">✓ Server SDK</span>
-          <h3>Subscription Management</h3>
-          <p><strong>Manage Active Subscriptions</strong></p>
-          <p>View, update, and cancel customer subscriptions.</p>
-          <ul>
-            <li>View all active subscriptions</li>
-            <li>Cancel subscriptions</li>
-            <li>Update billing information</li>
-            <li>Track billing cycles</li>
-          </ul>
-        </a>
-
-        <!-- Products Management -->
-        <a href="/products-management" class="integration-card">
-          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
-          <h3>Products Management</h3>
-          <p><strong>Catalog Products Dashboard</strong></p>
-          <p>Create and manage products for subscription plans.</p>
-          <ul>
-            <li>Create new catalog products</li>
-            <li>View existing products</li>
-            <li>Required for billing plans</li>
-            <li>Products API not in Server SDK</li>
-          </ul>
-        </a>
-
-        <!-- ACH Direct Debit -->
-        <a href="/ach" class="integration-card">
-          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
-          <h3>ACH Direct Debit</h3>
-          <p><strong>Bank Account Debit via Orders v2</strong></p>
-          <p>Merchant-collected bank details passed via <code>payment_source.bank.ach_debit</code> — no JS SDK required.</p>
-          <ul>
-            <li>US only — limited release, requires PayPal approval</li>
-            <li>Supports WEB, TEL, CCD, PPD SEC codes</li>
-            <li>Vault support for recurring debits</li>
-            <li>Capture settles in ~5 calendar days (PENDING → COMPLETED)</li>
-            <li>Marketplace &amp; Platforms (Managed Path) product</li>
-          </ul>
-        </a>
-
-        <!-- PayPal Payouts API Integration -->
+        <!-- Payouts -->
         <a href="/payouts" class="integration-card">
           <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <span class="sdk-badge payouts-api">▶ Payouts API</span>
           <h3>Payouts</h3>
           <p><strong>Send Bulk Payments</strong></p>
           <p>Send payments to multiple recipients using PayPal's Payouts API.</p>
@@ -333,39 +534,16 @@
           </ul>
         </a>
 
-      </section>
-
-      <!-- JavaScript SDK v6 Section -->
-      <h2 style="margin-top: 3rem; margin-bottom: 1rem; color: #6f42c1; border-bottom: 2px solid #6f42c1; padding-bottom: 0.5rem;">JavaScript SDK v6 Integrations</h2>
-      <section class="integrations-gallery">
-
-        <!-- JS SDK v6 Standard / Configuration -->
-        <a href="/js-sdk-v6/standard" class="integration-card">
-          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
-          <h3>Standard Checkout</h3>
-          <p><strong>Core SDK v6 Integration</strong></p>
-          <p>Standard checkout using the new JS SDK v6 with <code>createInstance()</code> and web components.</p>
+        <!-- Transaction Reports -->
+        <a href="/transaction-reports" class="integration-card">
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <h3>Transaction Reports</h3>
+          <p><strong>Transaction Analytics</strong></p>
+          <p>Query transaction history and account balance using the Reporting API.</p>
           <ul>
-            <li>Client ID &amp; Client Token auth</li>
-            <li>Eligibility checking via <code>findEligibleMethods()</code></li>
-            <li>PayPal, Venmo, Cards, Google Pay, Apple Pay</li>
-            <li>Promotional messaging component</li>
-            <li>Production go-live checklist included</li>
-          </ul>
-        </a>
-
-        <!-- JS SDK v6 iFrame -->
-        <a href="/js-sdk-v6/iframe" class="integration-card">
-          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
-          <h3>Sandboxed iFrame</h3>
-          <p><strong>Isolated Payment Processing</strong></p>
-          <p>High-security integration isolating the SDK inside a sandboxed <code>&lt;iframe&gt;</code> with postMessage communication.</p>
-          <ul>
-            <li>PCI DSS &amp; SOC 2 compliant architecture</li>
-            <li>Dual-app setup (merchant + payment frame)</li>
-            <li>Origin-validated cross-frame messaging</li>
-            <li>Ideal for banking &amp; financial services</li>
-            <li>Production go-live checklist included</li>
+            <li>Filter by date range and status</li>
+            <li>Account balance snapshot</li>
+            <li>Export-ready data view</li>
           </ul>
         </a>
 
@@ -380,43 +558,133 @@
             <li>Custom fallback via <code>isRecoverable</code></li>
             <li>Sequential mode attempt patterns</li>
             <li>Advanced error handling</li>
-            <li>Production go-live checklist included</li>
           </ul>
         </a>
 
-        <!-- ACH Pay with Bank — JS SDK v6 -->
+        <!-- JS SDK v6 iFrame -->
+        <a href="/js-sdk-v6/iframe" class="integration-card">
+          <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+          <h3>Sandboxed iFrame</h3>
+          <p><strong>Isolated Payment Processing</strong></p>
+          <p>High-security integration isolating the SDK inside a sandboxed <code>&lt;iframe&gt;</code> with postMessage communication.</p>
+          <ul>
+            <li>PCI DSS &amp; SOC 2 compliant architecture</li>
+            <li>Dual-app setup (merchant + payment frame)</li>
+            <li>Origin-validated cross-frame messaging</li>
+            <li>Ideal for banking &amp; financial services</li>
+          </ul>
+        </a>
+
+      </section>
+
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!--  SECTION 5 — IN DEVELOPMENT / LIMITED RELEASE          -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h2 class="section-heading orange">In Development &amp; Limited Release</h2>
+      <p style="color:#666; font-size:0.9em; margin-top:-0.25rem; margin-bottom:1rem;">
+        Features that require special provisioning, are sandbox-only, or are in limited/early release.
+        Contact your PayPal account team for access.
+      </p>
+      <section class="integrations-gallery">
+
+        <!-- Venmo Sandbox -->
+        <a href="/venmo" class="integration-card">
+          <span class="sdk-badge limited-release">⚑ Limited Release</span>
+          <span class="sdk-badge server-sdk">✓ Server SDK</span>
+          <span class="sdk-badge js-sdk-v5">★ JS SDK v5</span>
+          <h3>Venmo Sandbox</h3>
+          <p><strong>Venmo Payment Testing</strong></p>
+          <p>Dedicated Venmo testing page with vaulting and shipping options. Venmo vaulting not available in PayPal Sandbox.</p>
+          <ul>
+            <li>Standard Venmo payments</li>
+            <li>Venmo account vaulting (production only)</li>
+            <li>Shipping address collection</li>
+            <li>Mobile-optimized testing</li>
+          </ul>
+        </a>
+
+        <!-- ACH Direct Debit (API) -->
+        <a href="/ach" class="integration-card">
+          <span class="sdk-badge limited-release">⚑ Limited Release</span>
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+<h3>ACH Direct Debit</h3>
+          <p><strong>Bank Account Debit via Orders v2</strong></p>
+          <p>Merchant-collected bank details passed via <code>payment_source.bank.ach_debit</code> — no JS SDK required.</p>
+          <ul>
+            <li>US only — requires PayPal approval</li>
+            <li>Supports WEB, TEL, CCD, PPD SEC codes</li>
+            <li>Vault support for recurring debits</li>
+            <li>Marketplace &amp; Platforms (Managed Path) product</li>
+          </ul>
+        </a>
+
+        <!-- ACH SDK v6 -->
         <a href="/ach-sdk" class="integration-card">
+          <span class="sdk-badge limited-release">⚑ Limited Release</span>
           <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
           <span class="sdk-badge rest-api">⚠ Direct REST API</span>
           <h3>ACH — Pay with Bank</h3>
           <p><strong>Open Banking Popup Flow</strong></p>
-          <p>Bank account verification via popup using <code>createBankAchOneTimePaymentSession()</code> — limited release.</p>
+          <p>Bank account verification via popup using <code>createBankAchOneTimePaymentSession()</code>.</p>
           <ul>
             <li>Client token auth — <code>bank-ach-payments</code> component</li>
-            <li>Open Banking popup (Finicity / sandbox: Open Finance Bank OAUTH)</li>
+            <li>Open Banking popup (Finicity / sandbox: Open Finance Bank)</li>
             <li>NACHA debit authorization consent step included</li>
             <li>Requires Expanded Checkout + ACH provisioning</li>
           </ul>
         </a>
 
-        <!-- JS SDK v6 Card Eligibility Testing -->
+        <!-- Pay with Crypto -->
+        <a href="/crypto" class="integration-card">
+          <span class="sdk-badge limited-release">⚑ Limited Release</span>
+          <span class="sdk-badge rest-api">⚠ Direct REST API</span>
+          <h3>Pay with Crypto</h3>
+          <p><strong>Crypto Payment Testing</strong></p>
+          <p>Test Pay with Crypto using the Orders V2 API with <code>payment_source.crypto</code>.</p>
+          <ul>
+            <li>Create order → get payer-action link</li>
+            <li>Buyer connects wallet (Coinbase, MetaMask, Phantom)</li>
+            <li>Auto-capture on buyer approval</li>
+            <li>Confirm COMPLETED status</li>
+          </ul>
+        </a>
+
+        <!-- Card Eligibility Testing -->
         <a href="/js-sdk-v6/card-eligibility" class="integration-card">
+          <span class="sdk-badge limited-release">⚑ Limited Release</span>
           <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
           <h3>Card Eligibility Testing</h3>
           <p><strong>BCDC &amp; ACDC isEligible() Probe</strong></p>
           <p>Systematically test all candidate <code>isEligible()</code> keys for Advanced and Basic card fields.</p>
           <ul>
             <li>Probe all ACDC keys (<code>advanced_cards</code>, variants)</li>
-            <li>Probe all BCDC candidates (no confirmed key yet)</li>
+            <li>Probe all BCDC candidates</li>
             <li>Auto-calls <code>getDetails()</code> on any <code>true</code> result</li>
             <li>Configurable currency, country, amount, pageType</li>
-            <li>Raw <code>findEligibleMethods()</code> response dump</li>
           </ul>
         </a>
 
-
       </section>
+
     </div>
+
+    <!-- GitHub footer -->
+    <div style="margin-top:3rem; padding:20px 24px; background:#f8f9fa; border:1px solid #e0e0e0; border-radius:10px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <svg height="28" width="28" viewBox="0 0 16 16" fill="#1a1a1a" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <div>
+          <div style="font-weight:700; font-size:1em; color:#1a1a1a;">samuelrothermel / PP-Server-SDK</div>
+          <div style="font-size:0.85em; color:#666; margin-top:2px;">Source code for this demo — Express + PayPal Server SDK v2.x</div>
+        </div>
+      </div>
+      <a href="https://github.com/samuelrothermel/PP-Server-SDK" target="_blank" rel="noopener"
+         style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; background:#1a1a1a; color:#fff; border-radius:6px; text-decoration:none; font-size:0.9em; font-weight:600; white-space:nowrap;">
+        <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+
   </div>
 </body>
 </html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="/styles/custom.css" />
+  <title>MIT — JS SDK v6</title>
+  <style>
+    .page-header { text-align: center; margin-bottom: 32px; }
+    .page-header h1 { font-size: 2em; margin-bottom: 8px; color: #1a1a1a; }
+    .page-header .badge-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .page-header p { color: #666; margin: 0; }
+
+    .layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+    .info-card { border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; padding: 24px; }
+    .info-card h3 { margin: 0 0 10px; color: #1a1a1a; font-size: 1.15em; }
+    .info-card p { color: #555; font-size: 0.9em; line-height: 1.7; margin: 0 0 12px; }
+    .info-card ul { color: #555; font-size: 0.9em; padding-left: 18px; margin: 0 0 12px; }
+    .info-card ul li { margin-bottom: 5px; }
+
+    .flow-steps { counter-reset: step; }
+    .flow-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+    .flow-step::before {
+      counter-increment: step; content: counter(step);
+      flex-shrink: 0; width: 26px; height: 26px;
+      background: #6f42c1; color: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8em; font-weight: 700;
+    }
+    .flow-step-content { padding-top: 3px; }
+    .flow-step-content strong { display: block; font-size: 0.9em; color: #1a1a1a; margin-bottom: 2px; }
+    .flow-step-content span { font-size: 0.83em; color: #666; }
+
+    .action-panel { border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; overflow: hidden; position: sticky; top: 20px; }
+    .action-panel-header { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa; }
+    .action-panel-header h2 { margin: 0; font-size: 1em; color: #333; font-weight: 600; }
+
+    .form-section { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+    .form-section h3 { margin: 0 0 10px; font-size: 0.85em; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 0.82em; color: #666; margin-bottom: 4px; }
+    .form-group input, .form-group select { width: 100%; padding: 7px 9px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.88em; box-sizing: border-box; }
+
+    .actions-area { padding: 16px 20px; }
+    .btn-primary { width: 100%; padding: 12px; background: #6f42c1; color: #fff; border: none; border-radius: 6px; font-size: 0.95em; font-weight: 600; cursor: pointer; }
+    .btn-primary:hover { background: #5a32a3; }
+
+    .status-area { margin-top: 10px; padding: 10px 12px; border-radius: 6px; font-size: 0.88em; display: none; }
+    .status-area.info    { background: #e8f4fd; border: 1px solid #bee3f8; color: #2b6cb0; display:block; }
+    .status-area.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; display:block; }
+    .status-area.error   { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; display:block; }
+
+    .below-fold { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+    .response-panel { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; }
+    .response-panel h3 { margin: 0; padding: 14px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; color: #333; }
+    .response-panel pre { margin: 0; padding: 16px 20px; background: #1e1e1e; color: #d4d4d4; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; overflow: auto; max-height: 400px; }
+
+    .warning-note { padding: 12px 16px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; font-size: 0.85em; color: #5d4037; }
+    .v6-note { padding: 12px 16px; background: #f5f0ff; border: 1px solid #d6bcfa; border-radius: 8px; font-size: 0.85em; color: #44337a; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #0070ba; text-decoration: none; font-size: 0.9em; margin-bottom: 24px; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <a href="/" class="back-link">← Back to Dashboard</a>
+
+    <div class="page-header">
+      <div class="badge-row">
+        <span class="sdk-badge js-sdk-v6">⬡ JS SDK v6</span>
+        <span class="sdk-badge server-sdk">✓ Server SDK</span>
+      </div>
+      <h1>Merchant Initiated Transaction — JS SDK v6</h1>
+      <p>Off-session charge against a previously vaulted token. The v6 SDK handles the initial vault; the MIT charge is server-side.</p>
+    </div>
+
+    <div class="layout">
+
+      <div class="info-card">
+        <h3>JS SDK v6 + MIT Pattern</h3>
+        <p>With JS SDK v6, vault tokens are created during a customer-present session using the <code>paypal-button</code> web component with vault options. The MIT charge itself is server-side — the SDK is not involved in the off-session charge.</p>
+
+        <div class="v6-note" style="margin-bottom:16px;">
+          <strong>JS SDK v6 vault setup</strong> uses <code>createInstance()</code> with <code>vault: true</code> in the component options. Once the buyer approves, a payment token is stored server-side. This page demonstrates charging that stored token.
+        </div>
+
+        <h3>Flow</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-content">
+              <strong>Vault via v6 SDK (customer-present)</strong>
+              <span>Buyer approves vault using <code>paypal-button</code> with vault intent. Token stored server-side.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-content">
+              <strong>Create MIT order (server-side)</strong>
+              <span>POST order with <code>payment_source.token.id</code> and <code>stored_credential.payment_initiator = MERCHANT</code>.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-content">
+              <strong>Capture or authorize</strong>
+              <span>No buyer interaction needed — token was pre-approved at vault time.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="warning-note" style="margin-top:16px;">
+          <strong>Requires prior vaulting.</strong> Use the <a href="/js-sdk-v6/standard" style="color:#0070ba;">JS SDK v6 Standard Checkout</a> or <a href="/save-wo-purchase" style="color:#0070ba;">Save Without Purchase</a> to create a token first.
+        </div>
+      </div>
+
+      <div class="action-panel">
+        <div class="action-panel-header"><h2>Charge Vaulted Payment Method</h2></div>
+
+        <div class="form-section">
+          <h3>Customer</h3>
+          <div class="form-group">
+            <label>Customer ID</label>
+            <input type="text" id="customer-id" placeholder="e.g. CUST-123456" />
+          </div>
+          <div class="form-group">
+            <label>Payment Token ID</label>
+            <input type="text" id="payment-token-id" placeholder="e.g. 8XY12345ABCD6" />
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Order</h3>
+          <div class="form-group">
+            <label>Amount (USD)</label>
+            <input type="text" id="amount" value="50.00" />
+          </div>
+          <div class="form-group">
+            <label>Payment Intent</label>
+            <select id="intent">
+              <option value="CAPTURE">Capture</option>
+              <option value="AUTHORIZE">Authorize</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>MIT Usage</label>
+            <select id="usage">
+              <option value="SUBSEQUENT">Subsequent (recurring)</option>
+              <option value="DERIVED">Derived (installment)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions-area">
+          <button class="btn-primary" onclick="submitMit()">Charge Payment Method</button>
+          <div id="mit-status" class="status-area"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="below-fold">
+      <div id="response-panel" class="response-panel">
+        <h3>API Response</h3>
+        <pre id="response-content">No request sent yet.</pre>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function showStatus(msg, type) {
+      const el = document.getElementById('mit-status');
+      el.textContent = msg;
+      el.className = 'status-area ' + type;
+    }
+
+    async function submitMit() {
+      const tokenId = document.getElementById('payment-token-id').value.trim();
+      const customerId = document.getElementById('customer-id').value.trim();
+      const amount = document.getElementById('amount').value.trim();
+      const intent = document.getElementById('intent').value;
+      const usage = document.getElementById('usage').value;
+
+      if (!tokenId) { showStatus('Payment Token ID is required.', 'error'); return; }
+
+      showStatus('Creating MIT order…', 'info');
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ intent, amount, currency: 'USD', tokenId, customerId, usage, initiator: 'MERCHANT' }),
+        });
+        const data = await res.json();
+        document.getElementById('response-content').textContent = JSON.stringify(data, null, 2);
+
+        if (data.id) {
+          const captureUrl = `/api/orders/${data.id}/${intent === 'CAPTURE' ? 'capture' : 'authorize'}`;
+          showStatus('Order created (' + data.id + '). Finalizing…', 'info');
+          const r2 = await fetch(captureUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+          const d2 = await r2.json();
+          document.getElementById('response-content').textContent = JSON.stringify(d2, null, 2);
+          showStatus('Done — status: ' + d2.status, d2.status === 'COMPLETED' || d2.status === 'APPROVED' ? 'success' : 'info');
+        } else {
+          showStatus('Unexpected response.', 'error');
+        }
+      } catch (e) {
+        showStatus('Error: ' + e.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
