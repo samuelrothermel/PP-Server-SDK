@@ -35,10 +35,14 @@ Open **http://localhost:8888** — the dashboard links to every integration demo
 
 ### HTTPS (required for Google Pay & Apple Pay)
 
+Google Pay and Apple Pay require HTTPS. The easiest way to get a public HTTPS URL for sandbox testing is to deploy to **[Railway](https://railway.app)** — connect your GitHub repo, set the environment variables, and Railway provides an HTTPS domain automatically.
+
 ```bash
-npm run generate-certs   # generates key.pem + cert.pem
-npm run start:https      # starts HTTPS server on the configured port
+# Railway CLI (optional)
+railway up
 ```
+
+Alternatively, tools like [ngrok](https://ngrok.com) can tunnel a local HTTPS URL to your machine for quick testing.
 
 ---
 
@@ -76,7 +80,7 @@ Register the following event types in the [PayPal Developer Dashboard](https://d
 
 ### Google Pay
 
-Requires HTTPS — run `npm run generate-certs` then `npm run start:https`. Google Pay shows an informational message on plain HTTP.
+Requires HTTPS. Deploy to [Railway](https://railway.app) or use [ngrok](https://ngrok.com) to get a public HTTPS URL. Google Pay shows an informational message on plain HTTP localhost.
 
 ### Apple Pay
 
