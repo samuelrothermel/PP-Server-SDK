@@ -194,12 +194,7 @@
       customerInput.style.display = returningCb.checked ? 'block' : 'none';
     });
 
-    const statusArea = document.getElementById('status-area');
-    function showStatus(msg, type = 'info') {
-      statusArea.textContent = msg;
-      statusArea.className = 'status-area ' + type;
-      statusArea.style.display = 'block';
-    }
+    // statusArea and showStatus are already defined in js-sdk-v6-standard.js
   </script>
 </body>
 </html>

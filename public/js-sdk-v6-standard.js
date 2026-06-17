@@ -42,6 +42,7 @@ async function createOrder() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       paymentSource: 'paypal',
+      intent: 'capture',
       totalAmount: '50.00',
       currency: 'USD',
       items: [
