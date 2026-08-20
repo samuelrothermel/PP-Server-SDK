@@ -90,7 +90,10 @@ header h1 {
   background: #fff;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .integration-card:hover {
@@ -1017,7 +1020,8 @@ apple-pay-button {
   align-items: center !important;
   justify-content: center !important;
   margin: 8px 0 !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   transition: background-color 0.2s ease !important;
   box-sizing: border-box !important;
 }
@@ -1062,7 +1066,8 @@ apple-pay-button {
 
 /* Warning message styling for HTTPS requirements */
 #googlepay-container div[style*='background: #fff3cd'] {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 #googlepay-container div[style*='background: #fff3cd'] strong {
@@ -1210,7 +1215,9 @@ apple-pay-button {
   margin-bottom: 20px;
   border: 2px solid #e9ecef;
   border-radius: 12px;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -2086,4 +2093,54 @@ pre {
   border-left: 4px solid #2196f3;
   padding: 15px;
   margin: 20px 0;
+}
+
+/* Save Without Purchase page: stabilize hosted card field layout */
+.save-wo-purchase-page #card-button-container {
+  max-width: 350px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.save-wo-purchase-page #card-button-container .card-fields {
+  max-width: 350px;
+  width: 100%;
+  margin: 20px auto 0;
+}
+
+.save-wo-purchase-page #card-name-field-container,
+.save-wo-purchase-page #card-number-field-container,
+.save-wo-purchase-page #card-expiry-field-container,
+.save-wo-purchase-page #card-cvv-field-container {
+  width: 100% !important;
+  min-height: 48px !important;
+  height: 48px !important;
+  margin: 0 0 10px 0 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  background: #fff !important;
+  overflow: hidden !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+.save-wo-purchase-page #card-name-field-container iframe,
+.save-wo-purchase-page #card-number-field-container iframe,
+.save-wo-purchase-page #card-expiry-field-container iframe,
+.save-wo-purchase-page #card-cvv-field-container iframe {
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  position: static !important;
+  box-sizing: border-box !important;
+}
+
+.save-wo-purchase-page #multi-card-field-button {
+  width: 100% !important;
+  max-width: 350px !important;
+  margin-top: 4px !important;
 }
