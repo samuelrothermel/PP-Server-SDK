@@ -64,7 +64,11 @@ const onApprove = ({ vaultSetupToken }) =>
   })
     .then(response => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        return response.text().then(text => {
+          throw new Error(
+            `HTTP error! status: ${response.status}, details: ${text}`,
+          );
+        });
       }
       return response.json();
     })
@@ -129,8 +133,8 @@ const onApprove = ({ vaultSetupToken }) =>
     .catch(error => {
       console.error('Error during vault payment:', error);
       document.getElementById('payment-source-section').style.display = 'block';
-      document.getElementById('create-payment-info').textContent =
-        `ERROR: ${error.message}`;
+      document.getElementById('payment-source-type-info').textContent =
+        `ERROR creating payment token: ${error.message}`;
     });
 
 const onError = console.error;

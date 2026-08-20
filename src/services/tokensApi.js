@@ -18,6 +18,36 @@ const getSdkResult = response => {
   return response?.body;
 };
 
+const hasInvalidCardContextForSource = error => {
+  const details =
+    error?.result?.details ||
+    error?.details ||
+    (typeof error?.body === 'string'
+      ? (() => {
+          try {
+            return JSON.parse(error.body)?.details;
+          } catch {
+            return null;
+          }
+        })()
+      : error?.body?.details);
+
+  if (!Array.isArray(details)) {
+    return false;
+  }
+
+  return details.some(detail => {
+    const field = detail?.field || '';
+    const issue = detail?.issue || '';
+    return (
+      field.startsWith('/payment_source/card') &&
+      (issue === 'INVALID_PARAMETER' ||
+        issue === 'UNEXPECTED_PARAMETER' ||
+        issue === 'NOT_SUPPORTED')
+    );
+  });
+};
+
 /**
  * 3D SECURE API APPROACH
  *
@@ -65,6 +95,11 @@ export const createVaultSetupToken = async ({ paymentSource }) => {
     },
     card: {
       verificationMethod: 'SCA_WHEN_REQUIRED',
+      experienceContext: {
+        returnUrl: 'https://example.com/returnUrl',
+        cancelUrl: 'https://example.com/cancelUrl',
+        shippingPreference: 'NO_SHIPPING',
+      },
     },
     apple_pay: {
       // Apple Pay setup tokens can be created by specifying the source type only.
@@ -190,19 +225,48 @@ export const createVaultPaymentToken = async vaultSetupToken => {
     vaultSetupToken,
   );
 
-  const paymentTokenPayload = {
-    paymentSource: {
-      token: {
-        id: vaultSetupToken,
-        type: 'SETUP_TOKEN',
-      },
-    },
-  };
-
   try {
-    const sdkResponse = await vaultController.createPaymentToken({
-      body: paymentTokenPayload,
-    });
+    const buildPaymentTokenPayload = includeCardContext => {
+      const paymentSourcePayload = {
+        token: {
+          id: vaultSetupToken,
+          type: 'SETUP_TOKEN',
+        },
+      };
+
+      if (includeCardContext) {
+        paymentSourcePayload.card = {
+          experienceContext: {
+            returnUrl: 'https://example.com/returnUrl',
+            cancelUrl: 'https://example.com/cancelUrl',
+            shippingPreference: 'NO_SHIPPING',
+          },
+        };
+      }
+
+      return {
+        paymentSource: paymentSourcePayload,
+      };
+    };
+
+    let sdkResponse;
+    try {
+      sdkResponse = await vaultController.createPaymentToken({
+        body: buildPaymentTokenPayload(true),
+      });
+    } catch (initialError) {
+      if (hasInvalidCardContextForSource(initialError)) {
+        console.warn(
+          '[SERVER SDK] Retrying payment token creation without card context for non-card source',
+        );
+        sdkResponse = await vaultController.createPaymentToken({
+          body: buildPaymentTokenPayload(false),
+        });
+      } else {
+        throw initialError;
+      }
+    }
+
     const token = getSdkResult(sdkResponse);
 
     if (!token?.id) {
