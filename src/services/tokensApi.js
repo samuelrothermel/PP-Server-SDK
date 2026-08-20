@@ -38,6 +38,12 @@ const getSdkResult = response => {
 // create vault setup token
 export const createVaultSetupToken = async ({ paymentSource }) => {
   const normalizedPaymentSource = (paymentSource || 'card').toLowerCase();
+  const sourceKeyByType = {
+    paypal: 'paypal',
+    card: 'card',
+    apple_pay: 'applePay',
+  };
+  const sdkSourceKey = sourceKeyByType[normalizedPaymentSource];
   console.log(
     '[SERVER SDK] Creating vault setup token for:',
     normalizedPaymentSource,
@@ -46,43 +52,28 @@ export const createVaultSetupToken = async ({ paymentSource }) => {
   const paymentSources = {
     paypal: {
       description: 'Description for PayPal to be shown to PayPal payer',
-      usage_pattern: 'IMMEDIATE',
-      usage_type: 'MERCHANT',
-      customer_type: 'CONSUMER',
-      experience_context: {
-        shipping_preference: 'NO_SHIPPING',
-        payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
-        brand_name: 'EXAMPLE INC',
+      usagePattern: 'IMMEDIATE',
+      usageType: 'MERCHANT',
+      customerType: 'CONSUMER',
+      experienceContext: {
+        shippingPreference: 'NO_SHIPPING',
+        brandName: 'EXAMPLE INC',
         locale: 'en-US',
-        return_url: 'https://example.com/returnUrl',
-        cancel_url: 'https://example.com/cancelUrl',
+        returnUrl: 'https://example.com/returnUrl',
+        cancelUrl: 'https://example.com/cancelUrl',
       },
     },
     card: {
-      verification_method: 'SCA_WHEN_REQUIRED',
-      experience_context: {
-        shipping_preference: 'NO_SHIPPING',
-      },
+      verificationMethod: 'SCA_WHEN_REQUIRED',
     },
     apple_pay: {
-      usage_pattern: 'IMMEDIATE',
-      usage_type: 'MERCHANT',
-      customer_type: 'CONSUMER',
-      verification_method: 'SCA_WHEN_REQUIRED',
-      experience_context: {
-        shipping_preference: 'NO_SHIPPING',
-        payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
-        brand_name: 'EXAMPLE INC',
-        locale: 'en-US',
-        return_url: 'https://example.com/returnUrl',
-        cancel_url: 'https://example.com/cancelUrl',
-      },
+      // Apple Pay setup tokens can be created by specifying the source type only.
     },
   };
 
   const selectedPaymentSource = paymentSources[normalizedPaymentSource];
 
-  if (!selectedPaymentSource) {
+  if (!selectedPaymentSource || !sdkSourceKey) {
     const error = new Error(
       `Unsupported payment source for vault setup token: ${normalizedPaymentSource}`,
     );
@@ -91,8 +82,8 @@ export const createVaultSetupToken = async ({ paymentSource }) => {
   }
 
   const setupTokenPayload = {
-    payment_source: {
-      [normalizedPaymentSource]: selectedPaymentSource,
+    paymentSource: {
+      [sdkSourceKey]: selectedPaymentSource,
     },
   };
 
@@ -135,11 +126,10 @@ export const create3DSVaultSetupToken = async ({
   const paymentSources = {
     card: {
       // 3DS Configuration passed via API (not client-side)
-      verification_method: verificationMethod, // SCA_ALWAYS = Force 3DS challenge
-      experience_context: {
-        shipping_preference: 'NO_SHIPPING',
-        return_url: 'https://example.com/returnUrl',
-        cancel_url: 'https://example.com/cancelUrl',
+      verificationMethod: verificationMethod, // SCA_ALWAYS = Force 3DS challenge
+      experienceContext: {
+        returnUrl: 'https://example.com/returnUrl',
+        cancelUrl: 'https://example.com/cancelUrl',
       },
     },
   };
@@ -152,7 +142,7 @@ export const create3DSVaultSetupToken = async ({
   }
 
   const setupTokenPayload = {
-    payment_source: {
+    paymentSource: {
       [normalizedPaymentSource]: paymentSources[normalizedPaymentSource],
     },
   };
@@ -201,7 +191,7 @@ export const createVaultPaymentToken = async vaultSetupToken => {
   );
 
   const paymentTokenPayload = {
-    payment_source: {
+    paymentSource: {
       token: {
         id: vaultSetupToken,
         type: 'SETUP_TOKEN',
