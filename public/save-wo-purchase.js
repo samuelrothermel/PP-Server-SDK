@@ -268,6 +268,10 @@ function loadPayPalSDK() {
         .addEventListener('click', () => {
           cardField.submit();
         });
+    } else {
+      console.log(
+        'CardFields not eligible in this browser/account context; card UI will stay hidden.',
+      );
     }
 
     // Add event listener for vault testing
