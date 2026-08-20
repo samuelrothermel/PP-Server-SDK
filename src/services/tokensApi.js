@@ -18,29 +18,35 @@ const getSdkResult = response => {
   return response?.body;
 };
 
-const hasInvalidCardContextForSource = error => {
-  const details =
-    error?.result?.details ||
-    error?.details ||
-    (typeof error?.body === 'string'
-      ? (() => {
-          try {
-            return JSON.parse(error.body)?.details;
-          } catch {
-            return null;
-          }
-        })()
-      : error?.body?.details);
-
-  if (!Array.isArray(details)) {
-    return false;
+const parseDetails = payload => {
+  if (!payload) {
+    return [];
   }
+
+  if (Array.isArray(payload.details)) {
+    return payload.details;
+  }
+
+  if (typeof payload === 'string') {
+    try {
+      const parsed = JSON.parse(payload);
+      return Array.isArray(parsed?.details) ? parsed.details : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+};
+
+const hasInvalidTokenExperienceContext = payload => {
+  const details = parseDetails(payload);
 
   return details.some(detail => {
     const field = detail?.field || '';
     const issue = detail?.issue || '';
     return (
-      field.startsWith('/payment_source/card') &&
+      field.startsWith('/payment_source/token/experience_context') &&
       (issue === 'INVALID_PARAMETER' ||
         issue === 'UNEXPECTED_PARAMETER' ||
         issue === 'NOT_SUPPORTED')
@@ -116,13 +122,51 @@ export const createVaultSetupToken = async ({ paymentSource }) => {
     throw error;
   }
 
-  const setupTokenPayload = {
-    paymentSource: {
-      [sdkSourceKey]: selectedPaymentSource,
-    },
-  };
-
   try {
+    if (normalizedPaymentSource === 'card') {
+      const accessToken = await generateAccessToken();
+      const setupTokenPayload = {
+        payment_source: {
+          card: {
+            verification_method: 'SCA_WHEN_REQUIRED',
+            experience_context: {
+              return_url: 'https://example.com/returnUrl',
+              cancel_url: 'https://example.com/cancelUrl',
+              shipping_preference: 'NO_SHIPPING',
+            },
+          },
+        },
+      };
+
+      console.log(
+        '[SERVER SDK] createSetupToken(card) payload:',
+        JSON.stringify(setupTokenPayload, null, 2),
+      );
+
+      const response = await fetch(`${base}/v3/vault/setup-tokens`, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(setupTokenPayload),
+      });
+
+      const token = await handleResponse(response);
+      if (!token?.id) {
+        throw new Error('PayPal did not return a vault setup token id');
+      }
+
+      console.log('[SERVER SDK] Setup token created successfully:', token.id);
+      return token;
+    }
+
+    const setupTokenPayload = {
+      paymentSource: {
+        [sdkSourceKey]: selectedPaymentSource,
+      },
+    };
+
     const sdkResponse = await vaultController.createSetupToken({
       body: setupTokenPayload,
     });
@@ -226,48 +270,62 @@ export const createVaultPaymentToken = async vaultSetupToken => {
   );
 
   try {
-    const buildPaymentTokenPayload = includeCardContext => {
-      const paymentSourcePayload = {
+    const accessToken = await generateAccessToken();
+    const buildPaymentTokenPayload = includeTokenExperienceContext => ({
+      payment_source: {
         token: {
           id: vaultSetupToken,
           type: 'SETUP_TOKEN',
+          ...(includeTokenExperienceContext && {
+            experience_context: {
+              return_url: 'https://example.com/returnUrl',
+              cancel_url: 'https://example.com/cancelUrl',
+              shipping_preference: 'NO_SHIPPING',
+            },
+          }),
         },
-      };
+      },
+    });
 
-      if (includeCardContext) {
-        paymentSourcePayload.card = {
-          experienceContext: {
-            returnUrl: 'https://example.com/returnUrl',
-            cancelUrl: 'https://example.com/cancelUrl',
-            shippingPreference: 'NO_SHIPPING',
-          },
-        };
+    const tryCreatePaymentToken = async payload => {
+      console.log(
+        '[SERVER SDK] createPaymentToken payload:',
+        JSON.stringify(payload, null, 2),
+      );
+      const response = await fetch(`${base}/v3/vault/payment-tokens`, {
+        method: 'post',
+        headers: {
+          'PayPal-Request-Id': Date.now().toString(),
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        return response.json();
       }
 
-      return {
-        paymentSource: paymentSourcePayload,
-      };
+      const errorText = await response.text();
+      const error = new Error(errorText);
+      error.status = response.status;
+      throw error;
     };
 
-    let sdkResponse;
+    const primaryPayload = buildPaymentTokenPayload(true);
+    let token;
     try {
-      sdkResponse = await vaultController.createPaymentToken({
-        body: buildPaymentTokenPayload(true),
-      });
+      token = await tryCreatePaymentToken(primaryPayload);
     } catch (initialError) {
-      if (hasInvalidCardContextForSource(initialError)) {
+      if (hasInvalidTokenExperienceContext(initialError?.message)) {
         console.warn(
-          '[SERVER SDK] Retrying payment token creation without card context for non-card source',
+          '[SERVER SDK] Retrying payment token creation without token experience context',
         );
-        sdkResponse = await vaultController.createPaymentToken({
-          body: buildPaymentTokenPayload(false),
-        });
+        token = await tryCreatePaymentToken(buildPaymentTokenPayload(false));
       } else {
         throw initialError;
       }
     }
-
-    const token = getSdkResult(sdkResponse);
 
     if (!token?.id) {
       throw new Error('PayPal did not return a vault payment token id');
