@@ -35,9 +35,13 @@ export const renderVenmo = renderPage('venmo');
 export const renderCrypto = renderPage('crypto');
 export const renderJsSdkV6Standard = renderPage('js-sdk-v6-standard');
 export const renderJsSdkV6Iframe = renderPage('js-sdk-v6-iframe');
-export const renderJsSdkV6IframeButtons = renderPage('js-sdk-v6-iframe-buttons');
+export const renderJsSdkV6IframeButtons = renderPage(
+  'js-sdk-v6-iframe-buttons',
+);
 export const renderJsSdkV6Advanced = renderPage('js-sdk-v6-advanced');
-export const renderJsSdkV6CardEligibility = renderPage('js-sdk-v6-card-eligibility');
+export const renderJsSdkV6CardEligibility = renderPage(
+  'js-sdk-v6-card-eligibility',
+);
 export const renderInvoicing = renderPage('invoicing');
 export const renderTransactionReports = renderPage('transaction-reports');
 export const renderCheckoutWallets = renderPage('checkout-wallets');
@@ -49,3 +53,5 @@ export const renderApiOnlyCheckout = renderPage('api-only-checkout');
 export const renderMitV5 = renderPage('mit-v5');
 export const renderMitV6 = renderPage('mit-v6');
 export const renderMitApi = renderPage('mit-api');
+export const renderRmg = renderPage('rmg');
+export const renderBnpl = renderPage('bnpl');

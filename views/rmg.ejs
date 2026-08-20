@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/custom.css">
+  <title>Real-Money Gaming — PayPal Demo</title>
+  <style>
+    .rmg-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .rmg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #0070ba;
+    }
+    .rmg-header h1 { color: #0070ba; margin: 0; }
+    .nav-links a {
+      margin-left: 15px;
+      color: #0070ba;
+      text-decoration: none;
+    }
+    .nav-links a:hover { text-decoration: underline; }
+
+    .info-box {
+      background: #e7f3ff;
+      border: 1px solid #0070ba;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .info-box h3 { margin-top: 0; color: #0070ba; }
+    .info-box ul { margin: 10px 0; padding-left: 20px; }
+    .info-box li { margin: 6px 0; }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 0;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      transition: background 0.15s;
+    }
+    .tab-btn.active {
+      background: white;
+      color: #0070ba;
+      border-color: #ddd;
+      border-bottom: 2px solid white;
+      margin-bottom: -2px;
+    }
+    .tab-btn:hover:not(.active) { background: #e4e4e4; }
+
+    .tab-panel {
+      display: none;
+      background: white;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    .tab-panel.active { display: block; }
+    .tab-panel h2 { margin-top: 0; color: #333; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .form-row { display: flex; gap: 16px; }
+    .form-row .form-group { flex: 1; }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .checkbox-group input { width: auto; margin-right: 10px; }
+    .checkbox-group label { margin: 0; font-weight: normal; }
+
+    .button-container { margin: 20px 0; min-height: 55px; }
+
+    #message-container { margin: 20px 0; }
+    .message {
+      padding: 14px 18px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .message.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .message.error   { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .message.info    { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+
+    .result-box {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .result-box h4 { margin-top: 0; color: #333; }
+    .result-box pre {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 10px;
+      overflow-x: auto;
+      font-size: 12px;
+      margin: 0;
+    }
+
+    .vault-token-list { list-style: none; padding: 0; margin: 0; }
+    .vault-token-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: #fafafa;
+      font-size: 14px;
+    }
+    .vault-token-list .token-info { flex: 1; }
+    .vault-token-list .token-id   { font-size: 11px; color: #888; margin-top: 3px; }
+    .use-token-btn {
+      padding: 6px 14px;
+      background: #0070ba;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .use-token-btn:hover { background: #005ea6; }
+    .empty-state { color: #888; font-style: italic; padding: 12px 0; }
+
+    .step-badge {
+      display: inline-block;
+      background: #0070ba;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      text-align: center;
+      line-height: 24px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+    .step-label { font-weight: 600; color: #333; font-size: 15px; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 22px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="rmg-container">
+
+    <div class="rmg-header">
+      <h1>Real-Money Gaming (RMG)</h1>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/payouts">Payouts</a>
+        <a href="/vault">Vault</a>
+        <a href="/orders">Orders</a>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h3>RMG Merchant Integration Demo</h3>
+      <p>This page demonstrates the four core PayPal capabilities required by real-money gaming merchants.</p>
+      <ul>
+        <li><strong>Deposit via PayPal Branded</strong> — standard PayPal button checkout with optional vaulting</li>
+        <li><strong>Deposit via Venmo</strong> — Venmo funding source for US players</li>
+        <li><strong>Withdrawal via Payouts API</strong> — send winnings back to a player's PayPal account</li>
+        <li><strong>Payment Method Tokens</strong> — vault a payment method for fast returning-user deposits</li>
+      </ul>
+    </div>
+
+    <div id="message-container"></div>
+
+    <!-- ── Tabs ─────────────────────────────────────────────── -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('deposit-paypal')">PayPal Deposit</button>
+      <button class="tab-btn"       onclick="switchTab('deposit-venmo')">Venmo Deposit</button>
+      <button class="tab-btn"       onclick="switchTab('withdrawal')">Withdrawal</button>
+      <button class="tab-btn"       onclick="switchTab('vault')">Vault / Tokens</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  TAB 1 — PayPal Branded Deposit                           -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="tab-deposit-paypal" class="tab-panel active">
+      <h2>PayPal Deposit</h2>
+      <p>Player deposits funds into their gaming wallet using PayPal. Vaulting is optional — enable it to save the payment method for future fast deposits.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="pp-amount">Deposit Amount ($)</label>
+          <input type="number" id="pp-amount" value="25.00" step="0.01" min="1.00">
+        </div>
+        <div class="form-group">
+          <label for="pp-player-id">Player / Customer ID</label>
+          <input type="text" id="pp-player-id" placeholder="e.g. player_abc123">
+        </div>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="pp-vault" checked>
+        <label for="pp-vault">Vault payment method for returning deposits</label>
+      </div>
+
+      <div class="button-container" id="paypal-button-container"></div>
+
+      <div id="pp-result" class="result-box" style="display:none;">
+        <h4>Deposit Result</h4>
+        <pre id="pp-result-json"></pre>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  TAB 2 — Venmo Deposit                                    -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="tab-deposit-venmo" class="tab-panel">
+      <h2>Venmo Deposit</h2>
+      <p>Player deposits using Venmo. Ideal for US mobile players. Note: Venmo vaulting is available in production only (not sandbox).</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="venmo-amount">Deposit Amount ($)</label>
+          <input type="number" id="venmo-amount" value="10.00" step="0.01" min="1.00">
+        </div>
+        <div class="form-group">
+          <label for="venmo-player-id">Player / Customer ID</label>
+          <input type="text" id="venmo-player-id" placeholder="e.g. player_abc123">
+        </div>
+      </div>
+
+      <div class="button-container" id="venmo-button-container"></div>
+
+      <div id="venmo-result" class="result-box" style="display:none;">
+        <h4>Venmo Deposit Result</h4>
+        <pre id="venmo-result-json"></pre>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  TAB 3 — Withdrawal via Payouts API                       -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="tab-withdrawal" class="tab-panel">
+      <h2>Withdrawal (Payouts API)</h2>
+      <p>Send winnings or a cash-out request to a player's PayPal account using the Payouts API.</p>
+
+      <div>
+        <span class="step-badge">1</span>
+        <span class="step-label">Player details</span>
+      </div>
+      <br>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="payout-paypal-id">Recipient PayPal ID (payer_id)</label>
+          <input type="text" id="payout-paypal-id" placeholder="PayPal payer_id of the player">
+        </div>
+        <div class="form-group">
+          <label for="payout-amount">Withdrawal Amount ($)</label>
+          <input type="number" id="payout-amount" value="50.00" step="0.01" min="0.01">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="payout-note">Note to player</label>
+        <input type="text" id="payout-note" value="Your winnings withdrawal" placeholder="Message shown to recipient">
+      </div>
+
+      <hr class="divider">
+      <div>
+        <span class="step-badge">2</span>
+        <span class="step-label">Send withdrawal</span>
+      </div>
+      <br>
+      <button class="btn-primary" onclick="RMG.sendWithdrawal()">Send Withdrawal</button>
+
+      <div id="withdrawal-result" class="result-box" style="display:none;">
+        <h4>Payout Result</h4>
+        <pre id="withdrawal-result-json"></pre>
+        <hr class="divider" style="margin:12px 0;">
+        <label for="payout-batch-id-display"><strong>Batch ID:</strong></label>
+        <input type="text" id="payout-batch-id-display" readonly style="width:100%; margin-top:6px; background:#f0f0f0;">
+        <button class="btn-secondary" style="margin-top:10px;" onclick="RMG.checkWithdrawalStatus()">Check Status</button>
+      </div>
+
+      <div id="payout-status-result" class="result-box" style="display:none; margin-top:12px;">
+        <h4>Payout Status</h4>
+        <pre id="payout-status-json"></pre>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  TAB 4 — Payment Method Tokens (Vault)                    -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="tab-vault" class="tab-panel">
+      <h2>Payment Method Tokens</h2>
+      <p>Vault a player's PayPal account for frictionless returning deposits — no re-authentication required on subsequent deposits.</p>
+
+      <hr class="divider">
+
+      <div>
+        <span class="step-badge">1</span>
+        <span class="step-label">Save payment method (no purchase)</span>
+      </div>
+      <p style="margin:10px 0 16px; color:#555; font-size:14px;">
+        The player authorizes PayPal to save their payment method. No charge is made at this step.
+      </p>
+
+      <div class="form-group">
+        <label for="vault-player-id">Player / Customer ID</label>
+        <input type="text" id="vault-player-id" placeholder="e.g. player_abc123">
+      </div>
+
+      <div class="button-container" id="vault-button-container"></div>
+
+      <div id="vault-save-result" class="result-box" style="display:none;">
+        <h4>Vault Result</h4>
+        <pre id="vault-save-result-json"></pre>
+      </div>
+
+      <hr class="divider">
+
+      <div>
+        <span class="step-badge">2</span>
+        <span class="step-label">Charge with saved token (returning deposit)</span>
+      </div>
+      <p style="margin:10px 0 16px; color:#555; font-size:14px;">
+        Load saved tokens for a player and charge them directly — no PayPal window shown.
+      </p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="returning-player-id">Player / Customer ID</label>
+          <input type="text" id="returning-player-id" placeholder="e.g. player_abc123">
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button class="btn-secondary" style="width:100%;" onclick="RMG.loadVaultTokens()">Load Saved Methods</button>
+        </div>
+      </div>
+
+      <ul class="vault-token-list" id="vault-token-list">
+        <li class="empty-state">No tokens loaded — enter a Customer ID and click Load.</li>
+      </ul>
+
+      <div class="form-row" style="margin-top:16px;">
+        <div class="form-group">
+          <label for="returning-amount">Deposit Amount ($)</label>
+          <input type="number" id="returning-amount" value="25.00" step="0.01" min="1.00">
+        </div>
+      </div>
+
+      <div id="mit-result" class="result-box" style="display:none;">
+        <h4>Returning Deposit Result</h4>
+        <pre id="mit-result-json"></pre>
+      </div>
+    </div>
+
+  </div><!-- /.rmg-container -->
+
+  <script>
+    window.clientId = '<%= clientId %>';
+  </script>
+
+  <!-- PayPal JS SDK v5 — PayPal + Venmo funding, no Pay Later for RMG -->
+  <script id="paypal-sdk"
+    src="https://www.sandbox.paypal.com/sdk/js?client-id=<%= clientId %>&locale=en_US&commit=true&intent=capture&disable-funding=paylater&enable-funding=venmo,card">
+  </script>
+
+  <script src="/rmg.js"></script>
+</body>
+</html>

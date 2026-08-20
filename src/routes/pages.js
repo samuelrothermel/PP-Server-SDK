@@ -35,6 +35,8 @@ import {
   renderMitV5,
   renderMitV6,
   renderMitApi,
+  renderRmg,
+  renderBnpl,
 } from '../controllers/pageController.js';
 
 const router = express.Router();
@@ -75,6 +77,8 @@ router.get('/api-only/checkout', renderApiOnlyCheckout);
 router.get('/mit/v5', renderMitV5);
 router.get('/mit/v6', renderMitV6);
 router.get('/mit/api', renderMitApi);
+router.get('/rmg', renderRmg);
+router.get('/bnpl', renderBnpl);
 router.get('/api/payouts/oauth/callback', (req, res) => {
   res.render('paypal-oauth-callback');
 });

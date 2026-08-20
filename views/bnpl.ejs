@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/styles/checkout.css" />
+    <title>Buy Now Pay Later (BNPL) Demo</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Buy Now Pay Later (BNPL) Integration</h1>
+        <p style="color: #666; margin-top: 10px;">
+          Demonstrating PayPal and Pay Later buttons with BNPL messaging
+        </p>
+      </header>
+      
+      <!-- Integration Details Section -->
+      <div style="background: #f0f8ff; border: 1px solid #b8daff; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <h3 style="margin-top: 0; color: #004085;">Integration Pattern</h3>
+        <ul style="margin: 10px 0; color: #004085; line-height: 1.8;">
+          <li><strong>Merchant Type:</strong> Bidding Website / Custom E-commerce</li>
+          <li><strong>Frontend:</strong> Vite + React SPA (simulated with vanilla JS here)</li>
+          <li><strong>Backend:</strong> Node.js/Express with PayPal Server SDK v2</li>
+          <li><strong>Integration:</strong> PayPal JS SDK with <code>enable-funding=paylater</code></li>
+          <li><strong>Features:</strong> BNPL messaging, PayPal & Pay Later buttons</li>
+        </ul>
+        <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 12px; margin-top: 15px; color: #856404;">
+          <strong>⚠️ Note:</strong> Both buttons provide the same functionality. This is expected behavior - 
+          the Pay Later button is a visual prompt for customers who specifically want to see financing options, 
+          but both buttons open the same PayPal experience where Pay Later is available if eligible.
+        </div>
+      </div>
+      
+      <div class="checkout-layout">
+        <!-- Left Side: Order Summary -->
+        <div class="checkout-left">
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="order-row">
+              <span>Item (Bidding Platform Item):</span>
+              <span>$<span id="cart-total">250</span></span>
+            </div>
+            <div class="order-row">
+              <span>Shipping:</span>
+              <span>$<span id="shipping-amount">10.00</span></span>
+            </div>
+            <div class="order-row total">
+              <span>Total:</span>
+              <span>$<span id="amount-total">260</span></span>
+            </div>
+          </div>
+          
+          <!-- PayPal Pay Later Messaging -->
+          <div style="margin: 20px 0;">
+            <h4 style="margin-bottom: 10px; color: #333;">Financing Available</h4>
+            <div
+              data-pp-message
+              data-pp-style-layout="text"
+              data-pp-style-logo-type="inline"
+              data-pp-style-text-color="black"
+              data-pp-style-text-size="12"
+              data-pp-amount="260"
+              data-pp-placement="payment">
+            </div>
+          </div>
+          
+          <!-- Integration Notes -->
+          <div style="background: #e7f3ff; border-left: 4px solid #0070ba; padding: 15px; margin-top: 20px;">
+            <h4 style="margin-top: 0; color: #0070ba;">Developer Notes</h4>
+            <p style="font-size: 0.9em; margin: 5px 0; line-height: 1.6;">
+              <strong>SDK Configuration:</strong><br>
+              • Query param: <code>enable-funding=paylater</code><br>
+              • Both buttons use the same <code>createOrder</code> callback<br>
+              • Pay Later eligibility determined by PayPal based on cart total, buyer location, and account status<br>
+              • Messaging component automatically shows financing terms when eligible
+            </p>
+          </div>
+        </div>
+        
+        <!-- Right Side: Payment Section -->
+        <div class="checkout-right">
+          <div class="payment-section">
+            <h3>Choose Payment Method</h3>
+            
+            <!-- Payment Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+              <!-- PayPal Button -->
+              <div style="border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: white;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                  PayPal (includes Pay Later option)
+                </label>
+                <div id="paypal-button-container"></div>
+              </div>
+              
+              <!-- Pay Later Button -->
+              <div style="border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: white;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                  Pay Later (same functionality as PayPal)
+                </label>
+                <div id="paylater-button-container"></div>
+              </div>
+            </div>
+            
+            <!-- Behavior Explanation -->
+            <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; font-size: 0.9em; color: #555;">
+              <p style="margin: 0; line-height: 1.6;">
+                <strong>Expected Behavior:</strong> Both buttons open the same PayPal checkout window. 
+                If the buyer is eligible for Pay Later financing, they'll see that option in the payment 
+                selection screen. The separate Pay Later button serves as a visual cue to attract customers 
+                interested in financing options.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Result Display -->
+      <div id="result-message" style="margin-top: 30px; padding: 20px; border-radius: 8px; display: none;"></div>
+    </div>
+    
+    <!-- PayPal SDK with Pay Later enabled -->
+    <script
+      src="https://www.paypal.com/sdk/js?client-id=<%= clientId %>&components=buttons,messages&enable-funding=paylater&currency=USD"
+      data-sdk-integration-source="developer-studio">
+    </script>
+    <script src="/bnpl.js" type="module"></script>
+  </body>
+</html>

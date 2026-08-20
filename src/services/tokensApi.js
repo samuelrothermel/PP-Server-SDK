@@ -6,6 +6,18 @@ import { handleResponse } from '../utils/responseHandler.js';
 // set some important variables
 const base = 'https://api-m.sandbox.paypal.com';
 
+const getSdkResult = response => {
+  if (response?.result) {
+    return response.result;
+  }
+
+  if (typeof response?.body === 'string') {
+    return JSON.parse(response.body);
+  }
+
+  return response?.body;
+};
+
 /**
  * 3D SECURE API APPROACH
  *
@@ -25,7 +37,11 @@ const base = 'https://api-m.sandbox.paypal.com';
 
 // create vault setup token
 export const createVaultSetupToken = async ({ paymentSource }) => {
-  console.log('[SERVER SDK] Creating vault setup token for:', paymentSource);
+  const normalizedPaymentSource = (paymentSource || 'card').toLowerCase();
+  console.log(
+    '[SERVER SDK] Creating vault setup token for:',
+    normalizedPaymentSource,
+  );
 
   const paymentSources = {
     paypal: {
@@ -64,20 +80,32 @@ export const createVaultSetupToken = async ({ paymentSource }) => {
     },
   };
 
+  const selectedPaymentSource = paymentSources[normalizedPaymentSource];
+
+  if (!selectedPaymentSource) {
+    const error = new Error(
+      `Unsupported payment source for vault setup token: ${normalizedPaymentSource}`,
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
   const setupTokenPayload = {
     payment_source: {
-      [paymentSource]: paymentSources[paymentSource],
+      [normalizedPaymentSource]: selectedPaymentSource,
     },
   };
 
   try {
-    const { body: tokenResponse } = await vaultController.createSetupToken({
+    const sdkResponse = await vaultController.createSetupToken({
       body: setupTokenPayload,
     });
-    const token =
-      typeof tokenResponse === 'string'
-        ? JSON.parse(tokenResponse)
-        : tokenResponse;
+    const token = getSdkResult(sdkResponse);
+
+    if (!token?.id) {
+      throw new Error('PayPal did not return a vault setup token id');
+    }
+
     console.log('[SERVER SDK] Setup token created successfully:', token.id);
     return token;
   } catch (error) {
@@ -92,11 +120,12 @@ export const create3DSVaultSetupToken = async ({
   paymentSource,
   verificationMethod = 'SCA_ALWAYS',
 }) => {
+  const normalizedPaymentSource = (paymentSource || 'card').toLowerCase();
   console.log('='.repeat(80));
   console.log(
     '[3DS API APPROACH] Creating vault setup token with 3DS enforcement',
   );
-  console.log('[3DS API APPROACH] Payment Source:', paymentSource);
+  console.log('[3DS API APPROACH] Payment Source:', normalizedPaymentSource);
   console.log(
     '[3DS API APPROACH] Verification Method (passed via API):',
     verificationMethod,
@@ -116,7 +145,7 @@ export const create3DSVaultSetupToken = async ({
   };
 
   // Only support card for 3DS testing
-  if (paymentSource !== 'card') {
+  if (normalizedPaymentSource !== 'card') {
     throw new Error(
       '3D Secure vault setup tokens only support card payment source',
     );
@@ -124,7 +153,7 @@ export const create3DSVaultSetupToken = async ({
 
   const setupTokenPayload = {
     payment_source: {
-      [paymentSource]: paymentSources[paymentSource],
+      [normalizedPaymentSource]: paymentSources[normalizedPaymentSource],
     },
   };
 
@@ -135,13 +164,14 @@ export const create3DSVaultSetupToken = async ({
     console.log(
       '[3DS API APPROACH] Calling PayPal Vault API: POST /v3/vault/setup-tokens',
     );
-    const { body: tokenResponse } = await vaultController.createSetupToken({
+    const sdkResponse = await vaultController.createSetupToken({
       body: setupTokenPayload,
     });
-    const token =
-      typeof tokenResponse === 'string'
-        ? JSON.parse(tokenResponse)
-        : tokenResponse;
+    const token = getSdkResult(sdkResponse);
+
+    if (!token?.id) {
+      throw new Error('PayPal did not return a 3DS setup token id');
+    }
 
     console.log('[3DS API APPROACH] Setup token created successfully');
     console.log('[3DS API APPROACH] Token ID:', token.id);
@@ -180,13 +210,15 @@ export const createVaultPaymentToken = async vaultSetupToken => {
   };
 
   try {
-    const { body: tokenResponse } = await vaultController.createPaymentToken({
+    const sdkResponse = await vaultController.createPaymentToken({
       body: paymentTokenPayload,
     });
-    const token =
-      typeof tokenResponse === 'string'
-        ? JSON.parse(tokenResponse)
-        : tokenResponse;
+    const token = getSdkResult(sdkResponse);
+
+    if (!token?.id) {
+      throw new Error('PayPal did not return a vault payment token id');
+    }
+
     console.log('[SERVER SDK] Payment token created successfully:', token.id);
     return token;
   } catch (error) {
@@ -223,14 +255,10 @@ export const fetchPaymentTokens = async customerId => {
   console.log('[SERVER SDK] Fetching payment tokens for customer:', customerId);
 
   try {
-    const { body: responseData } =
-      await vaultController.listCustomerPaymentTokens({
-        customerId: customerId,
-      });
-    const response =
-      typeof responseData === 'string'
-        ? JSON.parse(responseData)
-        : responseData;
+    const sdkResponse = await vaultController.listCustomerPaymentTokens({
+      customerId: customerId,
+    });
+    const response = getSdkResult(sdkResponse);
 
     console.log('[SERVER SDK] Payment tokens fetched successfully');
 
@@ -255,12 +283,8 @@ export const getPaymentTokenDetails = async vaultId => {
   console.log('[SERVER SDK] Getting payment token details for:', vaultId);
 
   try {
-    const { body: tokenResponse } =
-      await vaultController.getPaymentToken(vaultId);
-    const tokenDetails =
-      typeof tokenResponse === 'string'
-        ? JSON.parse(tokenResponse)
-        : tokenResponse;
+    const sdkResponse = await vaultController.getPaymentToken(vaultId);
+    const tokenDetails = getSdkResult(sdkResponse);
     console.log('[SERVER SDK] Payment token details retrieved successfully');
     return tokenDetails;
   } catch (error) {

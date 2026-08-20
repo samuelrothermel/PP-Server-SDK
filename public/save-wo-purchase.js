@@ -17,31 +17,44 @@ const createVaultSetupToken = data => {
       paymentSource,
     }),
   })
-    .then(response => response.json())
+    .then(async response => {
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        throw new Error(
+          `Vault setup token request failed (${response.status}): ${responseText}`,
+        );
+      }
+
+      try {
+        return JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error(
+          `Vault setup token response was not valid JSON: ${responseText}`,
+        );
+      }
+    })
     .then(setupTokenResponse => {
       console.log(
         'Create Setup Token Raw Response: ',
-        JSON.stringify({ setupTokenResponse })
+        JSON.stringify({ setupTokenResponse }),
       );
       const vaultSetupToken = setupTokenResponse.id;
       document.getElementById('vault-info-section').style.display = 'block';
-      document.getElementById(
-        'vault-setup-info'
-      ).textContent = `Vault Setup Token ID: ${vaultSetupToken}`;
-      document.getElementById(
-        'vault-setup-status'
-      ).textContent = `Status: ${setupTokenResponse.status}`;
-      document.getElementById(
-        'customer-id-info'
-      ).textContent = `Customer ID: ${setupTokenResponse.customer.id}`;
+      document.getElementById('vault-setup-info').textContent =
+        `Vault Setup Token ID: ${vaultSetupToken}`;
+      document.getElementById('vault-setup-status').textContent =
+        `Status: ${setupTokenResponse.status}`;
+      document.getElementById('customer-id-info').textContent =
+        `Customer ID: ${setupTokenResponse.customer.id}`;
 
       return vaultSetupToken;
     })
     .catch(error => {
       document.getElementById('vault-info-section').style.display = 'block';
-      document.getElementById(
-        'vault-setup-info'
-      ).textContent = `ERROR: ${error}`;
+      document.getElementById('vault-setup-info').textContent =
+        `ERROR: ${error}`;
+      throw error;
     });
 };
 
@@ -60,66 +73,53 @@ const onApprove = ({ vaultSetupToken }) =>
       console.log(
         'Vault Payment result',
         vaultPaymentResponse,
-        JSON.stringify(vaultPaymentResponse, null, 2)
+        JSON.stringify(vaultPaymentResponse, null, 2),
       );
 
       document.getElementById('payment-source-section').style.display = 'block';
-      document.getElementById(
-        'payment-source-type-info'
-      ).textContent = `Payment Method Token ID: ${vaultPaymentResponse.id}`;
-      document.getElementById(
-        'customer-id-info'
-      ).textContent = `Customer ID: ${vaultPaymentResponse.customer.id}`;
+      document.getElementById('payment-source-type-info').textContent =
+        `Payment Method Token ID: ${vaultPaymentResponse.id}`;
+      document.getElementById('customer-id-info').textContent =
+        `Customer ID: ${vaultPaymentResponse.customer.id}`;
 
       // Handle different payment sources (Apple Pay vs Card)
       if (vaultPaymentResponse.payment_source.card) {
+        document.getElementById('card-verification-status-info').textContent =
+          `Card Verification Status: ${vaultPaymentResponse.payment_source.card.verification_status}`;
+        document.getElementById('card-verification-auth-info').textContent =
+          `Card Verification Auth Amount: $${vaultPaymentResponse.payment_source.card.verification.amount.value}`;
         document.getElementById(
-          'card-verification-status-info'
-        ).textContent = `Card Verification Status: ${vaultPaymentResponse.payment_source.card.verification_status}`;
-        document.getElementById(
-          'card-verification-auth-info'
-        ).textContent = `Card Verification Auth Amount: $${vaultPaymentResponse.payment_source.card.verification.amount.value}`;
-        document.getElementById(
-          'card-verification-processor-info'
-        ).textContent = `Processor Response Code: ${vaultPaymentResponse.payment_source.card.verification.processor_response.response_code}`;
-        document.getElementById(
-          'card-verification-cvv-info'
-        ).textContent = `CVV Response Code: ${vaultPaymentResponse.payment_source.card.verification.processor_response.cvv_code}`;
-        document.getElementById(
-          'card-verification-avs-info'
-        ).textContent = `AVS Response Code: ${vaultPaymentResponse.payment_source.card.verification.processor_response.avs_code}`;
+          'card-verification-processor-info',
+        ).textContent =
+          `Processor Response Code: ${vaultPaymentResponse.payment_source.card.verification.processor_response.response_code}`;
+        document.getElementById('card-verification-cvv-info').textContent =
+          `CVV Response Code: ${vaultPaymentResponse.payment_source.card.verification.processor_response.cvv_code}`;
+        document.getElementById('card-verification-avs-info').textContent =
+          `AVS Response Code: ${vaultPaymentResponse.payment_source.card.verification.processor_response.avs_code}`;
       } else if (vaultPaymentResponse.payment_source.apple_pay) {
+        document.getElementById('card-verification-status-info').textContent =
+          `Apple Pay Payment Source Verified`;
+        document.getElementById('card-verification-auth-info').textContent =
+          `Payment Method: Apple Pay`;
         document.getElementById(
-          'card-verification-status-info'
-        ).textContent = `Apple Pay Payment Source Verified`;
-        document.getElementById(
-          'card-verification-auth-info'
-        ).textContent = `Payment Method: Apple Pay`;
-        document.getElementById(
-          'card-verification-processor-info'
+          'card-verification-processor-info',
         ).textContent = `Apple Pay Token Stored Successfully`;
-        document.getElementById(
-          'card-verification-cvv-info'
-        ).textContent = `Apple Pay Security: Touch ID / Face ID`;
-        document.getElementById(
-          'card-verification-avs-info'
-        ).textContent = `Apple Pay Vault ID: Ready for Use`;
+        document.getElementById('card-verification-cvv-info').textContent =
+          `Apple Pay Security: Touch ID / Face ID`;
+        document.getElementById('card-verification-avs-info').textContent =
+          `Apple Pay Vault ID: Ready for Use`;
       } else if (vaultPaymentResponse.payment_source.paypal) {
+        document.getElementById('card-verification-status-info').textContent =
+          `PayPal Payment Source Verified`;
+        document.getElementById('card-verification-auth-info').textContent =
+          `Payment Method: PayPal`;
         document.getElementById(
-          'card-verification-status-info'
-        ).textContent = `PayPal Payment Source Verified`;
-        document.getElementById(
-          'card-verification-auth-info'
-        ).textContent = `Payment Method: PayPal`;
-        document.getElementById(
-          'card-verification-processor-info'
+          'card-verification-processor-info',
         ).textContent = `PayPal Account Linked Successfully`;
-        document.getElementById(
-          'card-verification-cvv-info'
-        ).textContent = `PayPal Security: Account Authentication`;
-        document.getElementById(
-          'card-verification-avs-info'
-        ).textContent = `PayPal Vault ID: Ready for Use`;
+        document.getElementById('card-verification-cvv-info').textContent =
+          `PayPal Security: Account Authentication`;
+        document.getElementById('card-verification-avs-info').textContent =
+          `PayPal Vault ID: Ready for Use`;
       }
 
       // Show vault testing section and populate vault ID
@@ -129,9 +129,8 @@ const onApprove = ({ vaultSetupToken }) =>
     .catch(error => {
       console.error('Error during vault payment:', error);
       document.getElementById('payment-source-section').style.display = 'block';
-      document.getElementById(
-        'create-payment-info'
-      ).textContent = `ERROR: ${error.message}`;
+      document.getElementById('create-payment-info').textContent =
+        `ERROR: ${error.message}`;
     });
 
 const onError = console.error;
@@ -173,7 +172,7 @@ function loadPayPalSDK() {
         console.log('Apple Pay component created:', !!applePayComponent);
         console.log(
           'Apple Pay component methods:',
-          Object.getOwnPropertyNames(applePayComponent)
+          Object.getOwnPropertyNames(applePayComponent),
         );
 
         // Check Apple Pay eligibility using native browser API
@@ -183,7 +182,7 @@ function loadPayPalSDK() {
           console.log('Native Apple Pay available:', isApplePayAvailable);
         } else {
           console.log(
-            'ApplePaySession not available (expected on non-Safari browsers)'
+            'ApplePaySession not available (expected on non-Safari browsers)',
           );
         }
 
@@ -230,7 +229,7 @@ function loadPayPalSDK() {
             'Reasons: component =',
             !!applePayComponent,
             'native =',
-            isApplePayAvailable
+            isApplePayAvailable,
           );
           document.getElementById('applepay-container').style.display = 'none';
         }
